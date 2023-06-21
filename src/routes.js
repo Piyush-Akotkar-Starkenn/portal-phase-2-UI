@@ -4,6 +4,7 @@ import React from "react";
 import MainDashboard from "views/admin/default";
 // import Vehicles from "views/admin/vehicles";
 // import RFIDs from "views/admin/rfids";
+// import OngoingTrips from "views/admin/ongoing";
 // import Devices from "views/admin/devices";
 // import Triggers from "views/admin/alert-triggers";
 // import Contacts from "views/admin/contacts";
