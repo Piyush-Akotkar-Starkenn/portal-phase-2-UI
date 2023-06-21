@@ -20,6 +20,8 @@ import { RiAlertLine, RiContactsLine } from "react-icons/ri"
 import { TbReport } from "react-icons/tb"
 import { BiRfid } from "react-icons/bi"
 
+//this is the new route
+console.log("Hello")
 const routes = [
   {
     name: "",
