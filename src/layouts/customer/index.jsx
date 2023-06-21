@@ -1,11 +1,11 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "components/navbar";
-import Sidebar from "components/sidebar_admin";
+import Sidebar from "components/sidebar_customer";
 import Footer from "components/footer/Footer";
-import { routes_admin } from "routes.js";
+import { routes_customer } from "routes.js";
 
-export default function Admin(props) {
+export default function CustomerLayout(props) {
   const { ...rest } = props;
   const location = useLocation();
   const [open, setOpen] = React.useState(true);
@@ -17,18 +17,18 @@ export default function Admin(props) {
     );
   }, []);
   React.useEffect(() => {
-    getActiveRoute(routes_admin);
+    getActiveRoute(routes_customer);
   }, [location.pathname]);
 
-  const getActiveRoute = (routes_admin) => {
+  const getActiveRoute = (routes) => {
     let activeRoute = "Main Dashboard";
-    for (let i = 0; i < routes_admin.length; i++) {
+    for (let i = 0; i < routes.length; i++) {
       if (
         window.location.href.indexOf(
-          routes_admin[i].layout + "/" + routes_admin[i].path
+          routes[i].layout + "/" + routes[i].path
         ) !== -1
       ) {
-        setCurrentRoute(routes_admin[i].name);
+        setCurrentRoute(routes[i].name);
       }
     }
     return activeRoute;
@@ -46,7 +46,7 @@ export default function Admin(props) {
   };
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
-      if (prop.layout === "/admin") {
+      if (prop.layout === "/CustomerLayout") {
         return (
           <Route path={`/${prop.path}`} element={prop.component} key={key} />
         );
@@ -68,7 +68,7 @@ export default function Admin(props) {
           onOpenSidenav={() => setOpen(true)}
           logoText={"Horizon UI Tailwind React"}
           brandText={currentRoute}
-          secondary={getActiveNavbar(routes_admin)}
+          secondary={getActiveNavbar(routes_customer)}
           {...rest}
         />
         <main
@@ -78,11 +78,11 @@ export default function Admin(props) {
           <div className="h-full">
             <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>
-                {getRoutes(routes_admin)}
+                {getRoutes(routes_customer)}
 
                 <Route
                   path="/"
-                  element={<Navigate to="/admin/default" replace />}
+                  element={<Navigate to="/CustomerLayout/default" replace />}
                 />
               </Routes>
             </div>

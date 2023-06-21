@@ -2,7 +2,7 @@
 
 import { HiX } from "react-icons/hi";
 import Links from "./components/Links";
-import routes from "routes.js";
+import { routes_admin } from "routes.js";
 
 const Sidebar = ({ open, onClose }) => {
   return (
@@ -12,21 +12,21 @@ const Sidebar = ({ open, onClose }) => {
       }`}
     >
       <span
-        className="absolute top-4 right-4 block cursor-pointer xl:hidden"
+        className="absolute right-4 top-4 block cursor-pointer xl:hidden"
         onClick={onClose}
       >
         <HiX />
       </span>
 
       <div className={`mx-[37px] mt-[40px] flex items-center`}>
-        <div className="mt-1 ml-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white">
+        <div className="ml-1 mt-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white">
           {/* Horizon <span class="font-medium">FREE</span> */}
         </div>
       </div>
       {/* Nav item */}
 
       <ul className="mb-auto pt-7">
-        <Links routes={routes} />
+        <Links routes={routes_admin} />
       </ul>
 
       {/* Nav item end */}
