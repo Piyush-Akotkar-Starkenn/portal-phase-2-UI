@@ -11,7 +11,6 @@ import Widget from "components/widget/Widget";
 import CheckTable from "views/admin/default/components/CheckTable";
 import DailyTraffic from "views/admin/default/components/DailyTraffic";
 import tableDataCheck from "./variables/tableDataCheck.json";
-import PrimeTable from "../tables/components/PrimeTable";
 
 const Dashboard = () => {
   return (
@@ -58,7 +57,6 @@ const Dashboard = () => {
             tableData={tableDataCheck}
           />
         </div>
-        <PrimeTable />
         {/* Traffic chart & Pie Chart */}
 
         <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
