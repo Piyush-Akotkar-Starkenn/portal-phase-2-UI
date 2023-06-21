@@ -2,23 +2,24 @@ import React from "react";
 
 // Admin Imports
 import MainDashboard from "views/admin/default";
-import Vehicles from "views/admin/vehicles";
-import RFIDs from "views/admin/rfids";
-import DataTables from "views/admin/ongoing";
-import Triggers from "views/admin/alert-triggers";
-import Contacts from "views/admin/contacts";
-import CompletedTrips from "views/admin/completed";
-import Reports from "views/admin/reports";
+// import Vehicles from "views/admin/vehicles";
+// import RFIDs from "views/admin/rfids";
+// import Devices from "views/admin/devices";
+// import Triggers from "views/admin/alert-triggers";
+// import Contacts from "views/admin/contacts";
+// import CompletedTrips from "views/admin/completed";
+// import Reports from "views/admin/reports";
 
 // Customer Imports
 import Dashboard from "views/customer/default";
-// import Vehicles from "views/customer/vehicles";
-// import RFIDs from "views/customer/rfids";
-// import DataTables from "views/customer/ongoing";
-// import Triggers from "views/customer/alert-triggers";
-// import Contacts from "views/customer/contacts";
-// import CompletedTrips from "customer/admin/completed";
-// import Reports from "views/customer/reports";
+import Vehicles from "views/customer/vehicles";
+import RFIDs from "views/customer/rfids";
+import Devices from "views/customer/devices";
+import OngoingTrips from "views/customer/ongoing";
+import Triggers from "views/customer/alert-triggers";
+import Contacts from "views/customer/contacts";
+import CompletedTrips from "views/customer/completed";
+import Reports from "views/customer/reports";
 
 // Icon Imports
 import { MdOutlineDashboard, MdWebhook } from "react-icons/md";
@@ -27,7 +28,6 @@ import { AiOutlineCheckSquare } from "react-icons/ai";
 import { RiAlertLine, RiContactsLine } from "react-icons/ri";
 import { TbReport } from "react-icons/tb";
 import { BiRfid } from "react-icons/bi";
-import OngoingTrips from "views/admin/ongoing";
 
 export const routes_admin = [
   {
@@ -53,7 +53,7 @@ export const routes_admin = [
     layout: "/admin",
     icon: <BsFillCpuFill className="h-7 w-7" />,
     path: "devices",
-    component: <DataTables />,
+    component: <Devices />,
   },
   {
     name: "",
@@ -116,7 +116,7 @@ export const routes_customer = [
   {
     name: "",
     title: "Vehicles",
-    layout: "/admin",
+    layout: "/customer",
     path: "vehicles",
     icon: <BsTruck className="h-7 w-7" />,
     component: <Vehicles />,
@@ -125,10 +125,10 @@ export const routes_customer = [
   {
     name: "",
     title: "Devices",
-    layout: "/admin",
+    layout: "/customer",
     icon: <BsFillCpuFill className="h-7 w-7" />,
     path: "devices",
-    component: <DataTables />,
+    component: <Devices />,
   },
   {
     name: "",

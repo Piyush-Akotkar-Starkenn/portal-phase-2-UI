@@ -9,7 +9,7 @@ export default function CustomerLayout(props) {
   const { ...rest } = props;
   const location = useLocation();
   const [open, setOpen] = React.useState(true);
-  const [currentRoute, setCurrentRoute] = React.useState("Main Dashboard");
+  const [currentRoute, setCurrentRoute] = React.useState("Dashboard");
 
   React.useEffect(() => {
     window.addEventListener("resize", () =>
@@ -20,15 +20,15 @@ export default function CustomerLayout(props) {
     getActiveRoute(routes_customer);
   }, [location.pathname]);
 
-  const getActiveRoute = (routes) => {
-    let activeRoute = "Main Dashboard";
-    for (let i = 0; i < routes.length; i++) {
+  const getActiveRoute = (routes_customer) => {
+    let activeRoute = "Dashboard";
+    for (let i = 0; i < routes_customer.length; i++) {
       if (
         window.location.href.indexOf(
-          routes[i].layout + "/" + routes[i].path
+          routes_customer[i].layout + "/" + routes_customer[i].path
         ) !== -1
       ) {
-        setCurrentRoute(routes[i].name);
+        setCurrentRoute(routes_customer[i].name);
       }
     }
     return activeRoute;
@@ -37,7 +37,9 @@ export default function CustomerLayout(props) {
     let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
       if (
-        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
+        window.location.href.indexOf(
+          routes_customer[i].layout + routes_customer[i].path
+        ) !== -1
       ) {
         return routes[i].secondary;
       }
@@ -82,7 +84,7 @@ export default function CustomerLayout(props) {
 
                 <Route
                   path="/"
-                  element={<Navigate to="/CustomerLayout/default" replace />}
+                  element={<Navigate to="/customer/default" replace />}
                 />
               </Routes>
             </div>

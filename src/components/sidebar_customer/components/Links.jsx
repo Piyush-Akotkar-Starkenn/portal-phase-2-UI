@@ -17,18 +17,14 @@ export function SidebarLinks(props) {
     return location.pathname.includes(routeName);
   };
 
-  const createLinks = (routes) => {
-    return routes.map((route, index) => {
-      if (
-        route.layout === "/admin" ||
-        route.layout === "/auth" ||
-        route.layout === "/rtl"
-      ) {
+  const createLinks = (routes_customer) => {
+    return routes_customer.map((route, index) => {
+      if (route.layout === "/admin" || route.layout === "/customer") {
         return (
           <Link key={index} to={route.layout + "/" + route.path}>
             <div className="relative mb-3 flex hover:cursor-pointer ">
               <li
-                className={`tooltip-button-${index} my-[12px] mx-auto flex cursor-pointer items-center`}
+                className={`tooltip-button-${index} mx-auto my-[12px] flex cursor-pointer items-center`}
                 key={index}
               >
                 <span
@@ -58,7 +54,7 @@ export function SidebarLinks(props) {
                 </p> */}
               </li>
               {activeRoute(route.path) ? (
-                <div class="absolute top-[8px] right-0 h-9 w-1 rounded-lg bg-brand-500 dark:bg-brand-400" />
+                <div class="absolute right-0 top-[8px] h-9 w-1 rounded-lg bg-brand-500 dark:bg-brand-400" />
               ) : null}
             </div>
           </Link>

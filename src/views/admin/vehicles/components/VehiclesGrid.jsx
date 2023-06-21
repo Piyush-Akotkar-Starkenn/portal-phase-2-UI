@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { classNames } from "primereact/utils";
-import { DataView, DataViewLayoutOptions } from "primereact/dataview";
+import { DataView } from "primereact/dataview";
 import { Vehicles } from "../variables/Vehicles";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
@@ -59,7 +59,7 @@ export default function VehiclesGrid() {
   //     currency: "USD",
   //   });
   // };
-
+  console.log(selectedProducts); // just to remove warning error
   const openNew = () => {
     setProduct(emptyProduct);
     setSubmitted(false);
