@@ -1,7 +1,7 @@
 import React from "react";
 
 // Admin Imports
-import MainDashboard from "views/admin/default";
+import Dashboard from "views/admin/default";
 // import Vehicles from "views/admin/vehicles";
 // import RFIDs from "views/admin/rfids";
 // import OngoingTrips from "views/admin/ongoing";
@@ -12,7 +12,7 @@ import MainDashboard from "views/admin/default";
 // import Reports from "views/admin/reports";
 
 // Customer Imports
-import Dashboard from "views/customer/default";
+import MainDashboard from "views/customer/default";
 import Vehicles from "views/customer/vehicles";
 import RFIDs from "views/customer/rfids";
 import Devices from "views/customer/devices";
@@ -37,7 +37,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "default",
     icon: <MdOutlineDashboard className="h-7 w-7" />,
-    component: <MainDashboard />,
+    component: <Dashboard />,
   },
   {
     name: "",
@@ -112,7 +112,7 @@ export const routes_customer = [
     layout: "/customer",
     path: "default",
     icon: <MdOutlineDashboard className="h-7 w-7" />,
-    component: <Dashboard />,
+    component: <MainDashboard />,
   },
   {
     name: "",
@@ -134,7 +134,7 @@ export const routes_customer = [
   {
     name: "",
     title: "Ongoing Trips",
-    layout: "/admin",
+    layout: "/customer",
     path: "ongoing-trips",
     icon: <MdWebhook className="h-7 w-7" />,
     component: <OngoingTrips />,
@@ -142,7 +142,7 @@ export const routes_customer = [
   {
     name: "",
     title: "Completed Trips",
-    layout: "/admin",
+    layout: "/customer",
     path: "completed-trips",
     icon: <AiOutlineCheckSquare className="h-7 w-7" />,
     component: <CompletedTrips />,
@@ -150,7 +150,7 @@ export const routes_customer = [
   {
     name: "",
     title: "Alert Triggers",
-    layout: "/admin",
+    layout: "/customer",
     path: "alert-triggers",
     icon: <RiAlertLine className="h-7 w-7" />,
     component: <Triggers />,
@@ -158,7 +158,7 @@ export const routes_customer = [
   {
     name: "",
     title: "Contacts",
-    layout: "/admin",
+    layout: "/customer",
     path: "contacts",
     icon: <RiContactsLine className="h-7 w-7" />,
     component: <Contacts />,
@@ -166,7 +166,7 @@ export const routes_customer = [
   {
     name: "",
     title: "Reports",
-    layout: "/admin",
+    layout: "/customer",
     path: "reports",
     icon: <TbReport className="h-7 w-7" />,
     component: <Reports />,
@@ -174,7 +174,7 @@ export const routes_customer = [
   {
     name: "",
     title: "RFIDs",
-    layout: "/admin",
+    layout: "/customer",
     path: "RFIDs",
     icon: <BiRfid className="h-7 w-7" />,
     component: <RFIDs />,

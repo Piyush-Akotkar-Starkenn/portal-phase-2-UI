@@ -33,22 +33,22 @@ export default function CustomerLayout(props) {
     }
     return activeRoute;
   };
-  const getActiveNavbar = (routes) => {
+  const getActiveNavbar = (routes_customer) => {
     let activeNavbar = false;
-    for (let i = 0; i < routes.length; i++) {
+    for (let i = 0; i < routes_customer.length; i++) {
       if (
         window.location.href.indexOf(
           routes_customer[i].layout + routes_customer[i].path
         ) !== -1
       ) {
-        return routes[i].secondary;
+        return routes_customer[i].secondary;
       }
     }
     return activeNavbar;
   };
-  const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.layout === "/CustomerLayout") {
+  const getRoutes = (routes_customer) => {
+    return routes_customer.map((prop, key) => {
+      if (prop.layout === "/customer") {
         return (
           <Route path={`/${prop.path}`} element={prop.component} key={key} />
         );
@@ -68,7 +68,6 @@ export default function CustomerLayout(props) {
         {/* Main Content */}
         <Navbar
           onOpenSidenav={() => setOpen(true)}
-          logoText={"Horizon UI Tailwind React"}
           brandText={currentRoute}
           secondary={getActiveNavbar(routes_customer)}
           {...rest}
