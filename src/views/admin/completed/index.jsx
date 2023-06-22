@@ -1,7 +1,7 @@
 import React from "react";
 
-const CompletedTrips = () => {
-  return <div>CompletedTrips</div>;
+const CompletedTripsAdmin = () => {
+  return <div>CompletedTrips_Admin</div>;
 };
 
-export default CompletedTrips;
+export default CompletedTripsAdmin;

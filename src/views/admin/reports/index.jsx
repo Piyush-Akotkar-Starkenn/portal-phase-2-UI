@@ -3,7 +3,7 @@ import VehiclesList from "./components/VehiclesList";
 import VehiclesGrid from "./components/VehiclesGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 
-const Reports = () => {
+const ReportsAdmin = () => {
   const [isListView, setIsListView] = useState(true);
 
   const handleListView = () => {
@@ -61,4 +61,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default ReportsAdmin;

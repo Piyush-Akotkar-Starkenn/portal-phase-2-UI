@@ -2,14 +2,14 @@ import React from "react";
 
 // Admin Imports
 import Dashboard from "views/admin/default";
-// import Vehicles from "views/admin/vehicles";
-// import RFIDs from "views/admin/rfids";
-// import OngoingTrips from "views/admin/ongoing";
-// import Devices from "views/admin/devices";
-// import Triggers from "views/admin/alert-triggers";
-// import Contacts from "views/admin/contacts";
-// import CompletedTrips from "views/admin/completed";
-// import Reports from "views/admin/reports";
+import VehiclesAdmin from "views/admin/vehicles";
+import RFIDsAdmin from "views/admin/rfids";
+import OngoingTripsAdmin from "views/admin/ongoing";
+import DevicesAdmin from "views/admin/devices";
+import TriggersAdmin from "views/admin/alert-triggers";
+import ContactsAdmin from "views/admin/contacts";
+import CompletedTripsAdmin from "views/admin/completed";
+import ReportsAdmin from "views/admin/reports";
 
 // Customer Imports
 import MainDashboard from "views/customer/default";
@@ -45,7 +45,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "vehicles",
     icon: <BsTruck className="h-7 w-7" />,
-    component: <Vehicles />,
+    component: <VehiclesAdmin />,
     secondary: true,
   },
   {
@@ -54,7 +54,7 @@ export const routes_admin = [
     layout: "/admin",
     icon: <BsFillCpuFill className="h-7 w-7" />,
     path: "devices",
-    component: <Devices />,
+    component: <DevicesAdmin />,
   },
   {
     name: "",
@@ -62,7 +62,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "ongoing-trips",
     icon: <MdWebhook className="h-7 w-7" />,
-    component: <OngoingTrips />,
+    component: <OngoingTripsAdmin />,
   },
   {
     name: "",
@@ -70,7 +70,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "completed-trips",
     icon: <AiOutlineCheckSquare className="h-7 w-7" />,
-    component: <CompletedTrips />,
+    component: <CompletedTripsAdmin />,
   },
   {
     name: "",
@@ -78,7 +78,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "alert-triggers",
     icon: <RiAlertLine className="h-7 w-7" />,
-    component: <Triggers />,
+    component: <TriggersAdmin />,
   },
   {
     name: "",
@@ -86,7 +86,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "contacts",
     icon: <RiContactsLine className="h-7 w-7" />,
-    component: <Contacts />,
+    component: <ContactsAdmin />,
   },
   {
     name: "",
@@ -94,7 +94,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "reports",
     icon: <TbReport className="h-7 w-7" />,
-    component: <Reports />,
+    component: <ReportsAdmin />,
   },
   {
     name: "",
@@ -102,7 +102,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "RFIDs",
     icon: <BiRfid className="h-7 w-7" />,
-    component: <RFIDs />,
+    component: <RFIDsAdmin />,
   },
 ];
 export const routes_customer = [

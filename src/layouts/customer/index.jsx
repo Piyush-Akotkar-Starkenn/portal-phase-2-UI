@@ -4,6 +4,7 @@ import Navbar from "components/navbar";
 import Sidebar from "components/sidebar_customer";
 import Footer from "components/footer/Footer";
 import { routes_customer } from "routes.js";
+import TopButton from "./scrolltop";
 
 export default function CustomerLayout(props) {
   const { ...rest } = props;
@@ -87,6 +88,7 @@ export default function CustomerLayout(props) {
                 />
               </Routes>
             </div>
+            <TopButton />
             <div className="p-3">
               <Footer />
             </div>

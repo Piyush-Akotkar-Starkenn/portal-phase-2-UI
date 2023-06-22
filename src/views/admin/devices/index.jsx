@@ -5,10 +5,10 @@
 // import Storage from "./components/Storage";
 // import Upload from "./components/Upload";
 
-const Devices = () => {
+const DevicesAdmin = () => {
   return (
     <div className="flex w-full flex-col gap-5">
-      <h1>Devices</h1>
+      <h1>Devices_Admin</h1>
       {/* <div className="w-ful mt-3 flex h-fit flex-col gap-5 lg:grid lg:grid-cols-12">
         <div className="col-span-4 lg:!mb-0">
           <Banner />
@@ -38,4 +38,4 @@ const Devices = () => {
   );
 };
 
-export default Devices;
+export default DevicesAdmin;

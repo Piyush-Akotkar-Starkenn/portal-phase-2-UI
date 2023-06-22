@@ -22,13 +22,13 @@ export function SidebarLinks(props) {
       if (route.layout === "/admin" || route.layout === "/customer") {
         return (
           <Link key={index} to={route.layout + "/" + route.path}>
-            <div className="relative mb-3 flex hover:cursor-pointer ">
+            <div className="relative mb-5 flex">
               <li
-                className={`tooltip-button-${index} mx-auto my-[12px] flex cursor-pointer items-center`}
+                className={`tooltip-button-${index} mx-auto my-[12px] flex items-center`}
                 key={index}
               >
                 <span
-                  className={` hover:text-gray-700 ${
+                  className={`hover:text-gray-700 ${
                     activeRoute(route.path) === true
                       ? "font-bold text-activeLink dark:text-white"
                       : "font-2xl text-gray-600"

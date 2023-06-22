@@ -16,7 +16,7 @@ const MainDashboard = () => {
   return (
     <div>
       {/* Card widget */}
-      <h1>gwww</h1>
+      <h4 className="text-dark text-xl font-bold dark:text-white">Dashboard</h4>
       <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-4 lg:grid-cols-4 2xl:grid-cols-4 3xl:grid-cols-6">
         <Widget
           icon={<BsTruck className="h-7 w-7" />}

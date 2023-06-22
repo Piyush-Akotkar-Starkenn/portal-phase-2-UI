@@ -19,11 +19,7 @@ export function SidebarLinks(props) {
 
   const createLinks = (routes_admin) => {
     return routes_admin.map((route, index) => {
-      if (
-        route.layout === "/admin" ||
-        route.layout === "/auth" ||
-        route.layout === "/customer"
-      ) {
+      if (route.layout === "/admin" || route.layout === "/customer") {
         return (
           <Link key={index} to={route.layout + "/" + route.path}>
             <div className="relative mb-3 flex hover:cursor-pointer ">

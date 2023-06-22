@@ -3,7 +3,7 @@ import VehiclesList from "./components/VehiclesList";
 import VehiclesGrid from "./components/VehiclesGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 
-const Triggers = () => {
+const TriggersAdmin = () => {
   const [isListView, setIsListView] = useState(true);
 
   const handleListView = () => {
@@ -61,4 +61,4 @@ const Triggers = () => {
   );
 };
 
-export default Triggers;
+export default TriggersAdmin;

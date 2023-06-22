@@ -3,7 +3,7 @@ import VehiclesList from "./components/VehiclesList";
 import VehiclesGrid from "./components/VehiclesGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 
-const Marketplace = () => {
+const VehiclesAdmin = () => {
   const [isListView, setIsListView] = useState(true);
 
   const handleListView = () => {
@@ -61,4 +61,4 @@ const Marketplace = () => {
   );
 };
 
-export default Marketplace;
+export default VehiclesAdmin;

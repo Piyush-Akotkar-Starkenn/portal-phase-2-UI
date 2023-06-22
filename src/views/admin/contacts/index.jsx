@@ -1,9 +1,9 @@
-const Contacts = () => {
+const ContactsAdmin = () => {
   return (
     <>
-      <h1>Contacts</h1>
+      <h1>Contacts_Admin</h1>
     </>
   );
 };
 
-export default Contacts;
+export default ContactsAdmin;
