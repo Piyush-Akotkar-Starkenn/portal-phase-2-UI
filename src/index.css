@@ -141,7 +141,6 @@ input:checked.defaultCheckbox::before {
   bottom: 5px;
   right: 4px;
   z-index: 9999;
-  color: #fff;
   border: none;
   cursor: pointer;
   opacity: 0.7;
@@ -154,4 +153,9 @@ input:checked.defaultCheckbox::before {
 
 .top-button:hover {
   opacity: 1;
+}
+.p-input-icon-left > i:first-of-type,
+.p-input-icon-left > svg:first-of-type,
+.p-input-icon-left > .p-input-prefix {
+  text-shadow: 1px 1px 2px #333;
 }

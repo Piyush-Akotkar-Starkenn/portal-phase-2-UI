@@ -4,6 +4,7 @@ import Navbar from "components/navbar";
 import Sidebar from "components/sidebar_admin";
 import Footer from "components/footer/Footer";
 import { routes_admin } from "routes.js";
+import TopButton from "./scrolltop";
 
 export default function Admin(props) {
   const { ...rest } = props;
@@ -86,6 +87,7 @@ export default function Admin(props) {
                 />
               </Routes>
             </div>
+            <TopButton />
             <div className="p-3">
               <Footer />
             </div>

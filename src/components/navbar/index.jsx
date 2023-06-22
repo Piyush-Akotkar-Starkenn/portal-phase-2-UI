@@ -176,7 +176,7 @@ const Navbar = (props) => {
         <Dropdown
           button={
             <img
-              className="h-10 w-10 rounded-full"
+              className="h-10 w-10 cursor-pointer rounded-full"
               src={avatar}
               alt="Elon Musk"
             />
