@@ -1,78 +1,97 @@
-import InputField from "components/fields/InputField";
-import { FcGoogle } from "react-icons/fc";
-import Checkbox from "components/checkbox";
+import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { BsArrowRightCircleFill } from "react-icons/bs";
+import "react-typed/dist/animatedCursor.css";
+import Typed from "react-typed";
+import FixedPlugin from "components/fixedPlugin/FixedPlugin";
 
 export default function SignIn() {
-  return (
-    <div className="mt-16 mb-16 flex h-full w-full items-center justify-center px-2 md:mx-0 md:px-0 lg:mb-10 lg:items-center lg:justify-start">
-      {/* Sign in section */}
-      <div className="mt-[10vh] w-full max-w-full flex-col items-center md:pl-4 lg:pl-0 xl:max-w-[420px]">
-        <h4 className="mb-2.5 text-4xl font-bold text-navy-700 dark:text-white">
-          Sign In
-        </h4>
-        <p className="mb-9 ml-1 text-base text-gray-600">
-          Enter your email and password to sign in!
-        </p>
-        <div className="mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-lightPrimary hover:cursor-pointer dark:bg-navy-800">
-          <div className="rounded-full text-xl">
-            <FcGoogle />
-          </div>
-          <h5 className="text-sm font-medium text-navy-700 dark:text-white">
-            Sign In with Google
-          </h5>
-        </div>
-        <div className="mb-6 flex items-center  gap-3">
-          <div className="h-px w-full bg-gray-200 dark:bg-navy-700" />
-          <p className="text-base text-gray-600 dark:text-white"> or </p>
-          <div className="h-px w-full bg-gray-200 dark:bg-navy-700" />
-        </div>
-        {/* Email */}
-        <InputField
-          variant="auth"
-          extra="mb-3"
-          label="Email*"
-          placeholder="mail@simmmple.com"
-          id="email"
-          type="text"
-        />
+  const [showPassword, setShowPassword] = useState(false);
 
-        {/* Password */}
-        <InputField
-          variant="auth"
-          extra="mb-3"
-          label="Password*"
-          placeholder="Min. 8 characters"
-          id="password"
-          type="password"
-        />
-        {/* Checkbox */}
-        <div className="mb-4 flex items-center justify-between px-2">
-          <div className="flex items-center">
-            <Checkbox />
-            <p className="ml-2 text-sm font-medium text-navy-700 dark:text-white">
-              Keep me logged In
-            </p>
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  return (
+    <div className="flex min-h-screen flex-col justify-center bg-gray-100 py-6 dark:!bg-gray-850 sm:py-12">
+      <div className="relative py-3 sm:mx-auto sm:max-w-xl">
+        <div className="absolute inset-0 -skew-y-6 transform bg-gradient-to-r from-blue-300 to-blueSecondary shadow-lg sm:-rotate-6 sm:skew-y-0 sm:rounded-3xl"></div>
+        <div className="relative bg-white px-4 py-10 shadow-lg dark:!bg-gray-750 sm:rounded-3xl sm:p-20">
+          <div className="mx-auto max-w-md">
+            <div>
+              <h1 className="text-2xl opacity-70 dark:!text-white">
+                <Typed
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: "500",
+                  }}
+                  strings={["Welcome To Starkenn Technologies.."]}
+                  typeSpeed={55}
+                />
+              </h1>
+            </div>
+            <div className="divide-y">
+              <div className="space-y-8 py-8 text-base leading-6 text-gray-700 sm:text-lg sm:leading-7">
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="username"
+                    class="peer block w-full appearance-none rounded-t-lg border-0 border-b-2 border-gray-300 bg-gray-50 px-2.5 pb-2.5 pt-5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:!bg-gray-800 dark:!text-white dark:focus:border-blue-500"
+                    placeholder=" "
+                  />
+                  <label
+                    for="username"
+                    class="absolute left-2.5 top-4 z-10 origin-[0] -translate-y-4 scale-75 transform text-base text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-gray-300 dark:!text-gray-400 peer-focus:dark:!text-gray-100"
+                  >
+                    Username
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    autoComplete="off"
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    class="peer block w-full appearance-none rounded-t-lg border-0 border-b-2 border-gray-300 bg-gray-50 px-2.5 pb-2.5 pt-5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:!bg-gray-800 dark:!text-white dark:focus:border-blue-500"
+                    placeholder=" "
+                  />
+                  <label
+                    for="password"
+                    class="absolute left-2.5 top-4 z-10 origin-[0] -translate-y-4 scale-75 transform text-base text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-gray-300 dark:!text-gray-400 peer-focus:dark:!text-gray-100"
+                  >
+                    Password
+                  </label>
+                  <div className="absolute right-2.5 top-4">
+                    {showPassword ? (
+                      <FaEyeSlash
+                        className="h-5 w-5 cursor-pointer  text-gray-500"
+                        onClick={togglePasswordVisibility}
+                      />
+                    ) : (
+                      <FaEye
+                        className="h-5 w-5 cursor-pointer text-gray-600"
+                        onClick={togglePasswordVisibility}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <button className="rounded-md bg-blueSecondary py-1 pl-4 pr-8 text-white dark:!bg-gray-100 dark:!text-gray-850">
+                    Sign In
+                    <BsArrowRightCircleFill className="absolute left-[4.6rem] top-[0.6rem]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="relative border-0 text-center">
+              <p>
+                <a href="/" className="text-blue-600 underline">
+                  Forgot Password?
+                </a>
+              </p>
+            </div>
           </div>
-          <a
-            className="text-sm font-medium text-brand-500 hover:text-brand-600 dark:text-white"
-            href=" "
-          >
-            Forgot Password?
-          </a>
-        </div>
-        <button className="linear mt-2 w-full rounded-xl bg-brand-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200">
-          Sign In
-        </button>
-        <div className="mt-4">
-          <span className=" text-sm font-medium text-navy-700 dark:text-gray-600">
-            Not registered yet?
-          </span>
-          <a
-            href=" "
-            className="ml-1 text-sm font-medium text-brand-500 hover:text-brand-600 dark:text-white"
-          >
-            Create an account
-          </a>
+          <FixedPlugin />
         </div>
       </div>
     </div>

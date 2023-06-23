@@ -159,3 +159,14 @@ input:checked.defaultCheckbox::before {
 .p-input-icon-left > .p-input-prefix {
   text-shadow: 1px 1px 2px #333;
 }
+@media (max-width: 767px) {
+  /* CSS styles for screens up to 767px wide (mobile devices) */
+  .grid {
+    display: grid;
+    grid-template-columns: auto;
+    column-gap: 20px;
+  }
+  .footer-content {
+    gap: 0.7rem;
+  }
+}

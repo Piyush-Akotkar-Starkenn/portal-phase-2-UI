@@ -1,7 +1,7 @@
 import React from "react";
 
-const CompletedTripsAdmin = () => {
+const FeatureSet = () => {
   return <div>CompletedTrips_Admin</div>;
 };
 
-export default CompletedTripsAdmin;
+export default FeatureSet;

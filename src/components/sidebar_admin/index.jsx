@@ -19,9 +19,7 @@ const Sidebar = ({ open, onClose }) => {
       </span>
 
       <div className={`mx-[37px] mt-[40px] flex items-center`}>
-        <div className="ml-1 mt-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white">
-          {/* Horizon <span class="font-medium">FREE</span> */}
-        </div>
+        <div className="ml-1 mt-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white"></div>
       </div>
       {/* Nav item */}
 

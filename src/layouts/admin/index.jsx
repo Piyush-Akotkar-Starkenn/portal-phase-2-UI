@@ -9,7 +9,7 @@ import TopButton from "./scrolltop";
 export default function Admin(props) {
   const { ...rest } = props;
   const location = useLocation();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const [currentRoute, setCurrentRoute] = React.useState("Main Dashboard");
 
   React.useEffect(() => {
@@ -67,7 +67,6 @@ export default function Admin(props) {
         {/* Main Content */}
         <Navbar
           onOpenSidenav={() => setOpen(true)}
-          logoText={"Horizon UI Tailwind React"}
           brandText={currentRoute}
           secondary={getActiveNavbar(routes_admin)}
           {...rest}

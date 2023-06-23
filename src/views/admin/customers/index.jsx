@@ -1,4 +1,4 @@
-const OngoingTripsAdmin = () => {
+const Customers = () => {
   return (
     <div>
       <h1>ongoing trips</h1>
@@ -6,4 +6,4 @@ const OngoingTripsAdmin = () => {
   );
 };
 
-export default OngoingTripsAdmin;
+export default Customers;

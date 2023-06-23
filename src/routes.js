@@ -3,13 +3,10 @@ import React from "react";
 // Admin Imports
 import Dashboard from "views/admin/default";
 import VehiclesAdmin from "views/admin/vehicles";
-import RFIDsAdmin from "views/admin/rfids";
-import OngoingTripsAdmin from "views/admin/ongoing";
 import DevicesAdmin from "views/admin/devices";
-import TriggersAdmin from "views/admin/alert-triggers";
-import ContactsAdmin from "views/admin/contacts";
-import CompletedTripsAdmin from "views/admin/completed";
-import ReportsAdmin from "views/admin/reports";
+import AnalyticsThreshold from "views/admin/analytics_threshold";
+import FeatureSet from "views/admin/feature_set";
+import Customers from "views/admin/customers";
 
 // Customer Imports
 import MainDashboard from "views/customer/default";
@@ -23,13 +20,19 @@ import CompletedTrips from "views/customer/completed";
 import Reports from "views/customer/reports";
 
 // Icon Imports
-import { MdOutlineDashboard, MdWebhook } from "react-icons/md";
+import {
+  MdOutlineDashboard,
+  MdWebhook,
+  MdOutlineFeaturedPlayList,
+} from "react-icons/md";
 import { BsTruck, BsFillCpuFill } from "react-icons/bs";
 import { AiOutlineCheckSquare } from "react-icons/ai";
 import { RiAlertLine, RiContactsLine } from "react-icons/ri";
-import { TbReport } from "react-icons/tb";
+import { TbReport, TbDeviceAnalytics } from "react-icons/tb";
 import { BiRfid } from "react-icons/bi";
+import { HiOutlineUsers } from "react-icons/hi";
 
+//routes for Admin panel
 export const routes_admin = [
   {
     name: "",
@@ -41,12 +44,11 @@ export const routes_admin = [
   },
   {
     name: "",
-    title: "Vehicles",
+    title: "Customers",
     layout: "/admin",
-    path: "vehicles",
-    icon: <BsTruck className="h-7 w-7" />,
-    component: <VehiclesAdmin />,
-    secondary: true,
+    path: "customers",
+    icon: <HiOutlineUsers className="h-7 w-7" />,
+    component: <Customers />,
   },
   {
     name: "",
@@ -58,53 +60,33 @@ export const routes_admin = [
   },
   {
     name: "",
-    title: "Ongoing Trips",
+    title: "Vehicles",
     layout: "/admin",
-    path: "ongoing-trips",
-    icon: <MdWebhook className="h-7 w-7" />,
-    component: <OngoingTripsAdmin />,
+    path: "vehicles",
+    icon: <BsTruck className="h-7 w-7" />,
+    component: <VehiclesAdmin />,
+    secondary: true,
+  },
+
+  {
+    name: "",
+    title: "Feature Set",
+    layout: "/admin",
+    path: "feature-set",
+    icon: <MdOutlineFeaturedPlayList className="h-7 w-7" />,
+    component: <FeatureSet />,
   },
   {
     name: "",
-    title: "Completed Trips",
+    title: "Analytics Threshold",
     layout: "/admin",
-    path: "completed-trips",
-    icon: <AiOutlineCheckSquare className="h-7 w-7" />,
-    component: <CompletedTripsAdmin />,
-  },
-  {
-    name: "",
-    title: "Alert Triggers",
-    layout: "/admin",
-    path: "alert-triggers",
-    icon: <RiAlertLine className="h-7 w-7" />,
-    component: <TriggersAdmin />,
-  },
-  {
-    name: "",
-    title: "Contacts",
-    layout: "/admin",
-    path: "contacts",
-    icon: <RiContactsLine className="h-7 w-7" />,
-    component: <ContactsAdmin />,
-  },
-  {
-    name: "",
-    title: "Reports",
-    layout: "/admin",
-    path: "reports",
-    icon: <TbReport className="h-7 w-7" />,
-    component: <ReportsAdmin />,
-  },
-  {
-    name: "",
-    title: "RFIDs",
-    layout: "/admin",
-    path: "RFIDs",
-    icon: <BiRfid className="h-7 w-7" />,
-    component: <RFIDsAdmin />,
+    path: "analytics-threshold",
+    icon: <TbDeviceAnalytics className="h-7 w-7" />,
+    component: <AnalyticsThreshold />,
   },
 ];
+
+//routes for Customer panel
 export const routes_customer = [
   {
     name: "",
