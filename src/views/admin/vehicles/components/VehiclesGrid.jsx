@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { DataView } from "primereact/dataview";
-import { Vehicles } from "../variables/Vehicles";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
@@ -13,6 +12,7 @@ import { GiMineTruck } from "react-icons/gi";
 import { FiEdit2 } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { Checkbox } from "primereact/checkbox";
+import axios from "axios";
 
 export default function VehiclesGrid() {
   let emptyProduct = {
@@ -32,34 +32,39 @@ export default function VehiclesGrid() {
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
   const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
   const [product, setProduct] = useState(emptyProduct);
+  // eslint-disable-next-line
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [checked, setChecked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [ecuData, setEcuData] = useState([]);
   const toast = useRef(null);
-  const dt = useRef(null);
+  // const dt = useRef(null);
   const [selectedEcu, setSelectedEcu] = useState(null);
-  const ECU = [
-    { name: "1", code: "one" },
-    { name: "2", code: "two" },
-    { name: "3", code: "three" },
-  ];
+  const [selectedIot, setSelectedIot] = useState(null);
+  const [selectedDms, setSelectedDms] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const status = [
-    { name: "Active", code: "1" },
-    { name: "Deactive", code: "2" },
+  const [data, setData] = useState([]);
+  const statusOptions = [
+    { status: 1, label: "Active" },
+    { status: 0, label: "Deactive" },
   ];
-  useEffect(() => {
-    Vehicles.getProducts().then((data) => setProducts(data));
-  }, []);
 
-  // const formatCurrency = (value) => {
-  //   return value.toLocaleString("en-US", {
-  //     style: "currency",
-  //     currency: "USD",
-  //   });
-  // };
-  console.log(selectedProducts); // just to remove warning error
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/Vehicles/getAllVehicle")
+      .then((res) => {
+        setEcuData(res.data.data);
+        const formattedData = res.data.data.map((item, index) => ({
+          ...item,
+          serialNo: index + 1,
+        }));
+        setData(formattedData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   const openNew = () => {
     setProduct(emptyProduct);
     setSubmitted(false);
@@ -163,9 +168,9 @@ export default function VehiclesGrid() {
     return id;
   };
 
-  const exportCSV = () => {
-    dt.current.exportCSV();
-  };
+  // const exportCSV = () => {
+  //   dt.current.exportCSV();
+  // };
 
   const confirmDeleteSelected = () => {
     setDeleteProductsDialog(true);
@@ -215,47 +220,42 @@ export default function VehiclesGrid() {
     );
   };
 
-  const rightToolbarTemplate = () => {
-    return (
-      <Button
-        label="Export"
-        icon="pi pi-download"
-        className="h-10 border-none bg-gray-600 px-5 py-0"
-        onClick={exportCSV}
-      />
-    );
-  };
-
-  // const imageBodyTemplate = (rowData) => {
+  // const rightToolbarTemplate = () => {
   //   return (
-  //     <img
-  //       src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
-  //       alt={rowData.image}
-  //       className="shadow-2 border-round"
-  //       style={{ width: "64px" }}
+  //     <Button
+  //       label="Export"
+  //       icon="pi pi-download"
+  //       className="h-10 border-none bg-gray-600 px-5 py-0"
+  //       onClick={exportCSV}
   //     />
   //   );
   // };
-
-  // const priceBodyTemplate = (rowData) => {
-  //   return formatCurrency(rowData.reg);
-  // };
-
-  // const ratingBodyTemplate = (rowData) => {
-  //   return <Rating value={rowData.rating} readOnly cancel={false} />;
-  // };
-
-  const getSeverity = (product) => {
-    switch (product.inventoryStatus) {
-      case "ACTIVE":
+  const getSeverity = (data) => {
+    switch (data.status) {
+      case "1":
         return "success";
 
-      case "DEACTIVE":
+      case "0":
         return "danger";
 
       default:
         return null;
     }
+  };
+  const statusBodyTemplate = (rowData) => {
+    return (
+      <Tag
+        className="px-3"
+        value={
+          parseInt(rowData.status) === 1
+            ? "Active"
+            : parseInt(rowData.status) === 0
+            ? "Deactive"
+            : undefined
+        }
+        severity={getSeverity(rowData)}
+      ></Tag>
+    );
   };
 
   const header = (
@@ -332,22 +332,19 @@ export default function VehiclesGrid() {
       />
     </React.Fragment>
   );
-  const itemTemplate = (product) => {
+  const itemTemplate = (ecuData) => {
     return (
       <div className="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-        <div className="border-1 surface-border surface-card border-round h-[28vh] w-[27vw] rounded-lg bg-white p-4 px-5 dark:bg-gray-900 dark:text-gray-150">
+        <div className="border-1 surface-border surface-card border-round h-[33vh] w-[27vw] rounded-lg bg-white p-4 px-5 dark:bg-gray-900 dark:text-gray-150">
           <div className="align-items-center flex flex-wrap justify-between gap-2">
             <div className="align-items-center flex gap-2">
               <Checkbox
                 onChange={(e) => setChecked(e.checked)}
                 checked={checked}
               ></Checkbox>
-              <span className="font-semibold">{product.name}</span>
+              <span className="font-semibold">{ecuData.vehicle_name}</span>
             </div>
-            <Tag
-              value={product.inventoryStatus}
-              severity={getSeverity(product)}
-            ></Tag>
+            <p>{statusBodyTemplate(ecuData)}</p>
           </div>
           <div className="flex-column align-items-center flex gap-6 py-1">
             <GiMineTruck
@@ -356,12 +353,34 @@ export default function VehiclesGrid() {
                 fontSize: "4rem",
               }}
             />
-            <div className="flex flex-col">
-              <p>Registration No. : {product.id}</p>
-              <p>ECU : {product.id}</p>
-              <p>IoT : {product.id}</p>
-              <p>DMS : {product.id}</p>
-            </div>
+            <table>
+              <tr>
+                <td>Reg Number</td>
+                <td className="pl-3">
+                  <span className="font-medium">
+                    {ecuData.vehicle_registration}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>DMS</td>
+                <td className="pl-3">
+                  <span className="font-medium">{ecuData.dms}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>IoT</td>
+                <td className="pl-3">
+                  <span className="font-medium">{ecuData.iot}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>ECU</td>
+                <td className="pl-3">
+                  <span className="font-medium">{ecuData.ecu}</span>
+                </td>
+              </tr>
+            </table>
           </div>
           <div className="align-items-center flex justify-start">
             <button
@@ -390,13 +409,14 @@ export default function VehiclesGrid() {
         <Toolbar
           className="rounded-lg border-none dark:bg-gray-950"
           start={leftToolbarTemplate}
-          end={rightToolbarTemplate}
+          // end={rightToolbarTemplate}
         ></Toolbar>
       </div>
 
       <div className="card rounded-lg bg-none dark:bg-gray-950">
         <DataView
-          value={products}
+          // ref={dt}
+          value={data}
           globalFilter={globalFilter}
           header={header}
           itemTemplate={itemTemplate}
@@ -446,57 +466,65 @@ export default function VehiclesGrid() {
         </div>
 
         <div className="field mt-2">
-          <label htmlFor="" className="font-bold">
+          <label htmlFor="ecu" className="font-bold">
             Select ECU
           </label>
           <Dropdown
+            name="ecu"
+            id="ecu"
             value={selectedEcu}
+            options={ecuData}
             onChange={(e) => setSelectedEcu(e.value)}
-            options={ECU}
-            optionLabel="name"
-            placeholder="Tap to select"
+            placeholder="Tap To Select"
+            optionLabel="ecu"
             className="md:w-14rem mt-2 w-full"
           />
         </div>
 
         <div className="field mt-2">
-          <label htmlFor="" className="font-bold">
+          <label htmlFor="iot" className="font-bold">
             Select IoT
           </label>
           <Dropdown
-            value={selectedEcu}
-            onChange={(e) => setSelectedEcu(e.value)}
-            options={ECU}
-            optionLabel="name"
-            placeholder="Tap to select"
+            name="iot"
+            id="iot"
+            value={selectedIot}
+            options={ecuData}
+            onChange={(e) => setSelectedIot(e.value)}
+            placeholder="Tap To Select"
+            optionLabel="iot"
             className="md:w-14rem mt-2 w-full"
           />
         </div>
 
         <div className="field mt-2">
-          <label htmlFor="" className="font-bold">
+          <label htmlFor="dms" className="font-bold">
             Select DMS
           </label>
           <Dropdown
-            value={selectedEcu}
-            onChange={(e) => setSelectedEcu(e.value)}
-            options={ECU}
-            optionLabel="name"
-            placeholder="Tap to select"
+            name="dms"
+            id="dms"
+            value={selectedDms}
+            options={ecuData}
+            onChange={(e) => setSelectedDms(e.value)}
+            placeholder="Tap To Select"
+            optionLabel="dms"
             className="md:w-14rem mt-2 w-full"
           />
         </div>
 
         <div className="field mt-2">
-          <label htmlFor="" className="font-bold">
+          <label htmlFor="status" className="font-bold">
             Select Status
           </label>
           <Dropdown
+            name="status"
+            id="status"
             value={selectedStatus}
+            options={statusOptions}
             onChange={(e) => setSelectedStatus(e.value)}
-            options={status}
-            optionLabel="name"
-            placeholder="Tap to select"
+            placeholder="Tap To Select"
+            optionLabel="label"
             className="md:w-14rem mt-2 w-full"
           />
         </div>

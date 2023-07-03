@@ -7,7 +7,7 @@ import DevicesAdmin from "views/admin/devices";
 import AnalyticsThreshold from "views/admin/analytics_threshold";
 import FeatureSet from "views/admin/feature_set";
 import Customers from "views/admin/customers";
-
+import AddVehicle from "views/admin/vehicles/AddVehicle";
 // Customer Imports
 import MainDashboard from "views/customer/default";
 import Vehicles from "views/customer/vehicles";
@@ -66,6 +66,15 @@ export const routes_admin = [
     icon: <BsTruck className="h-7 w-7" />,
     component: <VehiclesAdmin />,
     secondary: true,
+    children: [
+      {
+        name: "",
+        title: "Add Vehicle",
+        layout: "/admin",
+        path: "addvehicle",
+        component: <AddVehicle />,
+      },
+    ],
   },
 
   {

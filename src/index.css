@@ -77,7 +77,7 @@ input:checked.defaultCheckbox::before {
   padding: 15px 0px 3px 0px;
 }
 .p-datatable-wrapper {
-  border-radius: 18px;
+  border-radius: 18px 18px 0px 0px;
 }
 .p-datatable .p-datatable-thead > tr > th {
   background-color: #a3aed0;
@@ -159,6 +159,76 @@ input:checked.defaultCheckbox::before {
 .p-input-icon-left > .p-input-prefix {
   text-shadow: 1px 1px 2px #333;
 }
+#root
+  > div
+  > div
+  > div.sm\:none.duration-175.linear.fixed.\!z-50.flex.min-h-full.flex-col.bg-white.pb-10.shadow-2xl.shadow-white\/5.transition-all.dark\:\!bg-navy-800.dark\:text-white.md\:\!z-50.lg\:\!z-50.xl\:\!z-0.translate-x-0
+  > ul
+  > a:nth-child(1)
+  > div
+  > li
+  :focus-visible {
+  outline: none;
+}
+.p-tag-value {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  padding: 0rem;
+}
+.p-dropdown-panel .p-dropdown-items {
+  text-align: center;
+  padding: 0rem;
+}
+.p-fluid .p-inputtext:focus {
+  box-shadow: none;
+}
+.dark .p-dialog .p-dialog-header {
+  color: #fefefe;
+  background: #070d22;
+}
+.dark .p-dialog .p-dialog-header .p-dialog-header-icon {
+  color: #fefefe;
+}
+.dark .p-dialog .p-dialog-content {
+  background: #070d22;
+  color: #fefefe;
+}
+.dark .p-dialog .p-dialog-footer {
+  background: #070d22;
+  color: #fefefe;
+}
+.p-fluid .p-dialog-footer .p-button {
+  color: #fefefe;
+  border: none;
+}
+.dark .p-fluid .p-inputtext {
+  background-color: #111c44 !important;
+  color: #fefefe;
+}
+.dark .p-fluid .p-dropdown {
+  background: #111c44;
+}
+.dark .p-dropdown-items-wrapper {
+  background: #111c44;
+  color: #fefefe;
+}
+.dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: #fefefe;
+}
+.dark .p-datatable .p-datatable-thead > tr > th {
+  background-color: #111c44;
+  color: #ddd;
+}
+.dark .p-datatable .p-paginator-bottom {
+  background-color: #111c44;
+  color: #fefefe;
+}
+.dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background-color: #070d22;
+}
+
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {
@@ -168,5 +238,14 @@ input:checked.defaultCheckbox::before {
   }
   .footer-content {
     gap: 0.7rem;
+  }
+  .text-base {
+    font-size: 0.8rem;
+  }
+  .dropdowns {
+    display: block;
+  }
+  .field {
+    width: 94%;
   }
 }

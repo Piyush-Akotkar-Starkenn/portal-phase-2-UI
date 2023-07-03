@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Dropdown from "components/dropdown";
 import { FiAlignJustify } from "react-icons/fi";
 import { BsArrowBarUp } from "react-icons/bs";
@@ -6,10 +6,31 @@ import logo from "../../assets/img/logo.png";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import avatar from "assets/img/avatars/avatar4.png";
+import Sidebar from "components/sidebar_admin";
 
-const Navbar = (props) => {
-  const { onOpenSidenav } = props;
-  const [darkmode, setDarkmode] = React.useState(false);
+const Navbar = ({ onOpenSidenav }) => {
+  const [darkmode, setDarkmode] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const handleOpenSidenav = () => {
+    if (isMobile) {
+      setSidebarOpen(!sidebarOpen);
+      onOpenSidenav();
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-40 flex flex-row flex-wrap items-center justify-between bg-white p-2 backdrop-blur-xl dark:bg-navy-800">
@@ -41,12 +62,14 @@ const Navbar = (props) => {
             class="block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
           />
         </div> */}
-        <span
-          className="flex cursor-pointer text-xl text-gray-600 dark:text-white xl:hidden"
-          onClick={onOpenSidenav}
-        >
-          <FiAlignJustify className="h-5 w-5" />
-        </span>
+        {isMobile && (
+          <span
+            className="flex cursor-pointer text-xl text-gray-600 dark:text-white xl:hidden"
+            onClick={handleOpenSidenav}
+          >
+            <FiAlignJustify className="h-5 w-5" />
+          </span>
+        )}
         {/* start Notification */}
         <Dropdown
           button={
@@ -197,6 +220,7 @@ const Navbar = (props) => {
           classNames={"py-2 top-8 -left-[180px] w-max"}
         />
       </div>
+      {isMobile && <Sidebar open={sidebarOpen} onClose={handleOpenSidenav} />}
     </nav>
   );
 };

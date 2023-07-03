@@ -1,7 +1,10 @@
+import PrimeTable from "./components/PrimeTable";
+
 const Customers = () => {
   return (
     <div>
-      <h1>ongoing trips</h1>
+      <h4 className="text-dark text-xl font-bold dark:text-white">Customers</h4>
+      <PrimeTable />
     </div>
   );
 };

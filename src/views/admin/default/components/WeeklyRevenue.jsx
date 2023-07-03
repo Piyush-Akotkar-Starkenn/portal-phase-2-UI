@@ -19,7 +19,7 @@ const WeeklyRevenue = () => {
       </div>
 
       <div className="md:mt-16 lg:mt-0">
-        <div className="h-[250px] w-full xl:h-[350px]">
+        <div className="h-[250px] w-full xl:h-[400px]">
           <BarChart
             chartData={barChartDataWeeklyRevenue}
             chartOptions={barChartOptionsWeeklyRevenue}

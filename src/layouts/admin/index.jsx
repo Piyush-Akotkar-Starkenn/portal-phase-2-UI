@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "components/navbar";
 import Sidebar from "components/sidebar_admin";
@@ -9,15 +10,15 @@ import TopButton from "./scrolltop";
 export default function Admin(props) {
   const { ...rest } = props;
   const location = useLocation();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(true);
   const [currentRoute, setCurrentRoute] = React.useState("Main Dashboard");
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener("resize", () =>
       window.innerWidth < 1200 ? setOpen(false) : setOpen(true)
     );
   }, []);
-  React.useEffect(() => {
+  useEffect(() => {
     getActiveRoute(routes_admin);
   }, [location.pathname]);
 
