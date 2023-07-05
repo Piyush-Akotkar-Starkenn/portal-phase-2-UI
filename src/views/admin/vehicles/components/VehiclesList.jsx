@@ -9,6 +9,8 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
+import { FilterMatchMode } from "primereact/api";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function VehiclesList() {
@@ -28,7 +30,7 @@ export default function VehiclesList() {
   const [product, setProduct] = useState(emptyProduct);
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const [globalFilter, setGlobalFilter] = useState(null);
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
   const toast = useRef(null);
   // const dt = useRef(null);
   const [ecuData, setEcuData] = useState([]);
@@ -36,12 +38,16 @@ export default function VehiclesList() {
   const [selectedDms, setSelectedDms] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedEcu, setSelectedEcu] = useState(null);
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
   const statusOptions = [
     { status: 1, label: "Active" },
     { status: 0, label: "Deactive" },
   ];
 
   const [data, setData] = useState([]);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
     axios
@@ -76,6 +82,23 @@ export default function VehiclesList() {
 
   const hideDeleteProductsDialog = () => {
     setDeleteProductsDialog(false);
+  };
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
+  const clearSearch = () => {
+    setGlobalFilterValue("");
+    const _filters = { ...filters };
+    _filters["global"].value = null;
+    setFilters(_filters);
   };
 
   const saveProduct = () => {
@@ -166,9 +189,9 @@ export default function VehiclesList() {
   //   dt.current.exportCSV();
   // };
 
-  const confirmDeleteSelected = () => {
-    setDeleteProductsDialog(true);
-  };
+  // const confirmDeleteSelected = () => {
+  //   setDeleteProductsDialog(true);
+  // };
 
   const deleteSelectedProducts = () => {
     let _products = products.filter((val) => !selectedProducts.includes(val));
@@ -200,10 +223,10 @@ export default function VehiclesList() {
           label="Add Vehicle"
           icon="pi pi-plus"
           severity="Primary"
-          className="h-10 px-5 py-0"
+          className="h-10 px-5 py-0 dark:hover:text-white"
           onClick={openNew}
         />
-        <Button
+        {/* <Button
           label="Delete"
           icon="pi pi-trash"
           className="h-10 px-5 py-0"
@@ -211,7 +234,7 @@ export default function VehiclesList() {
           title="Select to delete"
           onClick={confirmDeleteSelected}
           disabled={!selectedProducts || !selectedProducts.length}
-        />
+        /> */}
       </div>
     );
   };
@@ -250,7 +273,7 @@ export default function VehiclesList() {
           icon="pi pi-pencil"
           rounded
           outlined
-          className="mr-2"
+          className="mr-2 dark:text-gray-100"
           style={{ width: "2rem", height: "2rem" }}
           onClick={() => editProduct(rowData)}
         />
@@ -258,7 +281,7 @@ export default function VehiclesList() {
           icon="pi pi-trash"
           rounded
           outlined
-          severity="danger"
+          className="text-red-500 dark:text-red-500"
           style={{ width: "2rem", height: "2rem" }}
           onClick={() => confirmDeleteProduct(rowData)}
         />
@@ -284,11 +307,18 @@ export default function VehiclesList() {
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
         <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search..."
-          className="w-[25vw] rounded-full dark:bg-gray-950 dark:text-gray-50"
+          value={globalFilterValue}
+          onChange={onGlobalFilterChange}
+          placeholder="Keyword Search"
+          className="searchbox w-[25vw] cursor-pointer rounded-full dark:bg-gray-950 dark:text-gray-50"
         />
+        {globalFilterValue && (
+          <Button
+            icon="pi pi-times"
+            className="p-button-rounded p-button-text"
+            onClick={clearSearch}
+          />
+        )}
       </span>
     </div>
   );
@@ -327,6 +357,19 @@ export default function VehiclesList() {
     </React.Fragment>
   );
 
+  const rowClassName = (rowData) => {
+    return classNames({
+      "p-clickable": true,
+      "p-highlight": rowData === selectedRow,
+    });
+  };
+  const navigate = useNavigate();
+  const onRowClick = (event) => {
+    setSelectedRow(event.data);
+    // Handle the row click event
+    navigate("/signin");
+    console.log("Clicked row:", event.data);
+  };
   return (
     <div>
       <Toast ref={toast} />
@@ -340,31 +383,34 @@ export default function VehiclesList() {
         </Toolbar>
 
         <DataTable
-          // ref={dt}
           removableSort
           value={data}
           selection={selectedProducts}
           onSelectionChange={(e) => setSelectedProducts(e.value)}
           dataKey="id"
           paginator
-          rows={10}
+          rows={5}
+          rowClassName={rowClassName}
+          onRowClick={onRowClick}
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-          globalFilter={globalFilter}
+          filterDisplay="menu"
+          filters={filters}
+          globalFilterFields={[
+            "vehicle_name",
+            "vehicle_registration",
+            "dms",
+            "iot",
+            "ecu",
+          ]}
+          emptyMessage="No vehicles found."
           header={header}
         >
           <Column
-            selectionMode="multiple"
-            className="dark:bg-gray-900 dark:text-gray-200"
-            exportable={false}
-          ></Column>
-
-          <Column
             field="serialNo"
-            header="#"
             className="border-none dark:bg-gray-900 dark:text-gray-200"
-            style={{ minWidth: "4rem" }}
+            style={{ minWidth: "4rem", textAlign: "center" }}
           ></Column>
           <Column
             field="vehicle_name"
@@ -415,7 +461,7 @@ export default function VehiclesList() {
             header="Action"
             exportable={false}
             className="border-none dark:bg-gray-900"
-            style={{ minWidth: "8rem" }}
+            style={{ minWidth: "6rem" }}
           ></Column>
         </DataTable>
       </div>

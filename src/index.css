@@ -228,6 +228,53 @@ input:checked.defaultCheckbox::before {
 .dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
   background-color: #070d22;
 }
+.p-column-filter-buttonbar .p-button:not(.p-button-icon-only) {
+  background-color: #422afb;
+  outline: none;
+  border: none;
+  color: #fefefe;
+}
+.dark .p-column-filter-overlay-menu .p-column-filter-constraint:last-child {
+  background: #111c44;
+}
+.dark .p-column-filter-overlay-menu .p-column-filter-buttonbar,
+.dark .p-multiselect-panel .p-multiselect-header {
+  background: #111c44;
+}
+.dark .p-multiselect-panel {
+  background: #111c44;
+  color: #fefefe;
+}
+.dark .p-multiselect-panel .p-multiselect-items .p-multiselect-item {
+  color: #fefefe;
+}
+.p-button:enabled:active,
+.p-button:not(button):not(a):not(.p-disabled):active {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.p-button:enabled:focus,
+.p-button:not(button):not(a):not(.p-disabled):focus {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.p-button:enabled:hover,
+.p-button:not(button):not(a):not(.p-disabled):hover {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #070d22;
+}
+.dark .p-menu.p-menu-overlay {
+  background: #070d22;
+  color: #ddd;
+}
+.dark .p-menu .p-menuitem-link .p-menuitem-icon,
+.dark .p-menu .p-menuitem-link .p-menuitem-text {
+  color: #ddd;
+}
 
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
@@ -247,5 +294,8 @@ input:checked.defaultCheckbox::before {
   }
   .field {
     width: 94%;
+  }
+  .searchbox {
+    width: 50vw;
   }
 }

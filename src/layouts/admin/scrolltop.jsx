@@ -21,7 +21,7 @@ const TopButton = () => {
       className={`top-button ${isVisible ? "show" : ""}`}
       onClick={scrollToTop}
     >
-      <BsFillArrowUpCircleFill className="h-5 w-5 text-gray-950 dark:text-gray-50" />
+      <BsFillArrowUpCircleFill className="h-6 w-6 text-gray-950 opacity-50 dark:text-gray-50" />
     </button>
   );
 };

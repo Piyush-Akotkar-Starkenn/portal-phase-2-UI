@@ -1,7 +1,9 @@
 const AnalyticsThreshold = () => {
   return (
     <>
-      <h1>Contacts_Admin</h1>
+      <h4 className="text-dark text-xl font-bold dark:text-white">
+        Analytics Threshold
+      </h4>
     </>
   );
 };

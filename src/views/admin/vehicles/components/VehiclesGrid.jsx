@@ -1,60 +1,38 @@
-import React, { useState, useEffect, useRef } from "react";
-import { classNames } from "primereact/utils";
-import { DataView } from "primereact/dataview";
-import { Toast } from "primereact/toast";
-import { Button } from "primereact/button";
-import { Toolbar } from "primereact/toolbar";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { Tag } from "primereact/tag";
-import { Dropdown } from "primereact/dropdown";
-import { GiMineTruck } from "react-icons/gi";
-import { FiEdit2 } from "react-icons/fi";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { Checkbox } from "primereact/checkbox";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FilterMatchMode } from "primereact/api";
+import { DataView } from "primereact/dataview";
+import { Tag } from "primereact/tag";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { GiMineTruck } from "react-icons/gi";
 
 export default function VehiclesGrid() {
-  let emptyProduct = {
-    id: null,
-    name: "",
-    image: null,
-    description: "",
-    category: null,
-    reg: 0,
-    quantity: 0,
-    rating: 0,
-    inventoryStatus: "ACTIVE",
-  };
-
-  const [products, setProducts] = useState(null);
-  const [productDialog, setProductDialog] = useState(false);
-  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
-  const [product, setProduct] = useState(emptyProduct);
-  // eslint-disable-next-line
-  const [selectedProducts, setSelectedProducts] = useState(null);
-  const [checked, setChecked] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [globalFilter, setGlobalFilter] = useState(null);
-  const [ecuData, setEcuData] = useState([]);
-  const toast = useRef(null);
-  // const dt = useRef(null);
-  const [selectedEcu, setSelectedEcu] = useState(null);
-  const [selectedIot, setSelectedIot] = useState(null);
-  const [selectedDms, setSelectedDms] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [allData, setAllData] = useState([]);
   const [data, setData] = useState([]);
-  const statusOptions = [
-    { status: 1, label: "Active" },
-    { status: 0, label: "Deactive" },
-  ];
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    device_type: { value: null, matchMode: FilterMatchMode.IN },
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
+
+  const getSeverity = (data) => {
+    switch (data.status) {
+      case "1":
+        return "success";
+      case "0":
+        return "danger";
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/Vehicles/getAllVehicle")
       .then((res) => {
-        setEcuData(res.data.data);
+        setAllData(res.data.data);
+
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
@@ -65,337 +43,164 @@ export default function VehiclesGrid() {
         console.log(err);
       });
   }, []);
-  const openNew = () => {
-    setProduct(emptyProduct);
-    setSubmitted(false);
-    setProductDialog(true);
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters["global"].value = value;
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+    applyFilters(_filters); // Apply filters after global search value changes
   };
 
-  const hideDialog = () => {
-    setSubmitted(false);
-    setProductDialog(false);
+  const clearSearch = () => {
+    setGlobalFilterValue("");
+    const _filters = { ...filters };
+    _filters["global"].value = null;
+    setFilters(_filters);
+    applyFilters(_filters); // Apply filters after clearing search
   };
 
-  const hideDeleteProductDialog = () => {
-    setDeleteProductDialog(false);
-  };
-
-  const hideDeleteProductsDialog = () => {
-    setDeleteProductsDialog(false);
-  };
-
-  const saveProduct = () => {
-    setSubmitted(true);
-
-    if (product.name.trim()) {
-      let _products = [...products];
-      let _product = { ...product };
-
-      if (product.id) {
-        const index = findIndexById(product.id);
-
-        _products[index] = _product;
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Product Updated",
-          life: 3000,
-        });
-      } else {
-        _product.id = createId();
-        _product.image = "product-placeholder.svg";
-        _products.push(_product);
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Product Created",
-          life: 3000,
-        });
-      }
-
-      setProducts(_products);
-      setProductDialog(false);
-      setProduct(emptyProduct);
+  const applyFilters = (filters) => {
+    let filteredData = allData;
+    if (filters.global.value) {
+      filteredData = filteredData.filter((item) =>
+        Object.values(item).some((value) =>
+          String(value)
+            .toLowerCase()
+            .includes(filters.global.value.toLowerCase())
+        )
+      );
     }
-  };
-
-  const editProduct = (product) => {
-    setProduct({ ...product });
-    setProductDialog(true);
-  };
-
-  const confirmDeleteProduct = (product) => {
-    setProduct(product);
-    setDeleteProductDialog(true);
-  };
-
-  const deleteProduct = () => {
-    let _products = setProduct(product);
-
-    setProducts(_products);
-    setDeleteProductDialog(false);
-    setProduct(emptyProduct);
-    toast.current.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Product Deleted",
-      life: 3000,
-    });
-  };
-
-  const findIndexById = (id) => {
-    let index = -1;
-
-    for (let i = 0; i < products.length; i++) {
-      if (products[i].id === id) {
-        index = i;
-        break;
-      }
+    if (filters.device_type.value) {
+      filteredData = filteredData.filter((item) =>
+        filters.device_type.value.includes(item.device_type)
+      );
     }
-
-    return index;
+    setData(filteredData);
   };
 
-  const createId = () => {
-    let id = "";
-    let chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    return id;
-  };
-
-  // const exportCSV = () => {
-  //   dt.current.exportCSV();
-  // };
-
-  const confirmDeleteSelected = () => {
-    setDeleteProductsDialog(true);
-  };
-
-  const deleteSelectedProducts = () => {
-    setProducts([]);
-    setDeleteProductsDialog(false);
-    setSelectedProducts(null);
-    toast.current.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Products Deleted",
-      life: 3000,
-    });
-  };
-
-  const onInputChange = (e, name) => {
-    const val = (e.target && e.target.value) || "";
-    let _product = { ...product };
-
-    _product[`${name}`] = val;
-
-    setProduct(_product);
-  };
-
-  const leftToolbarTemplate = () => {
+  const itemTemplate = (item) => {
     return (
-      <div className="flex flex-wrap gap-2">
-        <Button
-          label="Add Vehicle"
-          icon="pi pi-plus"
-          severity="Primary"
-          className="h-10 px-5 py-0"
-          onClick={openNew}
-        />
-
-        <Button
-          label="Delete All"
-          icon="pi pi-trash"
-          className="h-10 px-5 py-0"
-          severity="danger"
-          title="Select to delete"
-          onClick={confirmDeleteSelected}
-        />
-      </div>
-    );
-  };
-
-  // const rightToolbarTemplate = () => {
-  //   return (
-  //     <Button
-  //       label="Export"
-  //       icon="pi pi-download"
-  //       className="h-10 border-none bg-gray-600 px-5 py-0"
-  //       onClick={exportCSV}
-  //     />
-  //   );
-  // };
-  const getSeverity = (data) => {
-    switch (data.status) {
-      case "1":
-        return "success";
-
-      case "0":
-        return "danger";
-
-      default:
-        return null;
-    }
-  };
-  const statusBodyTemplate = (rowData) => {
-    return (
-      <Tag
-        className="px-3"
-        value={
-          parseInt(rowData.status) === 1
-            ? "Active"
-            : parseInt(rowData.status) === 0
-            ? "Deactive"
-            : undefined
-        }
-        severity={getSeverity(rowData)}
-      ></Tag>
-    );
-  };
-
-  const header = (
-    <div className="align-items-center flex flex-wrap justify-between gap-2 py-3 dark:bg-gray-950">
-      {/* <h4 className="m-0">Manage Products</h4> */}
-      <span>
-        <Checkbox
-          className="my-auto"
-          onChange={(e) => setChecked(e.checked)}
-          checked={checked}
-        ></Checkbox>
-        &nbsp;Select All
-      </span>
-      <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search..."
-          className="w-[25vw] rounded-full dark:bg-gray-900 dark:text-gray-50"
-        />
-      </span>
-    </div>
-  );
-  const productDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        outlined
-        className="h-9 px-2 py-0"
-        style={{ backgroundColor: "transparent" }}
-        onClick={hideDialog}
-      />
-      <Button
-        label="Save"
-        className="h-9 border-none px-2 py-0"
-        style={{ backgroundColor: "#422AFB" }}
-        icon="pi pi-check"
-        onClick={saveProduct}
-      />
-    </React.Fragment>
-  );
-  const deleteProductDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteProductDialog}
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        outlined
-        onClick={deleteProduct}
-      />
-    </React.Fragment>
-  );
-  const deleteProductsDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteProductsDialog}
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        onClick={deleteSelectedProducts}
-      />
-    </React.Fragment>
-  );
-  const itemTemplate = (ecuData) => {
-    return (
-      <div className="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-        <div className="border-1 surface-border surface-card border-round h-[33vh] w-[27vw] rounded-lg bg-white p-4 px-5 dark:bg-gray-900 dark:text-gray-150">
-          <div className="align-items-center flex flex-wrap justify-between gap-2">
-            <div className="align-items-center flex gap-2">
-              <Checkbox
-                onChange={(e) => setChecked(e.checked)}
-                checked={checked}
-              ></Checkbox>
-              <span className="font-semibold">{ecuData.vehicle_name}</span>
+      <div className="p-col-12 mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
+        <div className="card">
+          <div className="card-body px-6 py-3">
+            <div className="flex items-center justify-end">
+              <div>
+                <Tag
+                  value={
+                    parseInt(item.status) === 1
+                      ? "Active"
+                      : parseInt(item.status) === 0
+                      ? "Deactive"
+                      : undefined
+                  }
+                  severity={getSeverity(item)}
+                ></Tag>
+              </div>
             </div>
-            <p>{statusBodyTemplate(ecuData)}</p>
-          </div>
-          <div className="flex-column align-items-center flex gap-6 py-1">
-            <GiMineTruck
-              className="text-red-450 dark:text-red-550"
-              style={{
-                fontSize: "4rem",
-              }}
-            />
-            <table>
-              <tr>
-                <td>Reg Number</td>
-                <td className="pl-3">
-                  <span className="font-medium">
-                    {ecuData.vehicle_registration}
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td>DMS</td>
-                <td className="pl-3">
-                  <span className="font-medium">{ecuData.dms}</span>
-                </td>
-              </tr>
-              <tr>
-                <td>IoT</td>
-                <td className="pl-3">
-                  <span className="font-medium">{ecuData.iot}</span>
-                </td>
-              </tr>
-              <tr>
-                <td>ECU</td>
-                <td className="pl-3">
-                  <span className="font-medium">{ecuData.ecu}</span>
-                </td>
-              </tr>
-            </table>
-          </div>
-          <div className="align-items-center flex justify-start">
-            <button
-              className="mr-3 rounded-full bg-gray-400 p-2 text-gray-800"
-              onClick={() => editProduct(product)}
-            >
-              <FiEdit2 />
-            </button>
-            <button
-              className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600"
-              severity="danger"
-              onClick={() => confirmDeleteProduct(product)}
-            >
-              <RiDeleteBin6Line />
-            </button>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="mt-4 flex justify-between font-semibold">
+                  <div className="mr-auto">
+                    <span>Vehicle Name</span>
+                  </div>
+                  <div>
+                    <span className="px-2 font-normal">
+                      {item.vehicle_name}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between font-semibold ">
+                  <div className="mr-auto">
+                    <span>Registration No.</span>
+                  </div>
+                  <div className=" text-end">
+                    <span className="px-2 font-normal">
+                      {item.vehicle_registration}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between font-semibold ">
+                  <div className="mr-auto">
+                    <span>DMS</span>
+                  </div>
+                  <div>
+                    <span className="px-2 font-normal">{item.dms}</span>
+                  </div>
+                </div>
+                <div className="text-bold flex justify-between font-semibold ">
+                  <div className="mr-auto">
+                    <span>IoT</span>
+                  </div>
+                  <div>
+                    <span className="px-2 font-normal">{item.iot}</span>
+                  </div>
+                </div>
+                <div className="text-bold flex justify-between font-semibold ">
+                  <div className="mr-auto">
+                    <span>ECU</span>
+                  </div>
+                  <div>
+                    <span className="px-2 font-normal">{item.ecu}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <GiMineTruck
+                  className="text-red-450 dark:text-red-550"
+                  style={{
+                    fontSize: "4rem",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end rounded">
+              <div>
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-rounded p-button-text mr-2"
+                  style={{
+                    borderColor: "#6E70F2",
+                    width: "2.2rem",
+                    height: "2.2rem",
+                  }}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  rounded
+                  outlined
+                  style={{
+                    borderColor: "#F18080",
+                    width: "2.2rem",
+                    height: "2.2rem",
+                  }}
+                  className="p-button-rounded p-button-text p-button-danger"
+                />
+              </div>
+            </div>
+            {/* <div className="p-mt-2">
+              <span className="font-bold">Device Type:</span> {item.device_type}
+            </div>
+            <div>
+              <span className="font-bold">Customer ID:</span> {item.customer_id}
+            </div>
+            <div>
+              <span className="font-bold">Sim Number:</span> {item.sim_number}
+            </div>
+            <div>
+              <span className="font-bold">Status:</span>{" "}
+              <Tag
+                value={
+                  parseInt(item.status) === 1
+                    ? "Active"
+                    : parseInt(item.status) === 0
+                    ? "Deactive"
+                    : undefined
+                }
+                severity={getSeverity(item)}
+              ></Tag>
+            </div> */}
           </div>
         </div>
       </div>
@@ -404,173 +209,36 @@ export default function VehiclesGrid() {
 
   return (
     <div>
-      <Toast ref={toast} />
-      <div className="card rounded-lg bg-none dark:bg-gray-950">
-        <Toolbar
-          className="rounded-lg border-none dark:bg-gray-950"
-          start={leftToolbarTemplate}
-          // end={rightToolbarTemplate}
-        ></Toolbar>
+      <div className="my-4 mr-7  flex justify-end">
+        <div className="justify-content-between align-items-center flex flex-wrap gap-2">
+          <span className="p-input-icon-left">
+            <i className="pi pi-search" />
+            <InputText
+              value={globalFilterValue}
+              onChange={onGlobalFilterChange}
+              placeholder="Keyword Search"
+              className="searchbox w-[25vw] cursor-pointer rounded-full dark:bg-gray-950 dark:text-gray-50"
+            />
+            {globalFilterValue && (
+              <Button
+                icon="pi pi-times"
+                className="p-button-rounded p-button-text"
+                onClick={clearSearch}
+              />
+            )}
+          </span>
+        </div>
       </div>
 
-      <div className="card rounded-lg bg-none dark:bg-gray-950">
-        <DataView
-          // ref={dt}
-          value={data}
-          globalFilter={globalFilter}
-          header={header}
-          itemTemplate={itemTemplate}
-          paginator
-          rows={6}
-        />
-      </div>
-      {/* Add New Vehicle Form */}
-      <Dialog
-        visible={productDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Product Details"
-        modal
-        className="p-fluid"
-        footer={productDialogFooter}
-        onHide={hideDialog}
-      >
-        <div className="field">
-          <label htmlFor="name" className="mb-2 font-bold">
-            Vehicle Name
-          </label>
-          <InputText
-            id="name"
-            value={product.name}
-            onChange={(e) => onInputChange(e, "name")}
-            required
-            autoFocus
-            className={classNames({ "p-invalid": submitted && !product.name })}
-            style={{ marginTop: "0.5rem" }}
-          />
-          {submitted && !product.name && (
-            <small className="p-error">Name is required.</small>
-          )}
-        </div>
-        <div className="field mt-2">
-          <label htmlFor="description" className="font-bold">
-            Registration Number
-          </label>
-          <InputText
-            id="description"
-            className="mt-2"
-            value={product.description}
-            onChange={(e) => onInputChange(e, "description")}
-            required
-          />
-        </div>
-
-        <div className="field mt-2">
-          <label htmlFor="ecu" className="font-bold">
-            Select ECU
-          </label>
-          <Dropdown
-            name="ecu"
-            id="ecu"
-            value={selectedEcu}
-            options={ecuData}
-            onChange={(e) => setSelectedEcu(e.value)}
-            placeholder="Tap To Select"
-            optionLabel="ecu"
-            className="md:w-14rem mt-2 w-full"
-          />
-        </div>
-
-        <div className="field mt-2">
-          <label htmlFor="iot" className="font-bold">
-            Select IoT
-          </label>
-          <Dropdown
-            name="iot"
-            id="iot"
-            value={selectedIot}
-            options={ecuData}
-            onChange={(e) => setSelectedIot(e.value)}
-            placeholder="Tap To Select"
-            optionLabel="iot"
-            className="md:w-14rem mt-2 w-full"
-          />
-        </div>
-
-        <div className="field mt-2">
-          <label htmlFor="dms" className="font-bold">
-            Select DMS
-          </label>
-          <Dropdown
-            name="dms"
-            id="dms"
-            value={selectedDms}
-            options={ecuData}
-            onChange={(e) => setSelectedDms(e.value)}
-            placeholder="Tap To Select"
-            optionLabel="dms"
-            className="md:w-14rem mt-2 w-full"
-          />
-        </div>
-
-        <div className="field mt-2">
-          <label htmlFor="status" className="font-bold">
-            Select Status
-          </label>
-          <Dropdown
-            name="status"
-            id="status"
-            value={selectedStatus}
-            options={statusOptions}
-            onChange={(e) => setSelectedStatus(e.value)}
-            placeholder="Tap To Select"
-            optionLabel="label"
-            className="md:w-14rem mt-2 w-full"
-          />
-        </div>
-      </Dialog>
-
-      <Dialog
-        visible={deleteProductDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={deleteProductDialogFooter}
-        onHide={hideDeleteProductDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {product && (
-            <span>
-              Are you sure you want to delete <b>{product.name}</b>?
-            </span>
-          )}
-        </div>
-      </Dialog>
-
-      <Dialog
-        visible={deleteProductsDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={deleteProductsDialogFooter}
-        onHide={hideDeleteProductsDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {product && (
-            <span>Are you sure you want to delete the selected products?</span>
-          )}
-        </div>
-      </Dialog>
+      <DataView
+        value={data}
+        layout="grid"
+        itemTemplate={itemTemplate}
+        paginator
+        rows={6}
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        emptyMessage="No vehicles found."
+      />
     </div>
   );
 }
