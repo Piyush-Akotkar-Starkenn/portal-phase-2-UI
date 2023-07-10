@@ -10,7 +10,6 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
 import { FilterMatchMode } from "primereact/api";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function VehiclesList() {
@@ -47,7 +46,6 @@ export default function VehiclesList() {
   ];
 
   const [data, setData] = useState([]);
-  const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
     axios
@@ -281,6 +279,14 @@ export default function VehiclesList() {
           icon="pi pi-trash"
           rounded
           outlined
+          className="mr-2 text-red-500 dark:text-red-500"
+          style={{ width: "2rem", height: "2rem" }}
+          onClick={() => confirmDeleteProduct(rowData)}
+        />
+        <Button
+          icon="pi pi-eye"
+          rounded
+          outlined
           className="text-red-500 dark:text-red-500"
           style={{ width: "2rem", height: "2rem" }}
           onClick={() => confirmDeleteProduct(rowData)}
@@ -357,19 +363,6 @@ export default function VehiclesList() {
     </React.Fragment>
   );
 
-  const rowClassName = (rowData) => {
-    return classNames({
-      "p-clickable": true,
-      "p-highlight": rowData === selectedRow,
-    });
-  };
-  const navigate = useNavigate();
-  const onRowClick = (event) => {
-    setSelectedRow(event.data);
-    // Handle the row click event
-    navigate("/signin");
-    console.log("Clicked row:", event.data);
-  };
   return (
     <div>
       <Toast ref={toast} />
@@ -390,8 +383,6 @@ export default function VehiclesList() {
           dataKey="id"
           paginator
           rows={5}
-          rowClassName={rowClassName}
-          onRowClick={onRowClick}
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"

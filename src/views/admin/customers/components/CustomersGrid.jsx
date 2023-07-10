@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { FilterMatchMode } from "primereact/api";
 import { DataView } from "primereact/dataview";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+const applyFilters = (filters, allData) => {
+  let filteredData = allData;
 
-export default function CustomersGrid() {
+  if (filters.global.value) {
+    filteredData = filteredData.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(filters.global.value.toLowerCase())
+      )
+    );
+  }
+
+  return filteredData;
+};
+export default function CustomersGrid({ data }) {
   const [allData, setAllData] = useState([]);
-  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
@@ -15,64 +26,32 @@ export default function CustomersGrid() {
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/Get/GetUser")
-      .then((res) => {
-        setAllData(res.data.data);
-
-        const formattedData = res.data.data.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-          address:
-            item.address +
-            ", " +
-            item.city +
-            ", " +
-            item.state +
-            ", " +
-            item.pincode,
-        }));
-        setData(formattedData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    setAllData(data);
+    const filteredData = applyFilters(filters, data);
+    setFilteredData(filteredData);
+  }, [data, filters]);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
-    let _filters = { ...filters };
-    _filters["global"].value = value;
-    setFilters(_filters);
     setGlobalFilterValue(value);
-    applyFilters(_filters); // Apply filters after global search value changes
+    const updatedFilters = {
+      ...filters,
+      global: { value, matchMode: FilterMatchMode.CONTAINS },
+    };
+    const filteredData = applyFilters(updatedFilters, allData);
+    setFilters(updatedFilters);
+    setFilteredData(filteredData);
   };
 
   const clearSearch = () => {
     setGlobalFilterValue("");
-    const _filters = { ...filters };
-    _filters["global"].value = null;
-    setFilters(_filters);
-    applyFilters(_filters); // Apply filters after clearing search
-  };
-
-  const applyFilters = (filters) => {
-    let filteredData = allData;
-    if (filters.global.value) {
-      filteredData = filteredData.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value)
-            .toLowerCase()
-            .includes(filters.global.value.toLowerCase())
-        )
-      );
-    }
-    if (filters.device_type.value) {
-      filteredData = filteredData.filter((item) =>
-        filters.device_type.value.includes(item.device_type)
-      );
-    }
-    setData(filteredData);
+    const updatedFilters = {
+      ...filters,
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    };
+    const filteredData = applyFilters(updatedFilters, allData);
+    setFilters(updatedFilters);
+    setFilteredData(filteredData);
   };
 
   const itemTemplate = (item) => {
@@ -86,6 +65,14 @@ export default function CustomersGrid() {
               </div>
               <div>
                 <span>{item.full_name}</span>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-between font-normal">
+              <div className="mr-16 flex-shrink-0">
+                <span>Email</span>
+              </div>
+              <div>
+                <span>{item.email}</span>
               </div>
             </div>
             <div className="flex justify-between font-normal">
@@ -164,7 +151,7 @@ export default function CustomersGrid() {
       </div>
 
       <DataView
-        value={data}
+        value={filteredData}
         layout="grid"
         itemTemplate={itemTemplate}
         paginator

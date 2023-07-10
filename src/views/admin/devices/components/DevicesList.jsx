@@ -36,10 +36,10 @@ export default function DevicesList() {
     axios
       .get("http://localhost:3001/api/Devices/get-all-devices")
       .then((res) => {
-        console.log(res.data.data.devices);
-        setAllData(res.data.data.devices);
+        console.log(res.data.data.device);
+        setAllData(res.data.data.device);
 
-        const formattedData = res.data.data.devices.map((item, index) => ({
+        const formattedData = res.data.data.device.map((item, index) => ({
           ...item,
           serialNo: index + 1,
         }));

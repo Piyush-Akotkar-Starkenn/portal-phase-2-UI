@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -9,10 +9,7 @@ import { Menu } from "primereact/menu";
 import { Toast } from "primereact/toast";
 import { CiMenuKebab } from "react-icons/ci";
 
-import axios from "axios";
-
-const CustomersList = () => {
-  const [data, setData] = useState([]);
+const CustomersList = ({ data }) => {
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [filters, setFilters] = useState({
@@ -58,29 +55,6 @@ const CustomersList = () => {
       },
     },
   ];
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/Get/GetUser")
-      .then((res) => {
-        const formattedData = res.data.data.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-          address:
-            item.address +
-            ", " +
-            item.city +
-            ", " +
-            item.state +
-            ", " +
-            item.pincode,
-        }));
-        setData(formattedData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -172,6 +146,12 @@ const CustomersList = () => {
         <Column
           field="full_name"
           header="Name"
+          style={{ minWidth: "8rem" }}
+          className="border-none dark:bg-gray-900 dark:text-gray-200"
+        ></Column>
+        <Column
+          field="email"
+          header="Email"
           style={{ minWidth: "8rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         ></Column>

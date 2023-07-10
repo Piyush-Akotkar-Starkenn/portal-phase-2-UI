@@ -7,11 +7,14 @@ import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import avatar from "assets/img/avatars/avatar4.png";
 import Sidebar from "components/sidebar_admin";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ onOpenSidenav }) => {
   const [darkmode, setDarkmode] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => {
@@ -30,6 +33,11 @@ const Navbar = ({ onOpenSidenav }) => {
       setSidebarOpen(!sidebarOpen);
       onOpenSidenav();
     }
+  };
+
+  const handleLogout = () => {
+    Cookies.remove("token");
+    navigate("/signin");
   };
 
   return (
@@ -208,12 +216,12 @@ const Navbar = ({ onOpenSidenav }) => {
                 >
                   Profile Settings
                 </a>
-                <a
-                  href=" "
+                <button
+                  onClick={handleLogout}
                   className="mt-3 text-sm font-medium text-red-500 hover:text-red-500"
                 >
                   Log Out
-                </a>
+                </button>
               </div>
             </div>
           }

@@ -275,7 +275,71 @@ input:checked.defaultCheckbox::before {
 .dark .p-menu .p-menuitem-link .p-menuitem-text {
   color: #ddd;
 }
+.custom-datepicker .p-datepicker {
+  width: 200px; /* Set the desired width */
+}
 
+.custom-datepicker .p-datepicker-calendar-container {
+  width: 200px; /* Set the desired width */
+}
+
+.custom-datepicker .p-datepicker-calendar {
+  width: 100%;
+}
+body
+  > div.p-datepicker.p-component.p-ripple-disabled.p-connected-overlay-enter-done {
+  width: 250px;
+}
+.p-datepicker table td > span {
+  height: 1rem;
+  width: 1rem;
+}
+.p-datepicker table {
+  width: 237px;
+  font-size: 0.8rem;
+}
+.p-datepicker table td > span {
+  border-radius: 0px;
+}
+.p-calendar .p-inputtext {
+  padding: 10px 0px;
+  text-align: center;
+}
+.p-tabview-nav {
+  justify-content: center;
+}
+.p-tabview .p-tabview-nav {
+  background: none;
+  border: none;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: none;
+  color: #333;
+  font-weight: 500;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus {
+  box-shadow: none;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  border-radius: 0px;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  background: none;
+}
+.p-tabview .p-tabview-panels {
+  border-radius: 0px;
+}
+.p-tabview
+  .p-tabview-nav
+  li:not(.p-highlight):not(.p-disabled):hover
+  .p-tabview-nav-link {
+  background: none;
+  border-color: #adb5bd;
+  color: #6c757d;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  background: #ffffff;
+}
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {
