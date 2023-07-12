@@ -10,6 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
 import { FilterMatchMode } from "primereact/api";
+import { TabView, TabPanel } from "primereact/tabview";
 import axios from "axios";
 
 export default function VehiclesList() {
@@ -37,6 +38,7 @@ export default function VehiclesList() {
   const [selectedDms, setSelectedDms] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedEcu, setSelectedEcu] = useState(null);
+  const [visible, setVisible] = useState(false);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
@@ -289,7 +291,7 @@ export default function VehiclesList() {
           outlined
           className="text-red-500 dark:text-red-500"
           style={{ width: "2rem", height: "2rem" }}
-          onClick={() => confirmDeleteProduct(rowData)}
+          onClick={() => setVisible(true)}
         />
       </React.Fragment>
     );
@@ -374,7 +376,6 @@ export default function VehiclesList() {
         >
           {leftToolbarTemplate}
         </Toolbar>
-
         <DataTable
           removableSort
           value={data}
@@ -620,6 +621,177 @@ export default function VehiclesList() {
             <span>Are you sure you want to delete the selected products?</span>
           )}
         </div>
+      </Dialog>
+      <Dialog
+        header="Vehicle Details"
+        visible={visible}
+        style={{ width: "70vw" }}
+        onHide={() => setVisible(false)}
+      >
+        <TabView>
+          <TabPanel header="Vehicle's Trips" leftIcon="pi pi-truck mr-2">
+            <DataTable
+              removableSort
+              value={data}
+              selection={selectedProducts}
+              onSelectionChange={(e) => setSelectedProducts(e.value)}
+              dataKey="id"
+              paginator
+              rows={5}
+              rowsPerPageOptions={[5, 10, 25]}
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+              filterDisplay="menu"
+              filters={filters}
+              globalFilterFields={[
+                "vehicle_name",
+                "vehicle_registration",
+                "dms",
+                "iot",
+                "ecu",
+              ]}
+              emptyMessage="No vehicles found."
+              header={header}
+            >
+              <Column
+                field="serialNo"
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "4rem", textAlign: "center" }}
+              ></Column>
+              <Column
+                field="vehicle_name"
+                header="Vehicle Name"
+                sortable
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "10rem", border: "none !important" }}
+              ></Column>
+
+              <Column
+                field="vehicle_registration"
+                header="Registration No."
+                sortable
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "12rem" }}
+              ></Column>
+              <Column
+                field="dms"
+                header="DMS"
+                sortable
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "9rem" }}
+              ></Column>
+              <Column
+                field="iot"
+                header="IoT"
+                sortable
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "9rem" }}
+              ></Column>
+              <Column
+                field="ecu"
+                header="ECU"
+                sortable
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "9rem" }}
+              ></Column>
+              <Column
+                field="status"
+                header="Status"
+                body={statusBodyTemplate}
+                sortable
+                className="border-none dark:bg-gray-900 dark:text-gray-200"
+                style={{ minWidth: "7rem" }}
+              ></Column>
+            </DataTable>
+          </TabPanel>
+          <TabPanel header="Feature Set" leftIcon="pi pi-cog mr-2">
+            <form className="mx-auto">
+              <div className="flex justify-evenly">
+                <div className="card justify-content-center mt-5 flex">
+                  <span className="p-float-label">
+                    <InputText id="f_name" name="f_name" />
+                    <label htmlFor="f_name">First Name</label>
+                  </span>
+                </div>
+                <div className="card justify-content-center mt-5 flex">
+                  <span className="p-float-label">
+                    <InputText id="l_name" name="l_name" />
+                    <label htmlFor="l_name">Last Name</label>
+                  </span>
+                </div>
+              </div>
+              <div className="mx-auto mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText id="email" type="email" name="email" />
+                  <label htmlFor="email">Email</label>
+                </span>
+              </div>
+              <div className="mx-auto mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText
+                    id="confirmPassword"
+                    type="password"
+                    name="confirmPassword"
+                  />
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                </span>
+              </div>
+              <div className="mx-auto mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText
+                    id="company_name"
+                    type="text"
+                    name="company_name"
+                  />
+                  <label htmlFor="company_name">Company Name</label>
+                </span>
+              </div>
+              <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText id="phone" type="phone" name="phone" />
+                  <label htmlFor="phone">Contact Number</label>
+                </span>
+              </div>
+              <div className="mx-auto mt-6 w-[34.5vw]">
+                <span>Address:</span>
+              </div>
+              <div className="mx-auto mt-6 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText id="address" type="text" name="address" />
+                  <label htmlFor="address">
+                    Flat No./ Plot No., Area/Society
+                  </label>
+                </span>
+              </div>
+              <div className="mx-auto mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText id="city" type="text" name="city" />
+                  <label htmlFor="city">City</label>
+                </span>
+              </div>
+              <div className="mx-auto mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText id="state" type="text" name="state" />
+                  <label htmlFor="state">State</label>
+                </span>
+              </div>
+              <div className="mx-auto mt-8 w-[34.5vw]">
+                <span className="p-float-label">
+                  <InputText id="pincode" type="number" name="pincode" />
+                  <label htmlFor="pincode">Pincode</label>
+                </span>
+              </div>
+              <div className="mt-6 flex justify-center">
+                <button
+                  type="submit"
+                  className="rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </TabPanel>
+        </TabView>
       </Dialog>
     </div>
   );

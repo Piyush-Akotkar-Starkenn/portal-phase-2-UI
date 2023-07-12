@@ -6,12 +6,18 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { FilterMatchMode } from "primereact/api";
 import { Menu } from "primereact/menu";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import { CiMenuKebab } from "react-icons/ci";
 
 const CustomersList = ({ data }) => {
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [editDialogVisible, setEditDialogVisible] = useState(false);
+  const [editedCustomer, setEditedCustomer] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
@@ -43,8 +49,9 @@ const CustomersList = ({ data }) => {
     {
       label: "Edit",
       icon: "pi pi-pencil",
-      command: () => {
-        navigate("/edit-customer");
+      command: (customer) => {
+        setEditedCustomer(customer);
+        setEditDialogVisible(true);
       },
     },
     {
@@ -55,6 +62,142 @@ const CustomersList = ({ data }) => {
       },
     },
   ];
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  const EditCustomerDialog = ({ visible, onHide, customer }) => {
+    const [editedCustomerData, setEditedCustomerData] = useState(customer);
+
+    const onSave = () => {
+      // Perform the save operation with the editedCustomerData
+      onHide();
+    };
+
+    return (
+      <Dialog
+        visible={visible}
+        onHide={onHide}
+        header="Edit Customer"
+        footer={
+          <div>
+            <Button label="Save" icon="pi pi-check" onClick={onSave} />
+            <Button
+              label="Cancel"
+              icon="pi pi-times"
+              onClick={onHide}
+              className="p-button-secondary"
+            />
+          </div>
+        }
+      >
+        <div className="p-fluid">
+          <div className="flex justify-evenly">
+            <div className="card justify-content-center mt-5 flex">
+              <span className="p-float-label">
+                <InputText id="f_name" name="f_name" />
+                <label htmlFor="f_name">First Name</label>
+              </span>
+            </div>
+            <div className="card justify-content-center mt-5 flex">
+              <span className="p-float-label">
+                <InputText id="l_name" name="l_name" />
+                <label htmlFor="l_name">Last Name</label>
+              </span>
+            </div>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText id="email" type="email" name="email" />
+              <label htmlFor="email">Email</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+              />
+              <label htmlFor="password">Password</label>
+              <div className="absolute right-2.5 top-4">
+                {showPassword ? (
+                  <FaEyeSlash
+                    className="h-5 w-5 cursor-pointer text-gray-500"
+                    onClick={togglePasswordVisibility}
+                  />
+                ) : (
+                  <FaEye
+                    className="h-5 w-5 cursor-pointer text-gray-600"
+                    onClick={togglePasswordVisibility}
+                  />
+                )}
+              </div>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+              />
+              <label htmlFor="confirmPassword">Confirm Password</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText id="company_name" type="text" name="company_name" />
+              <label htmlFor="company_name">Company Name</label>
+            </span>
+          </div>
+          <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText id="phone" type="tel" name="phone" />
+              <label htmlFor="phone">Contact Number</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-6 w-[34.5vw]">
+            <span>Address:</span>
+          </div>
+          <div className="mx-auto mt-6 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText id="address" type="text" name="address" />
+              <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText id="city" type="text" name="city" />
+              <label htmlFor="city">City</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText id="state" type="text" name="state" />
+              <label htmlFor="state">State</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="pincode"
+                type="text"
+                name="pincode"
+                keyfilter="pint"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const formattedValue = value.replace(/\D/g, "").slice(0, 6); // Remove non-digits and limit to 6 characters
+                  e.target.value = formattedValue;
+                }}
+              />
+              <label htmlFor="pincode">Pincode (Format: xxxxxx)</label>
+            </span>
+          </div>
+          {/* Add more fields as needed */}
+        </div>
+      </Dialog>
+    );
+  };
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -181,6 +324,11 @@ const CustomersList = ({ data }) => {
           className="border-none dark:bg-gray-900 "
         />
       </DataTable>
+      <EditCustomerDialog
+        visible={editDialogVisible}
+        onHide={() => setEditDialogVisible(false)}
+        customer={editedCustomer}
+      />
     </div>
   );
 };

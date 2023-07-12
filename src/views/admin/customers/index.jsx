@@ -14,6 +14,7 @@ const Customers = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState([]);
+
   useEffect(() => {
     fetchCustomersData();
   }, []);
@@ -42,6 +43,7 @@ const Customers = () => {
   const handleGridView = () => {
     setIsListView(false);
   };
+
   const openDialog = () => {
     setIsDialogVisible(true);
   };
@@ -49,6 +51,7 @@ const Customers = () => {
   const closeDialog = () => {
     setIsDialogVisible(false);
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSuccess(true);
@@ -105,6 +108,7 @@ const Customers = () => {
       }
     }
   };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -120,8 +124,8 @@ const Customers = () => {
           <button
             className={`${
               isListView === true
-                ? "list-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "list-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "list-btn bg-gray-150 px-3 py-2 dark:bg-gray-700"
+                : "list-btn bg-white px-3 py-2 dark:bg-gray-150"
             }`}
             onClick={handleListView}
           >
@@ -130,8 +134,8 @@ const Customers = () => {
           <button
             className={`${
               isListView === false
-                ? "grid-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "grid-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "grid-btn bg-gray-150 px-3 py-2 dark:bg-gray-700"
+                : "grid-btn bg-white px-3 py-2 dark:bg-gray-150"
             }`}
             onClick={handleGridView}
           >
@@ -142,7 +146,7 @@ const Customers = () => {
       <Button
         label="Add Customer"
         icon="pi pi-plus"
-        severity="Primary"
+        severity="primary"
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
         onClick={openDialog}
       />
@@ -193,7 +197,7 @@ const Customers = () => {
               <div className="absolute right-2.5 top-4">
                 {showPassword ? (
                   <FaEyeSlash
-                    className="h-5 w-5 cursor-pointer  text-gray-500"
+                    className="h-5 w-5 cursor-pointer text-gray-500"
                     onClick={togglePasswordVisibility}
                   />
                 ) : (
@@ -223,7 +227,7 @@ const Customers = () => {
           </div>
           <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="phone" type="phone" name="phone" />
+              <InputText id="phone" type="tel" name="phone" />
               <label htmlFor="phone">Contact Number</label>
             </span>
           </div>
@@ -250,10 +254,21 @@ const Customers = () => {
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="pincode" type="phone" name="pincode" />
-              <label htmlFor="pincode">Pincode</label>
+              <InputText
+                id="pincode"
+                type="text"
+                name="pincode"
+                keyfilter="pint"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const formattedValue = value.replace(/\D/g, "").slice(0, 6); // Remove non-digits and limit to 6 characters
+                  e.target.value = formattedValue;
+                }}
+              />
+              <label htmlFor="pincode">Pincode (Format: xxxxxx)</label>
             </span>
           </div>
+
           <div className="mt-6 flex justify-center">
             <button
               type="submit"
