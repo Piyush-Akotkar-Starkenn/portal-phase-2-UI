@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FilterMatchMode } from "primereact/api";
 import { DataView } from "primereact/dataview";
@@ -6,16 +6,35 @@ import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { GiMineTruck } from "react-icons/gi";
+import { Dialog } from "primereact/dialog";
+import { TabPanel, TabView } from "primereact/tabview";
+import VehicleTrips from "./VehicleTrips";
+import FeatureSet from "./FeatureSet";
 
 export default function VehiclesGrid() {
   const [allData, setAllData] = useState([]);
   const [data, setData] = useState([]);
+  const [visible, setVisible] = useState(false);
+
+  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+  const toast = useRef(null);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
+  let emptyProduct = {
+    id: null,
+    vehicle_name: "",
+    vehicle_registration: "",
+    dms: "",
+    iot: "",
+    ecu: "",
+    status: "",
+  };
+  const [product, setProduct] = useState(emptyProduct);
+  const [products, setProducts] = useState(null);
   const getSeverity = (data) => {
     switch (data.status) {
       case "1":
@@ -43,7 +62,27 @@ export default function VehiclesGrid() {
         console.log(err);
       });
   }, []);
+  const confirmDeleteProduct = (product) => {
+    setProduct(product);
+    setDeleteProductDialog(true);
+  };
 
+  const deleteProduct = () => {
+    let _products = products.filter((val) => val.id !== product.id);
+
+    setProducts(_products);
+    setDeleteProductDialog(false);
+    setProduct(emptyProduct);
+    toast.current.show({
+      severity: "success",
+      summary: "Successful",
+      detail: "Product Deleted",
+      life: 3000,
+    });
+  };
+  const hideDeleteProductDialog = () => {
+    setDeleteProductDialog(false);
+  };
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -178,7 +217,16 @@ export default function VehiclesGrid() {
                   width: "2.2rem",
                   height: "2.2rem",
                 }}
+                onClick={() => confirmDeleteProduct()}
                 className="p-button-rounded p-button-text p-button-danger"
+              />
+              <Button
+                icon="pi pi-eye"
+                rounded
+                outlined
+                className="text-red-500 dark:text-blue-500"
+                style={{ width: "2rem", height: "2rem" }}
+                onClick={() => setVisible(true)}
               />
             </div>
           </div>
@@ -186,7 +234,23 @@ export default function VehiclesGrid() {
       </div>
     );
   };
-
+  const deleteProductDialogFooter = (
+    <React.Fragment>
+      <Button
+        label="No"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDeleteProductDialog}
+      />
+      <Button
+        label="Yes"
+        icon="pi pi-check"
+        severity="danger"
+        outlined
+        onClick={deleteProduct}
+      />
+    </React.Fragment>
+  );
   return (
     <div>
       <div className="my-4 mr-7  flex justify-end">
@@ -219,6 +283,40 @@ export default function VehiclesGrid() {
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         emptyMessage="No vehicles found."
       />
+      <Dialog
+        visible={deleteProductDialog}
+        style={{ width: "32rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Confirm"
+        modal
+        footer={deleteProductDialogFooter}
+        onHide={hideDeleteProductDialog}
+      >
+        <div className="confirmation-content">
+          <i
+            className="pi pi-exclamation-triangle mr-3"
+            style={{ fontSize: "2rem" }}
+          />
+          <span>
+            <b>Are you sure you want to delete?</b>?
+          </span>
+        </div>
+      </Dialog>
+      <Dialog
+        header="Vehicle Details"
+        visible={visible}
+        style={{ width: "70vw" }}
+        onHide={() => setVisible(false)}
+      >
+        <TabView>
+          <TabPanel header="Vehicle's Trips" leftIcon="pi pi-truck mr-2">
+            <VehicleTrips />
+          </TabPanel>
+          <TabPanel header="Feature Set" leftIcon="pi pi-cog mr-2">
+            <FeatureSet />
+          </TabPanel>
+        </TabView>
+      </Dialog>
     </div>
   );
 }

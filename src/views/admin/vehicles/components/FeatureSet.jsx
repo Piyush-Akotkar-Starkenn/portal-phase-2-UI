@@ -1654,6 +1654,13 @@ const FeatureSet = () => {
             />
           </div>
         </div>
+        <div className="text-right">
+          <Button
+            label="Update"
+            icon="pi pi-check"
+            className="p-button-primary px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
+          />
+        </div>
       </form>
     </>
   );
