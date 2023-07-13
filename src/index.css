@@ -346,6 +346,48 @@ body
 .p-inputtext:enabled:focus {
   box-shadow: none;
 }
+.dark .p-tabview .p-tabview-panels {
+  background: transparent;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  background: none;
+}
+.dark .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: none;
+}
+.vehicle-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.vehicle-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px;
+}
+
+.card-actions button {
+  margin-right: 8px;
+}
+
+.card-actions button:last-child {
+  margin-right: 0;
+}
+
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {

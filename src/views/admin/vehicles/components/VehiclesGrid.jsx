@@ -82,9 +82,9 @@ export default function VehiclesGrid() {
 
   const itemTemplate = (item) => {
     return (
-      <div className="p-col-12 mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
+      <div className="p-col-12 vehicle-card mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
         <div className="card">
-          <div className="card-body px-6 py-3">
+          <div className="card-header">
             <div className="flex items-center justify-end">
               <div>
                 <Tag
@@ -99,6 +99,8 @@ export default function VehiclesGrid() {
                 ></Tag>
               </div>
             </div>
+          </div>
+          <div className="card-body">
             <div className="flex items-center justify-between">
               <div>
                 <div className="mt-4 flex justify-between font-semibold">
@@ -155,29 +157,29 @@ export default function VehiclesGrid() {
                 />
               </div>
             </div>
-            <div className="mt-4 flex justify-end rounded">
-              <div>
-                <Button
-                  icon="pi pi-pencil"
-                  className="p-button-rounded p-button-text mr-2"
-                  style={{
-                    borderColor: "#6E70F2",
-                    width: "2.2rem",
-                    height: "2.2rem",
-                  }}
-                />
-                <Button
-                  icon="pi pi-trash"
-                  rounded
-                  outlined
-                  style={{
-                    borderColor: "#F18080",
-                    width: "2.2rem",
-                    height: "2.2rem",
-                  }}
-                  className="p-button-rounded p-button-text p-button-danger"
-                />
-              </div>
+          </div>
+          <div className="card-actions">
+            <div>
+              <Button
+                icon="pi pi-pencil"
+                className="p-button-rounded p-button-text mr-2"
+                style={{
+                  borderColor: "#6E70F2",
+                  width: "2.2rem",
+                  height: "2.2rem",
+                }}
+              />
+              <Button
+                icon="pi pi-trash"
+                rounded
+                outlined
+                style={{
+                  borderColor: "#F18080",
+                  width: "2.2rem",
+                  height: "2.2rem",
+                }}
+                className="p-button-rounded p-button-text p-button-danger"
+              />
             </div>
           </div>
         </div>
