@@ -340,6 +340,12 @@ body
 .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
   background: #ffffff;
 }
+.p-tabview .p-tabview-nav .p-tabview-ink-bar {
+  display: none;
+}
+.p-inputtext:enabled:focus {
+  box-shadow: none;
+}
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {

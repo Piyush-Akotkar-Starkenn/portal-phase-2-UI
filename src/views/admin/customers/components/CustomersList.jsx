@@ -65,8 +65,10 @@ const CustomersList = ({ data }) => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  //Edit Customer Dialog code
   const EditCustomerDialog = ({ visible, onHide, customer }) => {
-    const [editedCustomerData, setEditedCustomerData] = useState(customer);
+    // const [editedCustomerData, setEditedCustomerData] = useState(customer);
 
     const onSave = () => {
       // Perform the save operation with the editedCustomerData
@@ -91,7 +93,7 @@ const CustomersList = ({ data }) => {
         }
       >
         <div className="p-fluid">
-          <div className="flex justify-evenly">
+          <div className="flex justify-between">
             <div className="card justify-content-center mt-5 flex">
               <span className="p-float-label">
                 <InputText id="f_name" name="f_name" />
@@ -199,6 +201,10 @@ const CustomersList = ({ data }) => {
     );
   };
 
+  //end of Edit Customer Dialog
+
+  //Global Filter
+
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -237,6 +243,10 @@ const CustomersList = ({ data }) => {
     </div>
   );
 
+  //end of Global Filter
+
+  //Action menu
+
   const actionBodyTemplate = () => {
     return (
       <div>
@@ -261,6 +271,8 @@ const CustomersList = ({ data }) => {
       </div>
     );
   };
+
+  //end of Action menu
 
   return (
     <div>
