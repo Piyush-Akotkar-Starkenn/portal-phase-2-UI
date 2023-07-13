@@ -179,28 +179,6 @@ export default function VehiclesGrid() {
                 />
               </div>
             </div>
-            {/* <div className="p-mt-2">
-              <span className="font-bold">Device Type:</span> {item.device_type}
-            </div>
-            <div>
-              <span className="font-bold">Customer ID:</span> {item.customer_id}
-            </div>
-            <div>
-              <span className="font-bold">Sim Number:</span> {item.sim_number}
-            </div>
-            <div>
-              <span className="font-bold">Status:</span>{" "}
-              <Tag
-                value={
-                  parseInt(item.status) === 1
-                    ? "Active"
-                    : parseInt(item.status) === 0
-                    ? "Deactive"
-                    : undefined
-                }
-                severity={getSeverity(item)}
-              ></Tag>
-            </div> */}
           </div>
         </div>
       </div>

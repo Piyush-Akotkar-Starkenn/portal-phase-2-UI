@@ -71,7 +71,6 @@ const Customers = () => {
       city: formData.get("city"),
       state: formData.get("state"),
       pincode: formData.get("pincode"),
-      // Add more fields as needed
     };
 
     try {

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { classNames } from "primereact/utils";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
-import { Toolbar } from "primereact/toolbar";
+import { RadioButton } from "primereact/radiobutton";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
@@ -24,36 +23,32 @@ export default function VehiclesList() {
   };
 
   const [products, setProducts] = useState(null);
-  const [productDialog, setProductDialog] = useState(false);
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
   const [product, setProduct] = useState(emptyProduct);
   const [selectedProducts, setSelectedProducts] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const toast = useRef(null);
-  // const dt = useRef(null);
-  const [ecuData, setEcuData] = useState([]);
-  const [selectedIot, setSelectedIot] = useState(null);
-  const [selectedDms, setSelectedDms] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState(null);
-  const [selectedEcu, setSelectedEcu] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [editingEnabled, setEditingEnabled] = useState(false);
+
+  // Function to toggle editing mode
+  const toggleEditingMode = () => {
+    setEditingEnabled((prevEditingEnabled) => !prevEditingEnabled);
+  };
+  useEffect(() => {
+    if (!visible) {
+      setEditingEnabled(false);
+    }
+  }, [visible]);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
-  const statusOptions = [
-    { status: 1, label: "Active" },
-    { status: 0, label: "Deactive" },
-  ];
-
   const [data, setData] = useState([]);
 
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/Vehicles/getAllVehicle")
       .then((res) => {
-        setEcuData(res.data.data);
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
@@ -65,23 +60,8 @@ export default function VehiclesList() {
       });
   }, []);
 
-  const openNew = () => {
-    setProduct(emptyProduct);
-    setSubmitted(false);
-    setProductDialog(true);
-  };
-
-  const hideDialog = () => {
-    setSubmitted(false);
-    setProductDialog(false);
-  };
-
   const hideDeleteProductDialog = () => {
     setDeleteProductDialog(false);
-  };
-
-  const hideDeleteProductsDialog = () => {
-    setDeleteProductsDialog(false);
   };
 
   const onGlobalFilterChange = (e) => {
@@ -99,46 +79,6 @@ export default function VehiclesList() {
     const _filters = { ...filters };
     _filters["global"].value = null;
     setFilters(_filters);
-  };
-
-  const saveProduct = () => {
-    setSubmitted(true);
-
-    if (product.name.trim()) {
-      let _products = [...products];
-      let _product = { ...product };
-
-      if (product.id) {
-        const index = findIndexById(product.id);
-
-        _products[index] = _product;
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Product Updated",
-          life: 3000,
-        });
-      } else {
-        _product.id = createId();
-        _product.image = "product-placeholder.svg";
-        _products.push(_product);
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Product Created",
-          life: 3000,
-        });
-      }
-
-      setProducts(_products);
-      setProductDialog(false);
-      setProduct(emptyProduct);
-    }
-  };
-
-  const editProduct = (product) => {
-    setProduct({ ...product });
-    setProductDialog(true);
   };
 
   const confirmDeleteProduct = (product) => {
@@ -159,96 +99,6 @@ export default function VehiclesList() {
       life: 3000,
     });
   };
-
-  const findIndexById = (id) => {
-    let index = -1;
-
-    for (let i = 0; i < products.length; i++) {
-      if (products[i].id === id) {
-        index = i;
-        break;
-      }
-    }
-
-    return index;
-  };
-
-  const createId = () => {
-    let id = "";
-    let chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    return id;
-  };
-
-  // const exportCSV = () => {
-  //   dt.current.exportCSV();
-  // };
-
-  // const confirmDeleteSelected = () => {
-  //   setDeleteProductsDialog(true);
-  // };
-
-  const deleteSelectedProducts = () => {
-    let _products = products.filter((val) => !selectedProducts.includes(val));
-
-    setProducts(_products);
-    setDeleteProductsDialog(false);
-    setSelectedProducts(null);
-    toast.current.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Products Deleted",
-      life: 3000,
-    });
-  };
-
-  const onInputChange = (e, name) => {
-    const val = (e.target && e.target.value) || "";
-    let _product = { ...product };
-
-    _product[`${name}`] = val;
-
-    setProduct(_product);
-  };
-
-  const leftToolbarTemplate = () => {
-    return (
-      <div className="flex flex-wrap gap-2">
-        <Button
-          label="Add Vehicle"
-          icon="pi pi-plus"
-          severity="Primary"
-          className="h-10 px-5 py-0 dark:hover:text-white"
-          onClick={openNew}
-        />
-        {/* <Button
-          label="Delete"
-          icon="pi pi-trash"
-          className="h-10 px-5 py-0"
-          severity="danger"
-          title="Select to delete"
-          onClick={confirmDeleteSelected}
-          disabled={!selectedProducts || !selectedProducts.length}
-        /> */}
-      </div>
-    );
-  };
-
-  // const rightToolbarTemplate = () => {
-  //   return (
-  //     <Button
-  //       label="Export"
-  //       icon="pi pi-download"
-  //       className="h-10 border-none bg-gray-600 px-5 py-0"
-  //       onClick={exportCSV}
-  //     />
-  //   );
-  // };
 
   const statusBodyTemplate = (rowData) => {
     return (
@@ -275,7 +125,6 @@ export default function VehiclesList() {
           outlined
           className="mr-2 dark:text-gray-100"
           style={{ width: "2rem", height: "2rem" }}
-          onClick={() => editProduct(rowData)}
         />
         <Button
           icon="pi pi-trash"
@@ -289,7 +138,7 @@ export default function VehiclesList() {
           icon="pi pi-eye"
           rounded
           outlined
-          className="text-red-500 dark:text-red-500"
+          className="text-red-500 dark:text-blue-500"
           style={{ width: "2rem", height: "2rem" }}
           onClick={() => setVisible(true)}
         />
@@ -348,34 +197,11 @@ export default function VehiclesList() {
       />
     </React.Fragment>
   );
-  const deleteProductsDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteProductsDialog}
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        onClick={deleteSelectedProducts}
-      />
-    </React.Fragment>
-  );
 
   return (
     <div>
       <Toast ref={toast} />
-      <div className="card rounded-lg bg-none dark:bg-gray-950">
-        <Toolbar
-          className="rounded-lg border-none dark:bg-gray-950"
-          start={leftToolbarTemplate}
-          // end={rightToolbarTemplate}
-        >
-          {leftToolbarTemplate}
-        </Toolbar>
+      <div className="card mt-4 rounded-lg bg-none dark:bg-gray-950">
         <DataTable
           removableSort
           value={data}
@@ -457,129 +283,6 @@ export default function VehiclesList() {
           ></Column>
         </DataTable>
       </div>
-      {/* Add New Vehicle Form */}
-      <Dialog
-        visible={productDialog}
-        style={{ width: "40rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Fill the details"
-        modal
-        className="p-fluid dark:bg-gray-900"
-        onHide={hideDialog}
-      >
-        <div className="field">
-          <label htmlFor="name" className="mb-2 font-bold">
-            Vehicle Name
-          </label>
-          <InputText
-            id="name"
-            value={product.name}
-            onChange={(e) => onInputChange(e, "name")}
-            required
-            autoFocus
-            className={classNames({ "p-invalid": submitted && !product.name })}
-            style={{ marginTop: "0.5rem" }}
-          />
-          {submitted && !product.name && (
-            <small className="p-error">Name is required.</small>
-          )}
-        </div>
-        <div className="field mt-2">
-          <label htmlFor="description" className="font-bold">
-            Registration Number
-          </label>
-          <InputText
-            id="description"
-            className="mt-2"
-            value={product.description}
-            onChange={(e) => onInputChange(e, "description")}
-            required
-          />
-        </div>
-
-        <div className="dropdowns flex justify-between">
-          <div className="field mt-2 w-[20vw]">
-            <label htmlFor="ecu" className="font-bold">
-              Select ECU
-            </label>
-            <Dropdown
-              name="ecu"
-              id="ecu"
-              value={selectedEcu}
-              options={ecuData}
-              onChange={(e) => setSelectedEcu(e.value)}
-              placeholder="Tap To Select"
-              optionLabel="ecu"
-              className="md:w-14rem mt-2 w-full"
-            />
-          </div>
-
-          <div className="field mt-2 w-[20vw]">
-            <label htmlFor="iot" className="font-bold">
-              Select IoT
-            </label>
-            <Dropdown
-              name="iot"
-              id="iot"
-              value={selectedIot}
-              options={ecuData}
-              onChange={(e) => setSelectedIot(e.value)}
-              placeholder="Tap To Select"
-              optionLabel="iot"
-              className="md:w-14rem mt-2 w-full"
-            />
-          </div>
-        </div>
-        <div className="dropdowns flex justify-between">
-          <div className="field mt-2 w-[20vw]">
-            <label htmlFor="dms" className="font-bold">
-              Select DMS
-            </label>
-            <Dropdown
-              name="dms"
-              id="dms"
-              value={selectedDms}
-              options={ecuData}
-              onChange={(e) => setSelectedDms(e.value)}
-              placeholder="Tap To Select"
-              optionLabel="dms"
-              className="md:w-14rem mt-2 w-full"
-            />
-          </div>
-
-          <div className="field mt-2 w-[20vw]">
-            <label htmlFor="status" className="font-bold">
-              Select Status
-            </label>
-            <Dropdown
-              name="status"
-              id="status"
-              value={selectedStatus}
-              options={statusOptions}
-              onChange={(e) => setSelectedStatus(e.value)}
-              placeholder="Tap To Select"
-              optionLabel="label"
-              className="md:w-14rem mt-2 w-full"
-            />
-          </div>
-        </div>
-        <div className="mt-5 flex justify-end">
-          <Button
-            label="Cancel"
-            icon="pi pi-times"
-            className="mx-2 h-9 border-none px-2 py-0"
-            style={{ backgroundColor: "#444", width: "fit-content" }}
-            onClick={hideDialog}
-          />
-          <Button
-            label="Add Vehicle"
-            className="h-9 border-none px-2 py-0"
-            style={{ backgroundColor: "#422AFB", width: "fit-content" }}
-            icon="pi pi-plus"
-            onClick={saveProduct}
-          />
-        </div>
-      </Dialog>
 
       <Dialog
         visible={deleteProductDialog}
@@ -603,25 +306,6 @@ export default function VehiclesList() {
         </div>
       </Dialog>
 
-      <Dialog
-        visible={deleteProductsDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={deleteProductsDialogFooter}
-        onHide={hideDeleteProductsDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {product && (
-            <span>Are you sure you want to delete the selected products?</span>
-          )}
-        </div>
-      </Dialog>
       <Dialog
         header="Vehicle Details"
         visible={visible}
@@ -705,89 +389,1642 @@ export default function VehiclesList() {
             </DataTable>
           </TabPanel>
           <TabPanel header="Feature Set" leftIcon="pi pi-cog mr-2">
-            <form className="mx-auto">
-              <div className="flex justify-evenly">
-                <div className="card justify-content-center mt-5 flex">
-                  <span className="p-float-label">
-                    <InputText id="f_name" name="f_name" />
-                    <label htmlFor="f_name">First Name</label>
-                  </span>
-                </div>
-                <div className="card justify-content-center mt-5 flex">
-                  <span className="p-float-label">
-                    <InputText id="l_name" name="l_name" />
-                    <label htmlFor="l_name">Last Name</label>
-                  </span>
-                </div>
-              </div>
-              <div className="mx-auto mt-8 w-[34.5vw]">
-                <span className="p-float-label">
-                  <InputText id="email" type="email" name="email" />
-                  <label htmlFor="email">Email</label>
-                </span>
-              </div>
-              <div className="mx-auto mt-8 w-[34.5vw]">
-                <span className="p-float-label">
+            <div className="mb-2 flex justify-end">
+              {/* Toggler for enabling/disabling editing */}
+              <Button
+                icon={editingEnabled ? "pi pi-lock-open" : "pi pi-lock"}
+                className={`p-button-rounded p-button-text ${
+                  editingEnabled ? "p-button-success" : "p-button-danger"
+                }`}
+                onClick={toggleEditingMode}
+              />
+            </div>
+            <form>
+              <div className="card">
+                <div className="flex" style={{ flexDirection: "column" }}>
+                  <label htmlFor="username">Feature Set ID*</label>
                   <InputText
-                    id="confirmPassword"
-                    type="password"
-                    name="confirmPassword"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled
+                    style={{
+                      width: "63vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    value="Demo ID"
                   />
-                  <label htmlFor="confirmPassword">Confirm Password</label>
-                </span>
-              </div>
-              <div className="mx-auto mt-8 w-[34.5vw]">
-                <span className="p-float-label">
+                  <small id="username-help">
+                    Unique id to identify feature set
+                  </small>
+                </div>
+
+                <div className="mt-2 flex" style={{ flexDirection: "column" }}>
+                  <label htmlFor="username">Feature Set Name*</label>
                   <InputText
-                    id="company_name"
-                    type="text"
-                    name="company_name"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled
+                    style={{
+                      width: "63vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    value="Demo Name"
                   />
-                  <label htmlFor="company_name">Company Name</label>
-                </span>
+                  <small id="username-help">
+                    Unique id to identify feature set
+                  </small>
+                </div>
+                <p className="mt-4 font-bold ">System Type</p>
+                <div className="my-3 flex flex-wrap gap-3">
+                  <div className="align-items-center flex">
+                    <RadioButton
+                      inputId="ingredient1"
+                      name="offline"
+                      value="Offline"
+                      disabled={!editingEnabled}
+                    />
+                    <label htmlFor="ingredient1" className="ml-2">
+                      Offline Mode
+                    </label>
+                  </div>
+                  <div className="align-items-center flex">
+                    <RadioButton
+                      inputId="ingredient2"
+                      name="online"
+                      value="Online"
+                      disabled={!editingEnabled}
+                    />
+                    <label htmlFor="ingredient2" className="ml-2">
+                      Online Mode
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
-                <span className="p-float-label">
-                  <InputText id="phone" type="phone" name="phone" />
-                  <label htmlFor="phone">Contact Number</label>
-                </span>
+              <hr style={{ borderColor: "#333" }} />
+              <div className="field my-3 w-[63vw]">
+                <label htmlFor="ecu">Version*</label>
+                <Dropdown
+                  name="ecu"
+                  id="ecu"
+                  style={{
+                    width: "63vw",
+                    borderBottom: "1px dashed #ced4da",
+                    borderRadius: "0px",
+                    padding: "0.30px",
+                    borderRight: "none",
+                    borderLeft: "none",
+                    borderTop: "none",
+                  }}
+                  disabled={!editingEnabled}
+                  placeholder="Tap To Select"
+                  optionLabel="ecu"
+                  className="md:w-14rem mt-2 w-full"
+                />
               </div>
-              <div className="mx-auto mt-6 w-[34.5vw]">
-                <span>Address:</span>
-              </div>
-              <div className="mx-auto mt-6 w-[34.5vw]">
-                <span className="p-float-label">
-                  <InputText id="address" type="text" name="address" />
-                  <label htmlFor="address">
-                    Flat No./ Plot No., Area/Society
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Collision Avoidance System</p>
+              <div className="card justify-content-center mt-5 flex gap-4">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
                   </label>
-                </span>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
               </div>
-              <div className="mx-auto mt-8 w-[34.5vw]">
-                <span className="p-float-label">
-                  <InputText id="city" type="text" name="city" />
-                  <label htmlFor="city">City</label>
-                </span>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Activation Speed</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="10"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Alarm Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="1.5"
+                  />
+                </div>
               </div>
-              <div className="mx-auto mt-8 w-[34.5vw]">
-                <span className="p-float-label">
-                  <InputText id="state" type="text" name="state" />
-                  <label htmlFor="state">State</label>
-                </span>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Brake Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0.4"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Brake Speed</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="40"
+                  />
+                </div>
               </div>
-              <div className="mx-auto mt-8 w-[34.5vw]">
-                <span className="p-float-label">
-                  <InputText id="pincode" type="number" name="pincode" />
-                  <label htmlFor="pincode">Pincode</label>
-                </span>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[63vw]">
+                  <label htmlFor="ecu">Detect Stationary Object</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="No"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Allow Complete Brake</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="No"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
               </div>
-              <div className="mt-6 flex justify-center">
-                <button
-                  type="submit"
-                  className="rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
-                >
-                  Submit
-                </button>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[63vw]">
+                  <label htmlFor="ecu">Detect Oncoming Obstacle</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="No"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Safety Mode</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="Normal"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">TTC Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="175"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Brake ON Duration</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="1000"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Brake OFF Duration</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="1000"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Start Time</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="12"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Stop Time</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="12"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Sleep Alert</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Pre Warning</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="5"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Sleep Alert Interval</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="60"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Activation Speed</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="40"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Start Time</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="23"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Stop Time</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="6"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Brake Activate Time</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="10"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Braking</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="No"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Driver Evaluation</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Max Lane Change Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0.35"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Min Lane Change Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="-0.35"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Max Harsh Acceleration Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0.25"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Min Harsh Acceleration Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Sudden Braking Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="-0.4"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Max Speed Bump Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0.5"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Min Speed Bump Threshold</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="10"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Speed Governor</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Speed Limit</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Cruise</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <div className="field my-3 w-[30vw]">
+                <label htmlFor="ecu">Speed Limit</label>
+                <input
+                  type="number"
+                  id="username"
+                  aria-describedby="username-help"
+                  disabled={!editingEnabled}
+                  style={{
+                    width: "30vw",
+                    borderBottom: "1px dashed #ced4da",
+                    borderRadius: "0px",
+                    padding: "0.30px",
+                    borderRight: "none",
+                    borderLeft: "none",
+                    borderTop: "none",
+                  }}
+                  placeholder="100"
+                />
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Vehicle Type</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="12V Pedal"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">OBD</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Protocol Type</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="SAE J1393"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">TPMS</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Vehicle Settings</p>
+
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Accelerator Type</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="Sensor"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Sensor</p>
+              <p className="mt-4 font-bold ">Laser Sensor</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <p className="mt-4 font-bold ">RF Sensor</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">RF Angle</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Activation Speed</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="1"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Reserved 1</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Reserved 2</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Speed Settings</p>
+
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Speed Source</label>
+                  <Dropdown
+                    name="ecu"
+                    id="ecu"
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    disabled={!editingEnabled}
+                    placeholder="Speed Wire"
+                    optionLabel="ecu"
+                    className="md:w-14rem mt-2 w-full"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Slope</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0.51"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Offset</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="4.08"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Shutdown Delay</p>
+              <div className="field my-3 w-[30vw]">
+                <label htmlFor="ecu">Delay</label>
+                <input
+                  type="number"
+                  id="username"
+                  aria-describedby="username-help"
+                  disabled={!editingEnabled}
+                  style={{
+                    width: "30vw",
+                    borderBottom: "1px dashed #ced4da",
+                    borderRadius: "0px",
+                    padding: "0.30px",
+                    borderRight: "none",
+                    borderLeft: "none",
+                    borderTop: "none",
+                  }}
+                  placeholder="30"
+                />
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">RF Name</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Disable
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Enable
+                  </label>
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Time Based Errors</p>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">No Alarm</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Speed</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Acceleration Bypass</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">TPMS</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Speed Based Errors</p>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">RF Sensor Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Gyroscope Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">HMI Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Time Not Set</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="100"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Brake Error</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">TPMS Error</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">OBD Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">No Alarm</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Laser Sensor Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">RFID Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">IOT Absent</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Accessory Board</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">DD Module Disconnected</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="60"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Alcohol Sensor Disconnected</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Temperature Sensor Disconnected</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <hr style={{ borderColor: "#333" }} />
+              <p className="mt-4 font-bold ">Firmware OTA Update</p>
+              <div className="my-3 flex flex-wrap gap-3">
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient1"
+                    name="offline"
+                    value="Offline"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Not Available
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="ingredient2"
+                    name="online"
+                    value="Online"
+                    disabled={!editingEnabled}
+                  />
+                  <label htmlFor="ingredient2" className="ml-2">
+                    Available
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Reserved 1</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="field my-3 w-[30vw]">
+                  <label htmlFor="ecu">Reserved 2</label>
+                  <input
+                    type="number"
+                    id="username"
+                    aria-describedby="username-help"
+                    disabled={!editingEnabled}
+                    style={{
+                      width: "30vw",
+                      borderBottom: "1px dashed #ced4da",
+                      borderRadius: "0px",
+                      padding: "0.30px",
+                      borderRight: "none",
+                      borderLeft: "none",
+                      borderTop: "none",
+                    }}
+                    placeholder="0"
+                  />
+                </div>
               </div>
             </form>
           </TabPanel>
