@@ -5,6 +5,7 @@ import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { FilterMatchMode } from "primereact/api";
 import { TabView, TabPanel } from "primereact/tabview";
@@ -14,6 +15,7 @@ import VehicleTrips from "./VehicleTrips";
 
 export default function VehiclesList() {
   let emptyProduct = {
+    id: null,
     vehicle_name: "",
     vehicle_registration: "",
     dms: "",
@@ -24,18 +26,23 @@ export default function VehiclesList() {
 
   const [products, setProducts] = useState(null);
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+  const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [product, setProduct] = useState(emptyProduct);
+  const [editedProduct, setEditedProduct] = useState(emptyProduct);
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const toast = useRef(null);
   const [visible, setVisible] = useState(false);
+  const [ecuOptions, setEcuOptions] = useState([]);
+  const [iotOptions, setIotOptions] = useState([]);
+  const [dmsOptions, setDmsOptions] = useState([]);
 
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
   const [data, setData] = useState([]);
-
   useEffect(() => {
+    // Fetch vehicles data
     axios
       .get("http://localhost:3001/api/Vehicles/getAllVehicle")
       .then((res) => {
@@ -48,10 +55,62 @@ export default function VehiclesList() {
       .catch((err) => {
         console.log(err);
       });
+
+    // Fetch ECU data
+    axios
+      .get("http://localhost:3001/api/devices/devices/ECU")
+      .then((res) => {
+        const ecuOptions = Array.from(
+          new Set(res.data.devices.map((device) => device.device_id))
+        ).map((deviceId) => ({
+          label: deviceId,
+          value: deviceId,
+        }));
+        setEcuOptions(ecuOptions);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // Fetch IoT data
+    axios
+      .get("http://localhost:3001/api/devices/devices/IOT")
+      .then((res) => {
+        const iotOptions = Array.from(
+          new Set(res.data.devices.map((device) => device.device_id))
+        ).map((deviceId) => ({
+          label: deviceId,
+          value: deviceId,
+        }));
+        setIotOptions(iotOptions);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // Fetch DMS data
+    axios
+      .get("http://localhost:3001/api/devices/devices/DMS")
+      .then((res) => {
+        const dmsOptions = Array.from(
+          new Set(res.data.devices.map((device) => device.device_id))
+        ).map((deviceId) => ({
+          label: deviceId,
+          value: deviceId,
+        }));
+        setDmsOptions(dmsOptions);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   const hideDeleteProductDialog = () => {
     setDeleteProductDialog(false);
+  };
+
+  const hideEditDialog = () => {
+    setEditDialogVisible(false);
   };
 
   const onGlobalFilterChange = (e) => {
@@ -90,6 +149,30 @@ export default function VehiclesList() {
     });
   };
 
+  const editProduct = (product) => {
+    setEditedProduct(product);
+    setEditDialogVisible(true);
+  };
+
+  const saveEditedProduct = () => {
+    // Update the products state with the edited product
+    const updatedProducts = products.map((p) =>
+      p.id === editedProduct.id ? editedProduct : p
+    );
+    setProducts(updatedProducts);
+
+    // Show a toast message or perform any other actions
+    toast.current.show({
+      severity: "success",
+      summary: "Successful",
+      detail: "Product Updated",
+      life: 3000,
+    });
+
+    setEditedProduct(emptyProduct);
+    setEditDialogVisible(false);
+  };
+
   const statusBodyTemplate = (rowData) => {
     return (
       <Tag
@@ -115,6 +198,7 @@ export default function VehiclesList() {
           outlined
           className="mr-2 dark:text-gray-100"
           style={{ width: "2rem", height: "2rem" }}
+          onClick={() => editProduct(rowData)}
         />
         <Button
           icon="pi pi-trash"
@@ -184,6 +268,17 @@ export default function VehiclesList() {
         severity="danger"
         outlined
         onClick={deleteProduct}
+      />
+    </React.Fragment>
+  );
+
+  const editDialogFooter = (
+    <React.Fragment>
+      <Button
+        label="Save"
+        icon="pi pi-check"
+        className="p-button-primary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+        onClick={saveEditedProduct}
       />
     </React.Fragment>
   );
@@ -293,6 +388,87 @@ export default function VehiclesList() {
               Are you sure you want to delete <b>{product.name}</b>?
             </span>
           )}
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={editDialogVisible}
+        style={{ width: "32rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Edit Product"
+        modal
+        footer={editDialogFooter}
+        onHide={hideEditDialog}
+      >
+        <div className="p-fluid">
+          <div className="p-field">
+            <label htmlFor="vehicle_name">Vehicle Name</label>
+            <InputText
+              id="vehicle_name"
+              value={editedProduct.vehicle_name}
+              onChange={(e) =>
+                setEditedProduct({
+                  ...editedProduct,
+                  vehicle_name: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div className="p-field">
+            <label htmlFor="vehicle_registration">Registration No.</label>
+            <InputText
+              id="vehicle_registration"
+              value={editedProduct.vehicle_registration}
+              onChange={(e) =>
+                setEditedProduct({
+                  ...editedProduct,
+                  vehicle_registration: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div className="p-field">
+            <label htmlFor="dms">DMS</label>
+            <Dropdown
+              id="dms"
+              options={dmsOptions}
+              placeholder={
+                editedProduct.dms ? editedProduct.dms : "Tap to select"
+              }
+              onChange={(e) =>
+                setEditedProduct({ ...editedProduct, dms: e.value })
+              }
+              optionLabel="label"
+            />
+          </div>
+          <div className="p-field">
+            <label htmlFor="iot">IoT</label>
+            <Dropdown
+              id="iot"
+              options={iotOptions}
+              placeholder={
+                editedProduct.iot ? editedProduct.iot : "Tap to select"
+              }
+              onChange={(e) =>
+                setEditedProduct({ ...editedProduct, iot: e.value })
+              }
+              optionLabel="label"
+            />
+          </div>
+          <div className="p-field">
+            <label htmlFor="ecu">ECU</label>
+            <Dropdown
+              id="ecu"
+              options={ecuOptions}
+              placeholder={
+                editedProduct.ecu ? editedProduct.ecu : "Tap to select"
+              }
+              onChange={(e) =>
+                setEditedProduct({ ...editedProduct, ecu: e.value })
+              }
+              optionLabel="label"
+            />
+          </div>
         </div>
       </Dialog>
 
