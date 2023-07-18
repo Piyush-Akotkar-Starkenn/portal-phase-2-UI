@@ -15,15 +15,15 @@ const FeatureList = () => {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
+
   useEffect(() => {
     axios
-      .get("https://example.com/api/featureSets")
-      .then((response) => {
-        setData(response.data);
+      .get("http://localhost:3001/api/featureset/featureset-list")
+      .then((res) => {
+        console.log(res.data);
+        setData(res.data);
       })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+      .catch((err) => console.log(err));
   }, []);
 
   const openDialog = () => {
@@ -102,7 +102,7 @@ const FeatureList = () => {
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
         filterDisplay="menu"
         filters={filters}
-        globalFilterFields={["full_name", "address", "company_name", "phone"]}
+        globalFilterFields={["featureSetId", "featureSetName"]}
         emptyMessage="No customers found."
         header={header}
       >
@@ -112,35 +112,24 @@ const FeatureList = () => {
           style={{ minWidth: "4rem", textAlign: "center" }}
         />
         <Column
-          field="full_name"
-          header="Name"
+          field="featureSetId"
+          header="featureSetId"
           style={{ minWidth: "8rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column
-          field="email"
-          header="Email"
+          field="featureSetName"
+          header="featureSetName"
           style={{ minWidth: "8rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column
-          field="full_address"
+          field="Action"
           className="border-none dark:bg-gray-900 dark:text-gray-200"
-          header="Address"
+          header="Action"
           style={{ width: "12rem", minWidth: "20rem" }}
         />
-        <Column
-          field="company_name"
-          header="Company Name"
-          className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "6rem" }}
-        />
-        <Column
-          field="phone"
-          header="Contact No."
-          className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "5rem" }}
-        />
+
         {/* <Column
           header="Action"
           headerStyle={{ width: "11rem", textAlign: "left" }}
