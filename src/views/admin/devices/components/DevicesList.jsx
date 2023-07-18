@@ -10,14 +10,12 @@ import { Tag } from "primereact/tag";
 
 export default function DevicesList() {
   // eslint-disable-next-line
-  const [allData, setAllData] = useState([]);
   const [data, setData] = useState([]);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const [selectedCustomers, setSelectedCustomers] = useState([]);
 
   const getSeverity = (data) => {
     switch (data.status) {
@@ -34,11 +32,8 @@ export default function DevicesList() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Devices/get-all-devices")
+      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
       .then((res) => {
-        console.log(res.data.data.device);
-        setAllData(res.data.data.device);
-
         const formattedData = res.data.data.device.map((item, index) => ({
           ...item,
           serialNo: index + 1,
@@ -175,10 +170,6 @@ export default function DevicesList() {
         rows={5}
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         rowsPerPageOptions={[5, 10, 25]}
-        dataKey="id"
-        selectionMode="checkbox"
-        selection={selectedCustomers}
-        onSelectionChange={(e) => setSelectedCustomers(e.value)}
         filters={filters}
         filterDisplay="menu"
         globalFilterFields={[

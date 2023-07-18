@@ -387,7 +387,22 @@ body
 .card-actions button:last-child {
   margin-right: 0;
 }
+.setting:enabled:active,
+.setting:not(button):not(a):not(.p-disabled):active {
+  background: none;
+  color: #a9abf8;
+  border: 1px solid #a9abf8;
+}
+.setting:enabled:hover {
+  border: 1px solid #a9abf8;
+}
 
+.pi-pencil {
+  color: #a9abf8;
+}
+.edit:hover {
+  border: 1px solid #a9abf8 !important;
+}
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {

@@ -9,18 +9,39 @@ import Widget from "components/widget/Widget";
 const Dashboard = () => {
   const [vehiclesCount, setVehiclesCount] = useState();
   const [devicesCount, setDevicesCount] = useState();
+  const [customersCount, setCustomersCount] = useState();
   useEffect(() => {
     axios
-      .all([
-        axios.get("http://localhost:3001/api/Vehicles/getAllVehicle"),
-        axios.get("http://localhost:3001/api/Devices/get-all-devices"),
-      ])
-      .then(
-        axios.spread((res1, res2) => {
-          setVehiclesCount(res1.data.TotalCount);
-          setDevicesCount(res2.data.TotalCount);
-        })
-      )
+      .get("http://localhost:3001/api/Customers/Vehicles/getAllVehicle")
+
+      .then((res, res2) => {
+        console.log(res);
+        setVehiclesCount(res.data.TotalCount);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
+
+      .then((res) => {
+        console.log(res);
+        setDevicesCount(res.data.TotalCount);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/Admin/Get")
+
+      .then((res) => {
+        console.log(res);
+        setCustomersCount(res.data.TotalCount);
+      })
       .catch((err) => {
         console.log(err);
       });
@@ -35,7 +56,7 @@ const Dashboard = () => {
         <Widget
           icon={<BsTruck className="h-7 w-7" />}
           title={"Customers"}
-          subtitle={"10"}
+          subtitle={customersCount}
           cardhref={"/admin/customers"}
         />
         <Widget

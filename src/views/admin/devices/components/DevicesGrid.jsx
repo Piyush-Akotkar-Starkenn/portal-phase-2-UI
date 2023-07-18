@@ -29,7 +29,7 @@ export default function DevicesGrid() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Devices/get-all-devices")
+      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
       .then((res) => {
         console.log(res.data.data.device);
         setAllData(res.data.data.device);

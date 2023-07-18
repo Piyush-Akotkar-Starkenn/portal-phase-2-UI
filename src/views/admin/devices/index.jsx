@@ -42,7 +42,7 @@ const DevicesAdmin = () => {
         </div>
       </div>
       <Button
-        label="Add Device"
+        label="New Device"
         icon="pi pi-plus"
         severity="Primary"
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
