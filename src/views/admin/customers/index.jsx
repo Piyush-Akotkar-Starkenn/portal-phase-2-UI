@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CustomersList from "./components/CustomersList";
+import { Toast } from "primereact/toast";
 import CustomersGrid from "./components/CustomersGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -7,27 +8,38 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import axios from "axios";
+import { Dropdown } from "primereact/dropdown";
 
 const Customers = () => {
   const [isListView, setIsListView] = useState(true);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState([]);
+  const [userType, setUserType] = useState(null);
+  const toastRef = useRef(null);
+  const toastErr = useRef(null);
+  const handleChange = (event) => {
+    setUserType(event.value);
+  };
+  //User Type options
+  const options = [
+    { label: "Customer", value: 0 },
+    { label: "Admin", value: 1 },
+  ];
 
   useEffect(() => {
     fetchCustomersData();
   }, []);
-
+  //Fetching all data
   const fetchCustomersData = () => {
     axios
-      .get("http://localhost:3001/api/Get/GetUser")
+      .get("http://localhost:3001/api/Admin/Get")
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
           full_name: item.first_name + " " + item.last_name,
-          address: `${item.address}, ${item.city}, ${item.state}, ${item.pincode}`,
+          full_address: `${item.address}, ${item.city}, ${item.state}, ${item.pincode}`,
         }));
         setData(formattedData);
       })
@@ -51,10 +63,9 @@ const Customers = () => {
   const closeDialog = () => {
     setIsDialogVisible(false);
   };
-
+  //Add Customer form
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsSuccess(true);
 
     const form = event.target;
     const formData = new FormData(form);
@@ -68,6 +79,7 @@ const Customers = () => {
       address: formData.get("address"),
       password: formData.get("password"),
       confirmPassword: formData.get("confirmPassword"),
+      user_type: formData.get("user_type"),
       city: formData.get("city"),
       state: formData.get("state"),
       pincode: formData.get("pincode"),
@@ -75,7 +87,7 @@ const Customers = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/Get/UserSignup",
+        "http://localhost:3001/api/Admin/Signup",
         data,
         {
           headers: {
@@ -87,23 +99,30 @@ const Customers = () => {
       if (response.status === 200) {
         const responseData = response.data;
         console.log("Data posted successfully:", responseData);
-        setIsSuccess(true);
-
-        setTimeout(() => {
-          setIsDialogVisible(false);
-          fetchCustomersData();
-        }, 200);
+        setIsDialogVisible(false);
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "User Added successfully",
+          life: 3000,
+        });
+        fetchCustomersData();
       } else {
         console.log("Failed to post data:", response.statusText);
-        setIsSuccess(false);
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.log("Unauthorized: Please authenticate.");
+
         // Handle unauthorized error here, e.g., redirect to login page
       } else {
         console.log("Error:", error);
-        setIsSuccess(false);
+        toastErr.current.show({
+          severity: "danger",
+          summary: "Error",
+          detail: "Error while saving",
+          life: 3000,
+        });
       }
     }
   };
@@ -114,6 +133,8 @@ const Customers = () => {
 
   return (
     <>
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
+      <Toast ref={toastErr} className="bg-red-400" />
       <div className="flex justify-between">
         <h4 className="text-dark text-xl font-bold dark:text-white">
           Customers
@@ -143,7 +164,7 @@ const Customers = () => {
         </div>
       </div>
       <Button
-        label="Add Customer"
+        label="New Customer"
         icon="pi pi-plus"
         severity="primary"
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
@@ -174,7 +195,7 @@ const Customers = () => {
             </div>
             <div className="card justify-content-center mt-5 flex">
               <span className="p-float-label">
-                <InputText id="l_name" name="l_name" />
+                <InputText id="l_name" name="l_name" required />
                 <label htmlFor="l_name">Last Name</label>
               </span>
             </div>
@@ -216,6 +237,21 @@ const Customers = () => {
                 name="confirmPassword"
               />
               <label htmlFor="confirmPassword">Confirm Password</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <Dropdown
+                id="user_type"
+                name="user_type"
+                options={options}
+                value={userType}
+                optionLabel="label"
+                optionValue="value"
+                onChange={handleChange}
+                className="p-dropdown"
+              />
+              <label htmlFor="user_type">User Type</label>
             </span>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
@@ -271,18 +307,13 @@ const Customers = () => {
           <div className="mt-6 flex justify-center">
             <button
               type="submit"
-              className="rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+              className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
             >
-              Submit
+              Add Customer
             </button>
           </div>
         </form>
       </Dialog>
-      {isSuccess && (
-        <div className="fixed left-0 right-0 top-0 bg-green-500 py-2 text-center text-white">
-          Customer added successfully
-        </div>
-      )}
     </>
   );
 };

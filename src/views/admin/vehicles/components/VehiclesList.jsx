@@ -44,7 +44,7 @@ export default function VehiclesList() {
   useEffect(() => {
     // Fetch vehicles data
     axios
-      .get("http://localhost:3001/api/Vehicles/getAllVehicle")
+      .get("http://localhost:3001/api/Customers/Vehicles/getAllVehicle")
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
@@ -275,7 +275,7 @@ export default function VehiclesList() {
   const editDialogFooter = (
     <React.Fragment>
       <Button
-        label="Save"
+        label="Update"
         icon="pi pi-check"
         className="p-button-primary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
         onClick={saveEditedProduct}

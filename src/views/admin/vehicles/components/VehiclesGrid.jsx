@@ -48,7 +48,7 @@ export default function VehiclesGrid() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Vehicles/getAllVehicle")
+      .get("http://localhost:3001/api/Customers/Vehicles/getAllVehicle")
       .then((res) => {
         setAllData(res.data.data);
 

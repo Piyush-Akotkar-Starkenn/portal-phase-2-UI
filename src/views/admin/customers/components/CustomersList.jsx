@@ -1,78 +1,89 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { FilterMatchMode } from "primereact/api";
 import { Menu } from "primereact/menu";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Dialog } from "primereact/dialog";
-import { Toast } from "primereact/toast";
 import { CiMenuKebab } from "react-icons/ci";
+import { Toast } from "primereact/toast";
+import axios from "axios";
 
 const CustomersList = ({ data }) => {
-  const [selectedProducts, setSelectedProducts] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [editDialogVisible, setEditDialogVisible] = useState(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [customerData, setCustomerData] = useState(data);
+
+  const toastRef = useRef(null);
+  const toastErr = useRef(null);
 
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
   const menuRight = useRef(null);
-  const toast = useRef(null);
-  const navigate = useNavigate();
-  const items = [
-    {
-      label: "Rights Management",
-      icon: "pi pi-lock",
-      command: () => {
-        navigate("/edit-customer");
-      },
-    },
-    {
-      label: "Manage Assigned",
-      icon: "pi pi-users",
-      command: () => {
-        navigate("/edit-customer");
-      },
-    },
-    {
-      label: "Manage Unassigned",
-      icon: "pi pi-user-minus",
-      command: () => {
-        navigate("/edit-customer");
-      },
-    },
-    {
-      label: "Edit",
-      icon: "pi pi-pencil",
-      command: (customer) => {
-        setEditedCustomer(customer);
-        setEditDialogVisible(true);
-      },
-    },
-    {
-      label: "Delete",
-      icon: "pi pi-trash",
-      command: () => {
-        navigate("/edit-customer");
-      },
-    },
-  ];
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
 
-  //Edit Customer Dialog code
+  useEffect(() => {
+    setCustomerData(
+      data.map((customer, index) => ({
+        ...customer,
+        serialNo: index + 1,
+      }))
+    );
+  }, [data]);
+
+  // Edit Customer Dialog code
   const EditCustomerDialog = ({ visible, onHide, customer }) => {
-    // const [editedCustomerData, setEditedCustomerData] = useState(customer);
+    const [editedCustomerData, setEditedCustomerData] = useState(customer);
 
-    const onSave = () => {
-      // Perform the save operation with the editedCustomerData
-      onHide();
+    const onSave = async () => {
+      try {
+        const response = await axios.put(
+          `http://localhost:3001/api/Admin/update/${customer.userId}`,
+          editedCustomerData
+        );
+        console.log("Save success:", response.data);
+
+        const updatedData = customerData.map((customer) => {
+          if (customer.userId === editedCustomerData.userId) {
+            return {
+              ...customer,
+              ...editedCustomerData,
+            };
+          }
+          return customer;
+        });
+
+        setCustomerData(updatedData);
+
+        onHide();
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "User updated successfully",
+          life: 3000,
+        });
+      } catch (error) {
+        onHide();
+        toastErr.current.show({
+          severity: "danger",
+          summary: "Error",
+          detail: "Error while saving",
+          life: 3000,
+        });
+      }
+    };
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+
+      setEditedCustomerData((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
     };
 
     return (
@@ -82,12 +93,11 @@ const CustomersList = ({ data }) => {
         header="Edit Customer"
         footer={
           <div>
-            <Button label="Save" icon="pi pi-check" onClick={onSave} />
             <Button
-              label="Cancel"
-              icon="pi pi-times"
-              onClick={onHide}
-              className="p-button-secondary"
+              label="Update"
+              icon="pi pi-check"
+              className="p-button-primary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={onSave}
             />
           </div>
         }
@@ -96,121 +106,138 @@ const CustomersList = ({ data }) => {
           <div className="flex justify-between">
             <div className="card justify-content-center mt-5 flex">
               <span className="p-float-label">
-                <InputText id="f_name" name="f_name" />
-                <label htmlFor="f_name">First Name</label>
+                <InputText
+                  id="first_name"
+                  name="first_name"
+                  value={editedCustomerData?.first_name || ""}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="first_name">First Name</label>
               </span>
             </div>
             <div className="card justify-content-center mt-5 flex">
               <span className="p-float-label">
-                <InputText id="l_name" name="l_name" />
-                <label htmlFor="l_name">Last Name</label>
+                <InputText
+                  id="last_name"
+                  name="last_name"
+                  value={editedCustomerData?.last_name || ""}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="last_name">Last Name</label>
               </span>
             </div>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="email" type="email" name="email" />
+              <InputText
+                id="email"
+                type="email"
+                name="email"
+                value={editedCustomerData?.email || ""}
+                onChange={handleInputChange}
+              />
               <label htmlFor="email">Email</label>
             </span>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
               <InputText
-                id="password"
-                type={showPassword ? "text" : "password"}
-                name="password"
+                id="company_name"
+                type="text"
+                name="company_name"
+                value={editedCustomerData?.company_name || ""}
+                onChange={handleInputChange}
               />
-              <label htmlFor="password">Password</label>
-              <div className="absolute right-2.5 top-4">
-                {showPassword ? (
-                  <FaEyeSlash
-                    className="h-5 w-5 cursor-pointer text-gray-500"
-                    onClick={togglePasswordVisibility}
-                  />
-                ) : (
-                  <FaEye
-                    className="h-5 w-5 cursor-pointer text-gray-600"
-                    onClick={togglePasswordVisibility}
-                  />
-                )}
-              </div>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText
-                id="confirmPassword"
-                type="password"
-                name="confirmPassword"
-              />
-              <label htmlFor="confirmPassword">Confirm Password</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText id="company_name" type="text" name="company_name" />
               <label htmlFor="company_name">Company Name</label>
             </span>
           </div>
           <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="phone" type="tel" name="phone" />
+              <InputText
+                id="phone"
+                type="tel"
+                name="phone"
+                value={editedCustomerData?.phone || ""}
+                onChange={handleInputChange}
+              />
               <label htmlFor="phone">Contact Number</label>
             </span>
           </div>
-          <div className="mx-auto mt-6 w-[34.5vw]">
-            <span>Address:</span>
-          </div>
-          <div className="mx-auto mt-6 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText id="address" type="text" name="address" />
-              <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText id="city" type="text" name="city" />
-              <label htmlFor="city">City</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText id="state" type="text" name="state" />
-              <label htmlFor="state">State</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText
-                id="pincode"
-                type="text"
-                name="pincode"
-                keyfilter="pint"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const formattedValue = value.replace(/\D/g, "").slice(0, 6); // Remove non-digits and limit to 6 characters
-                  e.target.value = formattedValue;
-                }}
-              />
-              <label htmlFor="pincode">Pincode (Format: xxxxxx)</label>
-            </span>
-          </div>
-          {/* Add more fields as needed */}
         </div>
       </Dialog>
     );
   };
 
-  //end of Edit Customer Dialog
+  // Delete Customer Dialog code
+  const DeleteCustomerDialog = ({ visible, onHide, customer }) => {
+    const handleConfirmDelete = async () => {
+      try {
+        const response = await axios.put(
+          `http://localhost:3001/api/Admin/delete/${customer.userId}`,
+          { status: false }
+        );
+        console.log("Delete success:", response.data.user.userId);
 
-  //Global Filter
+        const updatedData = customerData
+          .filter((c) => c.userId !== customer.userId)
+          .map((customer, index) => ({
+            ...customer,
+            serialNo: index + 1,
+          }));
 
+        setCustomerData(updatedData);
+
+        onHide();
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "User deleted successfully",
+          life: 3000,
+        });
+      } catch (error) {
+        console.error(error);
+        onHide();
+        toastErr.current.show({
+          severity: "danger",
+          summary: "Error",
+          detail: "Error while deleting",
+          life: 3000,
+        });
+      }
+    };
+
+    return (
+      <Dialog
+        visible={visible}
+        onHide={onHide}
+        header="Confirm Delete"
+        footer={
+          <div>
+            <Button
+              label="Delete"
+              icon="pi pi-times"
+              className="p-button-danger px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={handleConfirmDelete}
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-check"
+              className="p-button-secondary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={onHide}
+            />
+          </div>
+        }
+      >
+        <div>Are you sure you want to delete this customer?</div>
+      </Dialog>
+    );
+  };
+
+  // Global Filter
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
-
     _filters["global"].value = value;
-
     setFilters(_filters);
     setGlobalFilterValue(value);
   };
@@ -243,44 +270,88 @@ const CustomersList = ({ data }) => {
     </div>
   );
 
-  //end of Global Filter
+  // Action menu
+  const actionBodyTemplate = (rowData) => {
+    const handleEdit = () => {
+      setEditedCustomer(rowData);
+      setEditDialogVisible(true);
+    };
 
-  //Action menu
+    const handleDelete = () => {
+      setSelectedProduct(rowData);
+      setDeleteDialogVisible(true);
+    };
 
-  const actionBodyTemplate = () => {
     return (
-      <div>
-        <Toast ref={toast}></Toast>
-        <Menu model={items} popup ref={menuRight} id="popup_menu_left" />
+      <React.Fragment>
+        <Button
+          icon="pi pi-pencil"
+          rounded
+          outlined
+          className="mr-2 dark:text-gray-100"
+          style={{ width: "2rem", height: "2rem" }}
+          onClick={handleEdit}
+        />
+        <Button
+          icon="pi pi-trash"
+          rounded
+          outlined
+          className="text-red-500 dark:text-red-500"
+          style={{ width: "2rem", height: "2rem" }}
+          onClick={handleDelete}
+        />
         <Button
           type="button"
-          className="text-bold border-none text-gray-950 hover:bg-none dark:text-white dark:hover:text-white"
+          className="text-bold setting ml-2 rounded-full text-gray-950 dark:text-white"
           onClick={(event) => menuRight.current.toggle(event)}
+          style={{ padding: "0.4rem" }}
           aria-controls="popup_menu_right"
           aria-haspopup
         >
           <CiMenuKebab />
         </Button>
         <Menu
-          model={items}
+          model={[
+            {
+              label: "Rights Management",
+              icon: "pi pi-lock",
+              // command: () => {
+              //   navigate("/edit-customer");
+              // },
+            },
+            {
+              label: "Manage Assigned",
+              icon: "pi pi-users",
+              // command: () => {
+              //   navigate("/edit-customer");
+              // },
+            },
+            {
+              label: "Manage Unassigned",
+              icon: "pi pi-user-minus",
+              // command: () => {
+              //   navigate("/edit-customer");
+              // },
+            },
+          ]}
           popup
           ref={menuRight}
           id="popup_menu_right"
           popupAlignment="right"
         />
-      </div>
+      </React.Fragment>
     );
   };
 
-  //end of Action menu
-
   return (
     <div>
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
+      <Toast ref={toastErr} className="bg-red-400" />
       <DataTable
         removableSort
-        value={data}
-        selection={selectedProducts}
-        onSelectionChange={(e) => setSelectedProducts(e.value)}
+        value={customerData}
+        selection={selectedProduct}
+        onSelectionChange={(e) => setSelectedProduct(e.value)}
         dataKey="id"
         paginator
         rows={5}
@@ -297,40 +368,40 @@ const CustomersList = ({ data }) => {
           field="serialNo"
           className="border-none dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "4rem", textAlign: "center" }}
-        ></Column>
+        />
         <Column
           field="full_name"
           header="Name"
           style={{ minWidth: "8rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
-        ></Column>
+        />
         <Column
           field="email"
           header="Email"
           style={{ minWidth: "8rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
-        ></Column>
+        />
         <Column
-          field="address"
+          field="full_address"
           className="border-none dark:bg-gray-900 dark:text-gray-200"
           header="Address"
-          style={{ width: "12rem", minWidth: "26rem" }}
-        ></Column>
+          style={{ width: "12rem", minWidth: "20rem" }}
+        />
         <Column
           field="company_name"
           header="Company Name"
           className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "4rem" }}
-        ></Column>
+          style={{ minWidth: "6rem" }}
+        />
         <Column
           field="phone"
           header="Contact No."
           className="border-none dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "5rem" }}
-        ></Column>
+        />
         <Column
           header="Action"
-          headerStyle={{ width: "4rem", textAlign: "left" }}
+          headerStyle={{ width: "11rem", textAlign: "left" }}
           bodyStyle={{ textAlign: "left", overflow: "visible" }}
           body={actionBodyTemplate}
           className="border-none dark:bg-gray-900 "
@@ -340,6 +411,11 @@ const CustomersList = ({ data }) => {
         visible={editDialogVisible}
         onHide={() => setEditDialogVisible(false)}
         customer={editedCustomer}
+      />
+      <DeleteCustomerDialog
+        visible={deleteDialogVisible}
+        onHide={() => setDeleteDialogVisible(false)}
+        customer={selectedProduct}
       />
     </div>
   );
