@@ -36,7 +36,7 @@ const Dashboard = () => {
   }, []);
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Admin/Get")
+      .get("http://localhost:3001/api/Admin/GetAll")
 
       .then((res) => {
         console.log(res);
