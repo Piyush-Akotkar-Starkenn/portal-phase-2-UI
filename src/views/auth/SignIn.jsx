@@ -20,10 +20,9 @@ export default function SignIn() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitted");
     if (data.email && data.password) {
       axios
-        .post("http://localhost:3001/api/Signup/login", data)
+        .post("http://localhost:3001/api/Admin/Login", data)
         .then((res) => {
           console.log(res);
           var currentTime = new Date();

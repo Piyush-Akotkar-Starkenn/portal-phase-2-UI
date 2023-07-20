@@ -1,15 +1,17 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { useState } from "react";
 import axios from "axios";
+import { useContext } from "react";
 import { AppContext } from "context/AppContext";
 
-const AddFeatureSet = () => {
+const EditFeatureset = (parameters) => {
   const [data, setData] = useState({});
   const [customers, setCustomers] = useState([]);
-  const [listCustomers, setListCustomers] = useState([]);
+  const [featuresetDetails, setFeaturesetDetails] = useState({});
+
   const { updateData, updateFunc } = useContext(AppContext);
 
   const handleChange = (e) => {
@@ -19,32 +21,37 @@ const AddFeatureSet = () => {
 
   useEffect(() => {
     setData({ ...data, ["selectCustomer"]: [...customers] });
-  }, [customers]);
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/featureset/featureset-get-all-customers")
-      .then((res) => {
-        console.log(res);
-        setListCustomers(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    console.log(featuresetDetails);
+  }, [customers, featuresetDetails]);
 
   const handleSelectCustomer = (e) => {
     const { name, value } = e.target;
     setCustomers([...customers, value]);
   };
 
+  useEffect(() => {
+    axios
+      .get(
+        `http://localhost:3001/api/featureset/featureset/${parameters?.propValue}`
+      )
+      .then((res) => {
+        setFeaturesetDetails(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log(Object.keys(data).length);
+    // console.log(Object.keys(data).length);
     try {
       axios
-        .post("http://localhost:3001/api/featureset/featureset-add", data)
+        .put(
+          `http://localhost:3001/api/featureset/featureset-edit/${parameters?.propValue}`,
+          data
+        )
         .then((res) => {
           updateFunc();
           console.log(res);
@@ -124,21 +131,26 @@ const AddFeatureSet = () => {
     { label: "GPS", value: "GPS" },
   ];
 
-  const Customersoptions = () => {
-    return listCustomers?.map((el) => ({
-      label: el.first_name,
-      value: el.userId,
-    }));
-  };
+  const Customersoptions = [
+    {
+      label: "Harshal",
+      value: "Harshal",
+    },
+    {
+      label: "Starkenn",
+      value: "Starkenn",
+    },
+  ];
 
   return (
     <>
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="flex" style={{ flexDirection: "column" }}>
-            <label htmlFor="username">Feature Set ID*</label>
+            <label htmlFor="username">Feature Set ID12345*</label>
             <InputText
               id="username"
+              placeholder={featuresetDetails?.featureSetId}
               aria-describedby="username-help"
               le={{
                 width: "63vw",
@@ -149,7 +161,6 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="Feature Set ID"
               name="featureSetId"
               onChange={handleChange}
             />
@@ -170,7 +181,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="Feature Set Name"
+              placeholder={featuresetDetails?.featureSetName}
               name="featureSetName"
               onChange={handleChange}
             />
@@ -192,8 +203,8 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              options={Customersoptions()}
-              placeholder="No"
+              options={Customersoptions}
+              placeholder={featuresetDetails?.selectCustomer}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -267,7 +278,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="10"
+              placeholder={featuresetDetails?.activationSpeed}
               name="activationSpeed"
               onChange={handleChange}
             />
@@ -287,7 +298,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="1.5"
+              placeholder={featuresetDetails?.alarmThreshold}
               name="alarmThreshold"
               onChange={handleChange}
             />
@@ -309,7 +320,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0.4"
+              placeholder={featuresetDetails?.brakeThreshold}
               name="brakeThreshold"
               onChange={handleChange}
             />
@@ -329,7 +340,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="40"
+              placeholder={featuresetDetails?.brakeSpeed}
               name="brakeSpeed"
               onChange={handleChange}
             />
@@ -343,7 +354,7 @@ const AddFeatureSet = () => {
               options={StationaryObjectoptions}
               optionLabel="label"
               optionValue="value"
-              placeholder="No"
+              placeholder={featuresetDetails?.detectStationaryObject}
               name="detectStationaryObject"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
@@ -365,7 +376,7 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={CompleteBrakeoptions}
-              placeholder="No"
+              placeholder={featuresetDetails?.allowCompleteBrake}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -388,7 +399,7 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={OncomingObstacleptions}
-              placeholder="No"
+              placeholder={featuresetDetails?.detectOncomingObstacles}
               optionLabel="label"
               optionValue="value"
               onChange={handleChange}
@@ -410,7 +421,7 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={SafetyModeoptions}
-              placeholder="Normal"
+              placeholder={featuresetDetails?.safetyMode}
               onChange={handleChange}
               optionLabel="label"
               optionValue="value"
@@ -434,7 +445,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="175"
+              placeholder={featuresetDetails?.ttcThreshold}
               name="ttcThreshold"
               onChange={handleChange}
             />
@@ -456,7 +467,7 @@ const AddFeatureSet = () => {
               }}
               name="brakeOnDuration"
               onChange={handleChange}
-              placeholder="1000"
+              placeholder={featuresetDetails?.brakeOnDuration}
             />
           </div>
         </div>
@@ -478,7 +489,7 @@ const AddFeatureSet = () => {
               }}
               name="brakeOffDuration"
               onChange={handleChange}
-              placeholder="1000"
+              placeholder={featuresetDetails?.brakeOffDuration}
             />
           </div>
         </div>
@@ -525,7 +536,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="5"
+              placeholder={featuresetDetails?.preWarning}
               name="preWarning"
               onChange={handleChange}
             />
@@ -547,7 +558,7 @@ const AddFeatureSet = () => {
               }}
               name="sleepAlertInterval"
               onChange={handleChange}
-              placeholder="60"
+              placeholder={featuresetDetails?.sleepAlertInterval}
             />
           </div>
         </div>
@@ -569,7 +580,7 @@ const AddFeatureSet = () => {
               }}
               name="activationSpeed"
               onChange={handleChange}
-              placeholder="40"
+              placeholder={featuresetDetails?.activationSpeed}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -589,7 +600,7 @@ const AddFeatureSet = () => {
               }}
               name="startTime"
               onChange={handleChange}
-              placeholder="23"
+              placeholder={featuresetDetails?.startTime}
             />
           </div>
         </div>
@@ -611,7 +622,7 @@ const AddFeatureSet = () => {
               }}
               name="stopTime"
               onChange={handleChange}
-              placeholder="6"
+              placeholder={featuresetDetails?.stopTime}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -631,7 +642,7 @@ const AddFeatureSet = () => {
               }}
               name="brakeActivateTime"
               onChange={handleChange}
-              placeholder="10"
+              placeholder={featuresetDetails?.brakeActivateTime}
             />
           </div>
         </div>
@@ -652,7 +663,7 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={Brakingoptions}
-              placeholder="No"
+              placeholder={featuresetDetails?.braking}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -703,7 +714,7 @@ const AddFeatureSet = () => {
               }}
               name="maxLaneChangeThreshold"
               onChange={handleChange}
-              placeholder="0.35"
+              placeholder={featuresetDetails?.maxLaneChangeThreshold}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -723,7 +734,7 @@ const AddFeatureSet = () => {
               }}
               name="minLaneChangeThreshold"
               onChange={handleChange}
-              placeholder="-0.35"
+              placeholder={featuresetDetails?.minLaneChangeThreshold}
             />
           </div>
         </div>
@@ -745,7 +756,7 @@ const AddFeatureSet = () => {
               }}
               name="maxHarshAccelerationThreshold"
               onChange={handleChange}
-              placeholder="0.25"
+              placeholder={featuresetDetails?.maxHarshAccelerationThreshold}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -765,7 +776,7 @@ const AddFeatureSet = () => {
               }}
               name="minHarshAccelerationThreshold"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.minHarshAccelerationThreshold}
             />
           </div>
         </div>
@@ -787,7 +798,7 @@ const AddFeatureSet = () => {
               }}
               name="suddenBrakingThreshold"
               onChange={handleChange}
-              placeholder="-0.4"
+              placeholder={featuresetDetails?.suddenBrakingThreshold}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -807,7 +818,7 @@ const AddFeatureSet = () => {
               }}
               name="maxSpeedBumpThreshold"
               onChange={handleChange}
-              placeholder="0.5"
+              placeholder={featuresetDetails?.maxSpeedBumpThreshold}
             />
           </div>
         </div>
@@ -829,7 +840,7 @@ const AddFeatureSet = () => {
               }}
               name="minSpeedBumpThreshold"
               onChange={handleChange}
-              placeholder="10"
+              placeholder={featuresetDetails?.minSpeedBumpThreshold}
             />
           </div>
         </div>
@@ -877,7 +888,7 @@ const AddFeatureSet = () => {
               }}
               name="speedLimit"
               onChange={handleChange}
-              placeholder="100"
+              placeholder={featuresetDetails?.speedLimit}
             />
           </div>
         </div>
@@ -924,7 +935,7 @@ const AddFeatureSet = () => {
             }}
             name="activationSpeed"
             onChange={handleChange}
-            placeholder="100"
+            placeholder={featuresetDetails?.activationSpeed}
           />
         </div>
         <div className="flex justify-between">
@@ -944,7 +955,7 @@ const AddFeatureSet = () => {
               name="vehicleType"
               onChange={handleChange}
               options={VehicleTypeoptions}
-              placeholder="12V Pedal"
+              placeholder={featuresetDetails?.vehicleType}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -995,7 +1006,7 @@ const AddFeatureSet = () => {
               name="protocolType"
               onChange={handleChange}
               options={ProtocolTypeoptions}
-              placeholder="SAE J1393"
+              placeholder={featuresetDetails?.protocolType}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -1045,7 +1056,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="Sensor"
+              placeholder={featuresetDetails?.acceleratorType}
               optionLabel="label"
               optionValue="value"
               name="acceleratorType"
@@ -1067,7 +1078,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="Cylinder"
+              placeholder={featuresetDetails?.brakeType}
               optionLabel="label"
               optionValue="value"
               name="brakeType"
@@ -1147,7 +1158,7 @@ const AddFeatureSet = () => {
               }}
               name="rfAngle"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.rfAngle}
             />
           </div>
         </div>
@@ -1169,7 +1180,7 @@ const AddFeatureSet = () => {
               }}
               name="reserved1"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.reserved1}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1189,7 +1200,7 @@ const AddFeatureSet = () => {
               }}
               name="reserved2"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.reserved2}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1209,7 +1220,7 @@ const AddFeatureSet = () => {
               }}
               name="reserved3"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.reserved3}
             />
           </div>
         </div>
@@ -1231,7 +1242,7 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               name="speedSource"
-              placeholder="speedSource"
+              placeholder={featuresetDetails?.speedSource}
               options={SpeedSourceoptions}
               optionLabel="label"
               optionValue="value"
@@ -1258,7 +1269,7 @@ const AddFeatureSet = () => {
               }}
               name="slope"
               onChange={handleChange}
-              placeholder="0.51"
+              placeholder={featuresetDetails?.slope}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1278,7 +1289,7 @@ const AddFeatureSet = () => {
               }}
               name="offset"
               onChange={handleChange}
-              placeholder="4.08"
+              placeholder={featuresetDetails?.offset}
             />
           </div>
         </div>
@@ -1301,7 +1312,7 @@ const AddFeatureSet = () => {
             }}
             name="delay"
             onChange={handleChange}
-            placeholder="30"
+            placeholder={featuresetDetails?.delay}
           />
         </div>
         <hr style={{ borderColor: "#333" }} />
@@ -1350,7 +1361,7 @@ const AddFeatureSet = () => {
               }}
               name="noAlarm"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.noAlarm}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1370,7 +1381,7 @@ const AddFeatureSet = () => {
               }}
               name="speed"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.speed}
             />
           </div>
         </div>
@@ -1392,7 +1403,7 @@ const AddFeatureSet = () => {
               }}
               name="accelerationBypass"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.accelerationBypass}
             />
           </div>
         </div>
@@ -1416,7 +1427,7 @@ const AddFeatureSet = () => {
               }}
               name="rfSensorAbsent"
               onChange={handleChange}
-              placeholder="100"
+              placeholder={featuresetDetails?.rfSensorAbsent}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1436,7 +1447,7 @@ const AddFeatureSet = () => {
               }}
               name="gyroscopeAbsent"
               onChange={handleChange}
-              placeholder="100"
+              placeholder={featuresetDetails?.gyroscopeAbsent}
             />
           </div>
         </div>
@@ -1458,7 +1469,7 @@ const AddFeatureSet = () => {
               }}
               name="hmiAbsent"
               onChange={handleChange}
-              placeholder="100"
+              placeholder={featuresetDetails?.hmiAbsent}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1478,7 +1489,7 @@ const AddFeatureSet = () => {
               }}
               name="timeNotSet"
               onChange={handleChange}
-              placeholder="100"
+              placeholder={featuresetDetails?.timeNotSet}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1498,7 +1509,7 @@ const AddFeatureSet = () => {
               }}
               name="accelerationError"
               onChange={handleChange}
-              placeholder="100"
+              placeholder={featuresetDetails?.accelerationError}
             />
           </div>
         </div>
@@ -1520,7 +1531,7 @@ const AddFeatureSet = () => {
               }}
               name="brakeError"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.brakeError}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1540,7 +1551,7 @@ const AddFeatureSet = () => {
               }}
               name="tpmsError"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.tpmsError}
             />
           </div>
         </div>
@@ -1562,7 +1573,7 @@ const AddFeatureSet = () => {
               }}
               name="simCardAbsent"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.simCardAbsent}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1582,7 +1593,7 @@ const AddFeatureSet = () => {
               }}
               name="lowBattery"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.lowBattery}
             />
           </div>
         </div>
@@ -1604,7 +1615,7 @@ const AddFeatureSet = () => {
               }}
               name="tripNotStarted"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.tripNotStarted}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1624,7 +1635,7 @@ const AddFeatureSet = () => {
               }}
               name="bluetoothConnAbsent"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.bluetoothConnAbsent}
             />
           </div>
         </div>
@@ -1646,7 +1657,7 @@ const AddFeatureSet = () => {
               }}
               name="obdAbsent"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.obdAbsent}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1666,7 +1677,7 @@ const AddFeatureSet = () => {
               }}
               name="noAlarm"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.noAlarm}
             />
           </div>
         </div>
@@ -1688,7 +1699,7 @@ const AddFeatureSet = () => {
               }}
               name="laserSensorAbsent"
               onChange={handleChange}
-              placeholder="60"
+              placeholder={featuresetDetails?.laserSensorAbsent}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1708,7 +1719,7 @@ const AddFeatureSet = () => {
               }}
               name="rfidAbsent"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.rfidAbsent}
             />
           </div>
         </div>
@@ -1730,7 +1741,7 @@ const AddFeatureSet = () => {
               }}
               name="iotAbsent"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.iotAbsent}
             />
           </div>
         </div>
@@ -1778,7 +1789,7 @@ const AddFeatureSet = () => {
               }}
               name="firewarereserver1"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.firewarereserver1}
             />
           </div>
         </div>
@@ -1826,7 +1837,7 @@ const AddFeatureSet = () => {
               }}
               name="alcoholreserved1"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.alcoholreserved1}
             />
           </div>
         </div>
@@ -1874,13 +1885,13 @@ const AddFeatureSet = () => {
               }}
               name="driverreserved1"
               onChange={handleChange}
-              placeholder="0"
+              placeholder={featuresetDetails?.driverreserved1}
             />
           </div>
         </div>
         <div className="text-right">
           <Button
-            label="Add Feature Set"
+            label="Edit Feature Set"
             icon="pi pi-check"
             type="submit"
             className="p-button-primary px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
@@ -1892,4 +1903,4 @@ const AddFeatureSet = () => {
   );
 };
 
-export default AddFeatureSet;
+export default EditFeatureset;

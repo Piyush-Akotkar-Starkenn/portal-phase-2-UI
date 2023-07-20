@@ -7,32 +7,78 @@ import AddFeatureSet from "./AddFeatureSet";
 import { FilterMatchMode } from "primereact/api";
 import { InputText } from "primereact/inputtext";
 import axios from "axios";
+import EditFeatureset from "./EditFeatureset";
+import { useContext } from "react";
+import { AppContext } from "context/AppContext";
+import AssignCustomer from "./AssignCustomer";
+import UnAssignCustomer from "./UnAssignCustomer";
 
 const FeatureList = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [isDialogVisible1, setIsDialogVisible1] = useState(false);
+  const [isDialogVisible2, setIsDialogVisible2] = useState(false);
+  const [isDialogVisible3, setIsDialogVisible3] = useState(false);
+
+  const [myData, setMyData] = useState();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [data, setData] = useState([]);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
+  const { updateData, updateFunc, resetState } = useContext(AppContext);
+
+  //get list of featureset
   useEffect(() => {
+    getListData();
+    console.log(updateData);
+  }, [updateData]);
+
+  const getListData = () => {
     axios
       .get("http://localhost:3001/api/featureset/featureset-list")
       .then((res) => {
-        console.log(res.data);
         setData(res.data);
       })
       .catch((err) => console.log(err));
-  }, []);
+  };
 
   const openDialog = () => {
     setIsDialogVisible(true);
   };
-
   const closeDialog = () => {
     setIsDialogVisible(false);
+    resetState();
   };
+
+  const openDialog1 = (rowData) => {
+    setMyData(rowData); // Set the rowData to myData state
+    setIsDialogVisible1(true);
+  };
+
+  const closeDialog1 = () => {
+    setIsDialogVisible1(false);
+    resetState();
+  };
+
+  const openDialog2 = (rowData) => {
+    setMyData(rowData);
+    setIsDialogVisible2(true);
+  };
+  const closeDialog2 = () => {
+    setIsDialogVisible2(false);
+    resetState();
+  };
+
+  const openDialog3 = (rowData) => {
+    setMyData(rowData);
+    setIsDialogVisible3(true);
+  };
+  const closeDialog3 = () => {
+    setIsDialogVisible3(false);
+    resetState();
+  };
+
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -68,6 +114,57 @@ const FeatureList = () => {
       </span>
     </div>
   );
+
+  const handleDelete = (rowData) => {
+    axios
+      .put(
+        `http://localhost:3001/api/featureset/featureset-delete/${rowData?.featureSetId}`
+      )
+      .then((res) => {
+        console.log(res);
+        getListData(); // Fetch the updated list of featuresets after the delete operation
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const actionBodyTemplate = (rowData) => {
+    return (
+      <React.Fragment>
+        <Button
+          icon="pi pi-plus"
+          rounded
+          outlined
+          style={{ width: "2rem", height: "2rem", marginRight: "5px" }}
+          onClick={() => openDialog2(rowData)}
+        />
+        <Button
+          icon="pi pi-minus"
+          rounded
+          outlined
+          style={{ width: "2rem", height: "2rem", marginRight: "5px" }}
+          onClick={() => openDialog3(rowData)}
+        />
+        <Button
+          icon="pi pi-pencil"
+          rounded
+          outlined
+          className="mr-2"
+          style={{ width: "2rem", height: "2rem", marginRight: "5px" }}
+          onClick={() => openDialog1(rowData)}
+        />
+        <Button
+          icon="pi pi-trash"
+          rounded
+          outlined
+          style={{ width: "2rem", height: "2rem" }}
+          severity="danger"
+          onClick={() => handleDelete(rowData)}
+        />
+      </React.Fragment>
+    );
+  };
   return (
     <>
       <div>
@@ -79,6 +176,28 @@ const FeatureList = () => {
           onClick={openDialog}
         />
       </div>
+      <Dialog
+        visible={isDialogVisible2}
+        onHide={closeDialog2}
+        style={{ width: "70vw" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Assign Feature-Set to Client Company"
+        modal
+        className="p-fluid dark:bg-gray-900"
+      >
+        <AssignCustomer propValue={myData?.featureSetId} />
+      </Dialog>
+      <Dialog
+        visible={isDialogVisible3}
+        onHide={closeDialog3}
+        style={{ width: "70vw" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Unassign Client Company from Feature-Set"
+        modal
+        className="p-fluid dark:bg-gray-900"
+      >
+        <UnAssignCustomer propValue={myData?.featureSetId} />
+      </Dialog>
 
       <Dialog
         visible={isDialogVisible}
@@ -91,6 +210,18 @@ const FeatureList = () => {
       >
         <AddFeatureSet />
       </Dialog>
+      <Dialog
+        visible={isDialogVisible1}
+        onHide={closeDialog1}
+        style={{ width: "70vw" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Edit Featureset Fill values which you wanted to update"
+        modal
+        className="p-fluid dark:bg-gray-900"
+      >
+        <EditFeatureset propValue={myData?.featureSetId} />
+      </Dialog>
+
       <DataTable
         removableSort
         value={data}
@@ -124,10 +255,10 @@ const FeatureList = () => {
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column
-          field="Action"
-          className="border-none dark:bg-gray-900 dark:text-gray-200"
+          body={actionBodyTemplate}
           header="Action"
-          style={{ width: "12rem", minWidth: "20rem" }}
+          className="dark:bg-gray-900 dark:text-gray-200"
+          style={{ minWidth: "6rem" }}
         />
 
         {/* <Column
