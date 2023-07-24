@@ -30,6 +30,8 @@ import { RiAlertLine, RiContactsLine } from "react-icons/ri";
 import { TbReport, TbDeviceAnalytics } from "react-icons/tb";
 import { BiRfid } from "react-icons/bi";
 import { HiOutlineUsers } from "react-icons/hi";
+import AdminProtected from "authorization/AdminProteted";
+import CustomerProtected from "authorization/CustomerProtected";
 
 //routes for Admin panel
 export const routes_admin = [
@@ -37,9 +39,13 @@ export const routes_admin = [
     name: "",
     title: "Dashboard",
     layout: "/admin",
-    path: "default",
+    path: "dashboard",
     icon: <MdOutlineDashboard className="h-7 w-7" />,
-    component: <Dashboard />,
+    component: (
+      <AdminProtected>
+        <Dashboard />
+      </AdminProtected>
+    ),
   },
   {
     name: "",
@@ -47,7 +53,11 @@ export const routes_admin = [
     layout: "/admin",
     path: "customers",
     icon: <HiOutlineUsers className="h-7 w-7" />,
-    component: <Customers />,
+    component: (
+      <AdminProtected>
+        <Customers />
+      </AdminProtected>
+    ),
   },
   {
     name: "",
@@ -55,7 +65,11 @@ export const routes_admin = [
     layout: "/admin",
     icon: <BsFillCpuFill className="h-7 w-7" />,
     path: "devices",
-    component: <DevicesAdmin />,
+    component: (
+      <AdminProtected>
+        <DevicesAdmin />
+      </AdminProtected>
+    ),
   },
   {
     name: "",
@@ -63,7 +77,11 @@ export const routes_admin = [
     layout: "/admin",
     path: "vehicles",
     icon: <BsTruck className="h-7 w-7" />,
-    component: <VehiclesAdmin />,
+    component: (
+      <AdminProtected>
+        <VehiclesAdmin />
+      </AdminProtected>
+    ),
     secondary: true,
   },
 
@@ -73,7 +91,11 @@ export const routes_admin = [
     layout: "/admin",
     path: "feature-set",
     icon: <MdOutlineFeaturedPlayList className="h-7 w-7" />,
-    component: <FeatureSet />,
+    component: (
+      <AdminProtected>
+        <FeatureSet />
+      </AdminProtected>
+    ),
   },
   {
     name: "",
@@ -81,7 +103,11 @@ export const routes_admin = [
     layout: "/admin",
     path: "analytics-threshold",
     icon: <TbDeviceAnalytics className="h-7 w-7" />,
-    component: <AnalyticsThreshold />,
+    component: (
+      <AdminProtected>
+        <AnalyticsThreshold />
+      </AdminProtected>
+    ),
   },
 ];
 
@@ -91,9 +117,13 @@ export const routes_customer = [
     name: "",
     title: "Dashboard",
     layout: "/customer",
-    path: "default",
+    path: "dashboard",
     icon: <MdOutlineDashboard className="h-7 w-7" />,
-    component: <MainDashboard />,
+    component: (
+      <CustomerProtected>
+        <MainDashboard />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -101,7 +131,11 @@ export const routes_customer = [
     layout: "/customer",
     path: "vehicles",
     icon: <BsTruck className="h-7 w-7" />,
-    component: <Vehicles />,
+    component: (
+      <CustomerProtected>
+        <Vehicles />
+      </CustomerProtected>
+    ),
     secondary: true,
   },
   {
@@ -110,7 +144,11 @@ export const routes_customer = [
     layout: "/customer",
     icon: <BsFillCpuFill className="h-7 w-7" />,
     path: "devices",
-    component: <Devices />,
+    component: (
+      <CustomerProtected>
+        <Devices />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -118,7 +156,11 @@ export const routes_customer = [
     layout: "/customer",
     path: "ongoing-trips",
     icon: <MdWebhook className="h-7 w-7" />,
-    component: <OngoingTrips />,
+    component: (
+      <CustomerProtected>
+        <OngoingTrips />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -126,7 +168,11 @@ export const routes_customer = [
     layout: "/customer",
     path: "completed-trips",
     icon: <AiOutlineCheckSquare className="h-7 w-7" />,
-    component: <CompletedTrips />,
+    component: (
+      <CustomerProtected>
+        <CompletedTrips />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -134,7 +180,11 @@ export const routes_customer = [
     layout: "/customer",
     path: "alert-triggers",
     icon: <RiAlertLine className="h-7 w-7" />,
-    component: <Triggers />,
+    component: (
+      <CustomerProtected>
+        <Triggers />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -142,7 +192,11 @@ export const routes_customer = [
     layout: "/customer",
     path: "contacts",
     icon: <RiContactsLine className="h-7 w-7" />,
-    component: <Contacts />,
+    component: (
+      <CustomerProtected>
+        <Contacts />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -150,7 +204,11 @@ export const routes_customer = [
     layout: "/customer",
     path: "reports",
     icon: <TbReport className="h-7 w-7" />,
-    component: <Reports />,
+    component: (
+      <CustomerProtected>
+        <Reports />
+      </CustomerProtected>
+    ),
   },
   {
     name: "",
@@ -158,6 +216,10 @@ export const routes_customer = [
     layout: "/customer",
     path: "RFIDs",
     icon: <BiRfid className="h-7 w-7" />,
-    component: <RFIDs />,
+    component: (
+      <CustomerProtected>
+        <RFIDs />
+      </CustomerProtected>
+    ),
   },
 ];

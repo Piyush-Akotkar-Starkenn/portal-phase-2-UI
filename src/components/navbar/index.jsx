@@ -37,6 +37,7 @@ const Navbar = ({ onOpenSidenav }) => {
 
   const handleLogout = () => {
     Cookies.remove("token");
+    Cookies.remove("user_type");
     navigate("/signin");
   };
 
