@@ -79,6 +79,19 @@ const CustomersList = ({ data }) => {
 
     const handleInputChange = (e) => {
       const { name, value } = e.target;
+      if (name === "first_name") {
+        setEditedCustomerData((prevState) => ({
+          ...prevState,
+          first_name: value,
+          full_name: `${value} ${prevState.last_name}`,
+        }));
+      } else if (name === "last_name") {
+        setEditedCustomerData((prevState) => ({
+          ...prevState,
+          last_name: value,
+          full_name: `${prevState.first_name} ${value}`,
+        }));
+      }
 
       setEditedCustomerData((prevState) => ({
         ...prevState,
@@ -149,6 +162,18 @@ const CustomersList = ({ data }) => {
                 onChange={handleInputChange}
               />
               <label htmlFor="company_name">Company Name</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="full_address"
+                type="text"
+                name="full_address"
+                value={editedCustomerData?.full_address || ""}
+                onChange={handleInputChange}
+              />
+              <label htmlFor="full_address">Full Address</label>
             </span>
           </div>
           <div className="mx-auto mb-3 mt-8 w-[34.5vw]">

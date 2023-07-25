@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Dropdown } from "primereact/dropdown";
+import { Button } from "primereact/button";
+import { useRef } from "react";
+import { Toast } from "primereact/toast";
 
-const AssignCustomer = (parameters) => {
+const AssignCustomer = ({ parameters, onSuccess }) => {
   const [data, setData] = useState([]);
-  const [customer, setCustomer] = useState("");
-
-  const handleChange = (e) => {
-    setCustomer(e.target.value);
-  };
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const toastErr = useRef(null);
+  const [validationError, setValidationError] = useState(false);
 
   useEffect(() => {
     axios
@@ -20,18 +22,20 @@ const AssignCustomer = (parameters) => {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [parameters.propValue]);
+  const customerOptions = data.map((customer) => ({
+    label: `${customer.first_name} ${customer.last_name}`,
+    value: customer.userId,
+  }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!customer) {
-      console.log("Please select a customer.");
+    if (!selectedCustomer) {
+      setValidationError(true);
       return;
     }
-
     const requestData = {
-      selectCustomer: [customer],
+      selectCustomer: [selectedCustomer],
     };
 
     axios
@@ -41,38 +45,51 @@ const AssignCustomer = (parameters) => {
       )
       .then((res) => {
         console.log(res);
+        if (onSuccess) {
+          onSuccess();
+        }
       })
       .catch((err) => {
         console.error(err);
+        toastErr.current.show({
+          severity: "danger",
+          summary: "Error",
+          detail: err.response.data.message || "An error occurred",
+          life: 3000,
+        });
       });
   };
 
   return (
-    <div>
-      <h1>Assign Customer</h1>
+    <>
+      <Toast ref={toastErr} className="bg-red-400" />
       <div className="field my-3 w-[30vw]">
         <form onSubmit={handleSubmit}>
-          <label htmlFor="ecu">Select Customer</label>
-          <select
-            name="selectCustomer"
-            className="border-black mx-4 my-4 border-4"
-            onChange={handleChange}
-            value={customer}
-          >
-            <option value="">-Select Customer-</option>
-            {data?.map((el, ind) => (
-              <option key={ind} value={el.userId}>
-                {el.first_name}
-              </option>
-            ))}
-          </select>
-          <br />
-          <button className="border-black my-4 border-4 px-2" type="submit">
-            Submit
-          </button>
+          <span className="p-float-label mt-8">
+            <Dropdown
+              value={selectedCustomer}
+              options={customerOptions}
+              onChange={(e) => setSelectedCustomer(e.value)}
+              className="rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
+              optionLabel="label"
+            />
+            <label htmlFor="dd-city">Select a customer</label>
+          </span>
+          {validationError && (
+            <div className="text-red-600">Please select a customer.</div>
+          )}
+          <div className="mt-4 text-right">
+            <Button
+              label="Assign"
+              icon="pi pi-check"
+              type="submit"
+              className="px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
+              style={{ width: "fit-content", background: "#2152FF" }}
+            />
+          </div>
         </form>
       </div>
-    </div>
+    </>
   );
 };
 
