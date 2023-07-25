@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FilterMatchMode } from "primereact/api";
 import { DataView } from "primereact/dataview";
+import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { MdOnDeviceTraining } from "react-icons/md";
@@ -14,6 +15,17 @@ export default function DevicesGrid() {
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+
+  const getSeverity = (data) => {
+    switch (data.status) {
+      case "1":
+        return "success";
+      case "0":
+        return "danger";
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     axios
@@ -74,6 +86,20 @@ export default function DevicesGrid() {
       <div className="p-col-11 mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
         <div className="card">
           <div className="card-body px-6 py-3">
+            <div className="flex items-center justify-end">
+              <div>
+                <Tag
+                  value={
+                    parseInt(item.status) === 1
+                      ? "Active"
+                      : parseInt(item.status) === 0
+                      ? "Deactive"
+                      : undefined
+                  }
+                  severity={getSeverity(item)}
+                ></Tag>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <div className="mt-4 flex justify-between font-semibold">

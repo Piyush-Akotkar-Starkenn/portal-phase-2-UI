@@ -403,6 +403,7 @@ body
 .edit:hover {
   border: 1px solid #a9abf8 !important;
 }
+
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {

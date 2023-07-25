@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { DataTable } from "primereact/datatable";
@@ -12,21 +12,26 @@ import { useContext } from "react";
 import { AppContext } from "context/AppContext";
 import AssignCustomer from "./AssignCustomer";
 import UnAssignCustomer from "./UnAssignCustomer";
+import { Toast } from "primereact/toast";
 
 const FeatureList = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [isDialogVisible1, setIsDialogVisible1] = useState(false);
   const [isDialogVisible2, setIsDialogVisible2] = useState(false);
   const [isDialogVisible3, setIsDialogVisible3] = useState(false);
-
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState(null);
   const [myData, setMyData] = useState();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [data, setData] = useState([]);
+  const toastRef = useRef(null);
+  const toastErr = useRef(null);
+
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
-  const { updateData, updateFunc, resetState } = useContext(AppContext);
+  const { updateData, resetState } = useContext(AppContext);
 
   //get list of featureset
   useEffect(() => {
@@ -38,9 +43,76 @@ const FeatureList = () => {
     axios
       .get("http://localhost:3001/api/featureset/featureset-list")
       .then((res) => {
-        setData(res.data);
+        const formattedData = res.data.map((item, index) => ({
+          ...item,
+          serialNo: index + 1,
+        }));
+        setData(formattedData);
       })
       .catch((err) => console.log(err));
+  };
+
+  const openDeleteDialog = (rowData) => {
+    setSelectedFeature(rowData);
+    setIsDeleteDialogVisible(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setSelectedFeature(null);
+    setIsDeleteDialogVisible(false);
+  };
+
+  const handleDeleteConfirmation = async () => {
+    if (selectedFeature) {
+      try {
+        const response = await axios.put(
+          `http://localhost:3001/api/featureset/featureset-delete/${selectedFeature?.featureSetId}`
+        );
+        const { featureSetName } = response.data;
+        console.log("Delete success:", response.data);
+
+        getListData(); // Fetch the updated list of featuresets after the delete operation
+
+        closeDeleteDialog();
+
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: `Feature set '${featureSetName}' deleted successfully`,
+          life: 3000,
+        });
+      } catch (error) {
+        console.error("Error during delete:", error);
+
+        closeDeleteDialog();
+
+        if (error.response) {
+          // Server responded with a status code other than 2xx
+          toastErr.current.show({
+            severity: "danger",
+            summary: "Error",
+            detail: error.response.data.message || "An error occurred",
+            life: 3000,
+          });
+        } else if (error.request) {
+          // The request was made but no response was received
+          toastErr.current.show({
+            severity: "danger",
+            summary: "Error",
+            detail: "No response received from the server",
+            life: 3000,
+          });
+        } else {
+          // Something happened in setting up the request
+          toastErr.current.show({
+            severity: "danger",
+            summary: "Error",
+            detail: "Error while deleting feature set",
+            life: 3000,
+          });
+        }
+      }
+    }
   };
 
   const openDialog = () => {
@@ -115,32 +187,19 @@ const FeatureList = () => {
     </div>
   );
 
-  const handleDelete = (rowData) => {
-    axios
-      .put(
-        `http://localhost:3001/api/featureset/featureset-delete/${rowData?.featureSetId}`
-      )
-      .then((res) => {
-        console.log(res);
-        getListData(); // Fetch the updated list of featuresets after the delete operation
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
         <Button
-          icon="pi pi-plus"
+          icon="pi pi-file"
           rounded
           outlined
           style={{ width: "2rem", height: "2rem", marginRight: "5px" }}
           onClick={() => openDialog2(rowData)}
         />
         <Button
-          icon="pi pi-minus"
+          icon="pi pi-file-excel
+"
           rounded
           outlined
           style={{ width: "2rem", height: "2rem", marginRight: "5px" }}
@@ -160,7 +219,7 @@ const FeatureList = () => {
           outlined
           style={{ width: "2rem", height: "2rem" }}
           severity="danger"
-          onClick={() => handleDelete(rowData)}
+          onClick={() => openDeleteDialog(rowData)}
         />
       </React.Fragment>
     );
@@ -215,13 +274,37 @@ const FeatureList = () => {
         onHide={closeDialog1}
         style={{ width: "70vw" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Edit Featureset Fill values which you wanted to update"
+        header="Featureset Details"
         modal
         className="p-fluid dark:bg-gray-900"
       >
         <EditFeatureset propValue={myData?.featureSetId} />
       </Dialog>
-
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
+      <Toast ref={toastErr} className="bg-red-400" />
+      <Dialog
+        visible={isDeleteDialogVisible}
+        onHide={closeDeleteDialog}
+        header="Confirm Delete"
+        footer={
+          <div>
+            <Button
+              label="Delete"
+              icon="pi pi-times"
+              className="p-button-danger px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={handleDeleteConfirmation}
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-check"
+              className="p-button-secondary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={closeDeleteDialog}
+            />
+          </div>
+        }
+      >
+        <div>Are you sure you want to delete this feature set?</div>
+      </Dialog>
       <DataTable
         removableSort
         value={data}
@@ -244,21 +327,21 @@ const FeatureList = () => {
         />
         <Column
           field="featureSetId"
-          header="featureSetId"
+          header="ID"
           style={{ minWidth: "8rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column
           field="featureSetName"
-          header="featureSetName"
-          style={{ minWidth: "8rem" }}
+          header="Name"
+          style={{ minWidth: "12rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column
           body={actionBodyTemplate}
           header="Action"
           className="dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "6rem" }}
+          style={{ minWidth: "8rem" }}
         />
 
         {/* <Column

@@ -1,32 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import DevicesList from "./components/DevicesList";
 import DevicesGrid from "./components/DevicesGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 import { Button } from "primereact/button";
-import axios from "axios";
 
 const DevicesAdmin = () => {
-  const [data, setData] = useState([]);
   const [isListView, setIsListView] = useState(true);
-
-  useEffect(() => {
-    fetchDevicesData();
-  }, []);
-  //Fetching all data
-  const fetchDevicesData = () => {
-    axios
-      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
-      .then((res) => {
-        const formattedData = res.data.data.device.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-        }));
-        setData(formattedData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
 
   const handleListView = () => {
     setIsListView(true);
@@ -69,10 +48,10 @@ const DevicesAdmin = () => {
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
         // onClick={openNew}
       />
-      {!isListView && <DevicesGrid data={data} />}
+      {!isListView && <DevicesGrid />}
       {isListView && (
         <div className="opacity-100 transition-opacity duration-500">
-          <DevicesList data={data} />
+          <DevicesList />
         </div>
       )}
     </>

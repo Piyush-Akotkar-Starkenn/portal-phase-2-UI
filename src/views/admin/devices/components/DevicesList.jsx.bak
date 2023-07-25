@@ -1,17 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { FilterMatchMode } from "primereact/api";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { MultiSelect } from "primereact/multiselect";
+import { Tag } from "primereact/tag";
 
-export default function DevicesList({ data }) {
+export default function DevicesList() {
+  // eslint-disable-next-line
+  const [data, setData] = useState([]);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+
+  const getSeverity = (data) => {
+    switch (data.status) {
+      case "1":
+        return "success";
+
+      case "0":
+        return "danger";
+
+      default:
+        return null;
+    }
+  };
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
+      .then((res) => {
+        const formattedData = res.data.data.device.map((item, index) => ({
+          ...item,
+          serialNo: index + 1,
+        }));
+        setData(formattedData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -62,6 +94,7 @@ export default function DevicesList({ data }) {
     value: deviceType,
   }));
 
+  console.log(deviceTypeOptions);
   const representativeFilterTemplate = (options) => {
     return (
       <React.Fragment>
@@ -85,6 +118,22 @@ export default function DevicesList({ data }) {
         <span>{option}</span>
         <p>{option.device_type}</p>
       </div>
+    );
+  };
+
+  const statusBodyTemplate = (rowData) => {
+    return (
+      <Tag
+        className="px-3"
+        value={
+          parseInt(rowData.status) === 1
+            ? "Active"
+            : parseInt(rowData.status) === 0
+            ? "Deactive"
+            : undefined
+        }
+        severity={getSeverity(rowData)}
+      ></Tag>
     );
   };
 
@@ -175,7 +224,14 @@ export default function DevicesList({ data }) {
           className="dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "12rem" }}
         ></Column>
-
+        <Column
+          field="status"
+          header="Status"
+          body={statusBodyTemplate}
+          sortable
+          className="dark:bg-gray-900 dark:text-gray-200"
+          style={{ minWidth: "10rem" }}
+        ></Column>
         <Column
           body={actionBodyTemplate}
           header="Action"
