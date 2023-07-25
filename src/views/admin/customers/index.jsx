@@ -33,7 +33,7 @@ const Customers = () => {
   //Fetching all data
   const fetchCustomersData = () => {
     axios
-      .get("http://localhost:3001/api/Admin/Get")
+      .get("http://localhost:3001/api/Admin/GetAll")
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
@@ -62,6 +62,7 @@ const Customers = () => {
 
   const closeDialog = () => {
     setIsDialogVisible(false);
+    setUserType(null);
   };
   //Add Customer form
   const handleSubmit = async (event) => {
@@ -84,6 +85,31 @@ const Customers = () => {
       state: formData.get("state"),
       pincode: formData.get("pincode"),
     };
+
+    const isValidPhoneNumber = (phoneNumber) => {
+      // Regular expression to check for exactly 10 digits
+      const phonePattern = /^\d{10}$/;
+      return phonePattern.test(phoneNumber);
+    };
+    // Validate the phone number
+    if (!isValidPhoneNumber(data.phone)) {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Invalid Phone Number",
+        detail: "Please enter a 10-digit valid phone number.",
+        life: 3000,
+      });
+      return;
+    }
+    if (data.password !== data.confirmPassword) {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Password Mismatch",
+        detail: "Password and Confirm Password do not match.",
+        life: 3000,
+      });
+      return;
+    }
 
     try {
       const response = await axios.post(
@@ -109,18 +135,85 @@ const Customers = () => {
         fetchCustomersData();
       } else {
         console.log("Failed to post data:", response.statusText);
+        toastRef.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "An error occurred. Please try again later.",
+          life: 3000,
+        });
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Unauthorized: Please authenticate.");
+      if (error.response) {
+        const { status, data } = error.response;
 
-        // Handle unauthorized error here, e.g., redirect to login page
+        if (status === 401) {
+          console.log("Unauthorized: Please authenticate.");
+
+          // Handle unauthorized error here, e.g., redirect to the login page
+          toastRef.current.show({
+            severity: "warn",
+            summary: "Unauthorized",
+            detail: "Please authenticate.",
+            life: 3000,
+          });
+        } else if (status === 400) {
+          // Handle validation errors
+          const { message } = data;
+
+          toastRef.current.show({
+            severity: "error",
+            summary: "Validation Error",
+            detail: message,
+            life: 3000,
+          });
+        } else if (status === 402) {
+          console.log("Passwords MisMatched.");
+
+          // Show password mismatch error toast message
+          toastRef.current.show({
+            severity: "error",
+            summary: "Password Mismatch",
+            detail: "Passwords do not match.",
+            life: 3000,
+          });
+        } else if (status === 500 && data === "This Email Already Taken ") {
+          // Show phone number already in use error toast message
+          toastRef.current.show({
+            severity: "error",
+            summary: "Use another email ID",
+            detail: "This email ID is already in use.",
+            life: 3000,
+          });
+        } else if (
+          status === 500 &&
+          data === "This Phone Number Already Taken"
+        ) {
+          // Show phone number already in use error toast message
+          toastRef.current.show({
+            severity: "error",
+            summary: "Use different Phone Number",
+            detail: "The phone number is already in use.",
+            life: 3000,
+          });
+        } else {
+          console.log("Error:", error);
+
+          // Show generic error toast message for other errors
+          toastRef.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "An error occurred. Please try again later.",
+            life: 3000,
+          });
+        }
       } else {
         console.log("Error:", error);
-        toastErr.current.show({
-          severity: "danger",
-          summary: "Error",
-          detail: "Error while saving",
+
+        // Show network error toast message
+        toastRef.current.show({
+          severity: "error",
+          summary: "Network Error",
+          detail: "An error occurred. Please check your network connection.",
           life: 3000,
         });
       }

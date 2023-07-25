@@ -57,7 +57,7 @@ const Generate = () => {
   };
 
   const renderOperation = () => {
-    const currentStatus = operationsStatus[currentOperation];
+    // const currentStatus = operationsStatus[currentOperation];
     switch (currentOperation) {
       case 1:
         return (
@@ -135,7 +135,7 @@ const Generate = () => {
     <>
       <div className="mt-8 flex flex-col items-center">
         <Toast ref={toast} />
-        <div className="h-64 w-64 rounded-lg bg-gray-200 p-4 shadow-lg">
+        <div className="w-100 h-64 rounded-lg bg-gray-200 p-4 shadow-lg">
           <div className="mb-4 flex justify-center">{renderOperation()}</div>
           <button
             className="rounded-lg bg-blue-500 px-4 py-2 text-white transition-opacity duration-500 hover:bg-blue-700"

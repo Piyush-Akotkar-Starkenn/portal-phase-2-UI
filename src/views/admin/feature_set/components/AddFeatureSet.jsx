@@ -47,7 +47,7 @@ const AddFeatureSet = () => {
         .post("http://localhost:3001/api/featureset/featureset-add", data)
         .then((res) => {
           updateFunc();
-          console.log(res);
+          console.log("successful");
         })
         .catch((err) => console.log(err));
     } catch (err) {
@@ -193,7 +193,6 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={Customersoptions()}
-              placeholder="No"
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -343,7 +342,6 @@ const AddFeatureSet = () => {
               options={StationaryObjectoptions}
               optionLabel="label"
               optionValue="value"
-              placeholder="No"
               name="detectStationaryObject"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
@@ -1192,26 +1190,26 @@ const AddFeatureSet = () => {
               placeholder="0"
             />
           </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 3</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              name="reserved3"
-              onChange={handleChange}
-              placeholder="0"
-            />
-          </div>
+        </div>
+        <div className="field my-3 w-[30vw]">
+          <label htmlFor="ecu">Reserved 3</label>
+          <input
+            type="number"
+            id="username"
+            aria-describedby="username-help"
+            style={{
+              width: "30vw",
+              borderBottom: "1px dashed #ced4da",
+              borderRadius: "0px",
+              padding: "0.30px",
+              borderRight: "none",
+              borderLeft: "none",
+              borderTop: "none",
+            }}
+            name="reserved3"
+            onChange={handleChange}
+            placeholder="0"
+          />
         </div>
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Speed Settings</p>
@@ -1481,26 +1479,26 @@ const AddFeatureSet = () => {
               placeholder="100"
             />
           </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Acceleration Error</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              name="accelerationError"
-              onChange={handleChange}
-              placeholder="100"
-            />
-          </div>
+        </div>
+        <div className="field my-3 w-[30vw]">
+          <label htmlFor="ecu">Acceleration Error</label>
+          <input
+            type="number"
+            id="username"
+            aria-describedby="username-help"
+            style={{
+              width: "30vw",
+              borderBottom: "1px dashed #ced4da",
+              borderRadius: "0px",
+              padding: "0.30px",
+              borderRight: "none",
+              borderLeft: "none",
+              borderTop: "none",
+            }}
+            name="accelerationError"
+            onChange={handleChange}
+            placeholder="100"
+          />
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
@@ -1883,8 +1881,8 @@ const AddFeatureSet = () => {
             label="Add Feature Set"
             icon="pi pi-check"
             type="submit"
-            className="p-button-primary px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
-            style={{ width: "fit-content" }}
+            className="px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
+            style={{ width: "fit-content", background: "#2152FF" }}
           />
         </div>
       </form>

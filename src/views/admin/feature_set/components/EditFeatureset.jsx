@@ -1203,26 +1203,26 @@ const EditFeatureset = (parameters) => {
               placeholder={featuresetDetails?.reserved2}
             />
           </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 3</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              name="reserved3"
-              onChange={handleChange}
-              placeholder={featuresetDetails?.reserved3}
-            />
-          </div>
+        </div>
+        <div className="field my-3 w-[30vw]">
+          <label htmlFor="ecu">Reserved 3</label>
+          <input
+            type="number"
+            id="username"
+            aria-describedby="username-help"
+            style={{
+              width: "30vw",
+              borderBottom: "1px dashed #ced4da",
+              borderRadius: "0px",
+              padding: "0.30px",
+              borderRight: "none",
+              borderLeft: "none",
+              borderTop: "none",
+            }}
+            name="reserved3"
+            onChange={handleChange}
+            placeholder={featuresetDetails?.reserved3}
+          />
         </div>
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Speed Settings</p>
@@ -1492,26 +1492,26 @@ const EditFeatureset = (parameters) => {
               placeholder={featuresetDetails?.timeNotSet}
             />
           </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Acceleration Error</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              name="accelerationError"
-              onChange={handleChange}
-              placeholder={featuresetDetails?.accelerationError}
-            />
-          </div>
+        </div>
+        <div className="field my-3 w-[30vw]">
+          <label htmlFor="ecu">Acceleration Error</label>
+          <input
+            type="number"
+            id="username"
+            aria-describedby="username-help"
+            style={{
+              width: "30vw",
+              borderBottom: "1px dashed #ced4da",
+              borderRadius: "0px",
+              padding: "0.30px",
+              borderRight: "none",
+              borderLeft: "none",
+              borderTop: "none",
+            }}
+            name="accelerationError"
+            onChange={handleChange}
+            placeholder={featuresetDetails?.accelerationError}
+          />
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
@@ -1891,11 +1891,11 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="text-right">
           <Button
-            label="Edit Feature Set"
+            label="Update Feature Set"
             icon="pi pi-check"
             type="submit"
-            className="p-button-primary px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
-            style={{ width: "fit-content" }}
+            className="px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
+            style={{ width: "fit-content", background: "#2152FF" }}
           />
         </div>
       </form>
