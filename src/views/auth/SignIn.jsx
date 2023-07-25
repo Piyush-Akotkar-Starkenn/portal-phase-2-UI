@@ -24,13 +24,23 @@ export default function SignIn() {
       axios
         .post("http://localhost:3001/api/Admin/Login", data)
         .then((res) => {
-          console.log(res);
-          var currentTime = new Date();
-          currentTime.setTime(currentTime.getTime() + 2 * 60 * 1000);
-          // Assuming you have obtained a token after login
           const token = res.data.accessToken;
-          Cookies.set("token", token, { expires: currentTime });
-          navigate("/admin/default");
+          const user_type = res.data.data.user_type;
+          const expirationTime = new Date();
+          expirationTime.setDate(expirationTime.getDate() + 7); // Cookie expires in 1 week
+          Cookies.set("token", token, {
+            expires: expirationTime,
+            sameSite: "strict",
+          });
+          Cookies.set("user_type", user_type, {
+            expires: expirationTime,
+            sameSite: "strict",
+          });
+          if (user_type === "1") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/customer/dashboard");
+          }
         })
         .catch((err) => {
           console.log(err);
