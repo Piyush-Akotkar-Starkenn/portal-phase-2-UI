@@ -12,7 +12,7 @@ const EditFeatureset = (parameters) => {
   const [customers, setCustomers] = useState([]);
   const [featuresetDetails, setFeaturesetDetails] = useState({});
 
-  const { updateData, updateFunc } = useContext(AppContext);
+  const { updateFunc } = useContext(AppContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,12 +20,12 @@ const EditFeatureset = (parameters) => {
   };
 
   useEffect(() => {
-    setData({ ...data, ["selectCustomer"]: [...customers] });
+    setData((prevData) => ({ ...prevData, selectCustomer: [...customers] }));
     console.log(featuresetDetails);
-  }, [customers, featuresetDetails]);
+  }, [customers, featuresetDetails, setData]);
 
   const handleSelectCustomer = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     setCustomers([...customers, value]);
   };
 
@@ -40,6 +40,7 @@ const EditFeatureset = (parameters) => {
       .catch((err) => {
         console.log(err);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = (e) => {

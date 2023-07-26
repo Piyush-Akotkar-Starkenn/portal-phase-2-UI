@@ -267,6 +267,9 @@ input:checked.defaultCheckbox::before {
   box-shadow: none;
   color: #070d22;
 }
+.dark .p-dropdown .p-dropdown-label {
+  color: #fefefe;
+}
 .dark .p-menu.p-menu-overlay {
   background: #070d22;
   color: #ddd;

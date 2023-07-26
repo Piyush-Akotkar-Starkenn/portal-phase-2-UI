@@ -114,7 +114,33 @@ const FeatureList = () => {
       }
     }
   };
-
+  const handleAddSuccess = () => {
+    setIsDialogVisible(false);
+    toastRef.current.show({
+      severity: "success",
+      summary: "Success",
+      detail: "Feature Set Added successfully",
+      life: 3000,
+    });
+  };
+  const handleAssignSuccess = () => {
+    setIsDialogVisible2(false);
+    toastRef.current.show({
+      severity: "success",
+      summary: "Success",
+      detail: "Feature Set Assigned successfully",
+      life: 3000,
+    });
+  };
+  const handleUnAssignSuccess = () => {
+    setIsDialogVisible3(false);
+    toastRef.current.show({
+      severity: "success",
+      summary: "Success",
+      detail: "Feature Set unassigned successfully",
+      life: 3000,
+    });
+  };
   const openDialog = () => {
     setIsDialogVisible(true);
   };
@@ -238,24 +264,30 @@ const FeatureList = () => {
       <Dialog
         visible={isDialogVisible2}
         onHide={closeDialog2}
-        style={{ width: "70vw" }}
+        style={{ width: "37vw" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Assign Feature-Set to Client Company"
         modal
         className="p-fluid dark:bg-gray-900"
       >
-        <AssignCustomer propValue={myData?.featureSetId} />
+        <AssignCustomer
+          parameters={{ propValue: myData?.featureSetId }}
+          onSuccess={handleAssignSuccess}
+        />
       </Dialog>
       <Dialog
         visible={isDialogVisible3}
         onHide={closeDialog3}
-        style={{ width: "70vw" }}
+        style={{ width: "37vw" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Unassign Client Company from Feature-Set"
         modal
         className="p-fluid dark:bg-gray-900"
       >
-        <UnAssignCustomer propValue={myData?.featureSetId} />
+        <UnAssignCustomer
+          parameters={{ propValue: myData?.featureSetId }}
+          onSuccess={handleUnAssignSuccess}
+        />
       </Dialog>
 
       <Dialog
@@ -267,7 +299,7 @@ const FeatureList = () => {
         modal
         className="p-fluid dark:bg-gray-900"
       >
-        <AddFeatureSet />
+        <AddFeatureSet onSuccess={handleAddSuccess} />
       </Dialog>
       <Dialog
         visible={isDialogVisible1}

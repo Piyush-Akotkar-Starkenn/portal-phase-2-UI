@@ -92,7 +92,7 @@ export default function SignIn() {
                       Username
                     </label>
                   </div>
-                  <div class="relative">
+                  <div class="relative my-4">
                     <input
                       autoComplete="off"
                       id="password"

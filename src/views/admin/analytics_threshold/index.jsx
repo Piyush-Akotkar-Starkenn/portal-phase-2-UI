@@ -9,11 +9,11 @@ const AnalyticsThreshold = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const toastRef = useRef(null);
   const toastErr = useRef(null);
+
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/Admin/AnalyticsThreshold/GetCustomers-AT")
       .then((response) => {
-        // Assuming the API returns an object with 'data' property containing the array of customers
         if (response.data && Array.isArray(response.data.data)) {
           setCustomers(response.data.data);
         } else {
@@ -29,6 +29,12 @@ const AnalyticsThreshold = () => {
     label: `${customer.first_name} ${customer.last_name}`,
     value: customer.userId,
   }));
+
+  const resetFormFields = () => {
+    setSelectedCustomer(null);
+    const form = document.querySelector("form");
+    form.reset();
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -64,6 +70,7 @@ const AnalyticsThreshold = () => {
           life: 3000,
         });
         console.log("Data saved successfully:", response.data);
+        resetFormFields();
       })
       .catch((error) => {
         toastRef.current.show({
@@ -85,6 +92,9 @@ const AnalyticsThreshold = () => {
       <h4 className="text-dark text-xl font-bold dark:text-white">
         Analytics Threshold
       </h4>
+      <p className="text-right text-red-400">
+        All Fields Are Required<span className="text-red-500">**</span>
+      </p>
       <form onSubmit={handleSubmit}>
         <div className="mt-12 flex justify-between">
           <div className="mb-6 w-[42vw]">
@@ -107,7 +117,7 @@ const AnalyticsThreshold = () => {
                 value={selectedCustomer}
                 options={customerOptions}
                 onChange={(e) => setSelectedCustomer(e.value)}
-                className="w-[42vw] rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm"
+                className="w-[42vw] rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
                 optionLabel="label"
               />
               <label htmlFor="dd-city">Select a customer</label>
@@ -115,7 +125,7 @@ const AnalyticsThreshold = () => {
           </div>
         </div>
         <div className="mb-6">
-          <p className="mb-2 block text-sm font-medium text-gray-600 dark:text-white">
+          <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
             Weightage
           </p>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
@@ -133,6 +143,9 @@ const AnalyticsThreshold = () => {
                   Brake
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
             <div className="flex-auto">
               <span className="p-float-label">
@@ -148,6 +161,9 @@ const AnalyticsThreshold = () => {
                   Tailgating
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
             <div className="flex-auto">
               <span className="p-float-label">
@@ -163,6 +179,9 @@ const AnalyticsThreshold = () => {
                   Rash Driving
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
           </div>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
@@ -180,6 +199,9 @@ const AnalyticsThreshold = () => {
                   Sleep Alert
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
             <div className="flex-auto">
               <span className="p-float-label">
@@ -195,6 +217,9 @@ const AnalyticsThreshold = () => {
                   Over Speed
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
             <div className="flex-auto">
               <span className="p-float-label">
@@ -210,11 +235,14 @@ const AnalyticsThreshold = () => {
                   Green Zone
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
           </div>
         </div>
         <div className="mb-6">
-          <p className="mb-2 block text-sm font-medium text-gray-600 dark:text-white">
+          <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
             Incentive
           </p>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
@@ -232,6 +260,9 @@ const AnalyticsThreshold = () => {
                   Minimum Distance
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
             </div>
             <div className="w-[390px]">
               <span className="p-float-label">
@@ -247,11 +278,14 @@ const AnalyticsThreshold = () => {
                   Minimum Driver Rating
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-5
+              </small>
             </div>
           </div>
         </div>
         <div className="mb-6">
-          <p className="mb-2 block text-sm font-medium text-gray-600 dark:text-white">
+          <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
             Accident
           </p>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
@@ -269,11 +303,14 @@ const AnalyticsThreshold = () => {
                   TTC Difference Percentage
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-100
+              </small>
             </div>
           </div>
         </div>
         <div className="mb-6">
-          <p className="mb-2 block text-sm font-medium text-gray-600 dark:text-white">
+          <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
             Leadership Board
           </p>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
@@ -291,11 +328,14 @@ const AnalyticsThreshold = () => {
                   Total Distance
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-10000
+              </small>
             </div>
           </div>
         </div>
         <div className="mb-6">
-          <p className="mb-2 block text-sm font-medium text-gray-600 dark:text-white">
+          <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
             Halt
           </p>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
@@ -313,6 +353,9 @@ const AnalyticsThreshold = () => {
                   Duration
                 </label>
               </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 1-1000
+              </small>
             </div>
           </div>
         </div>

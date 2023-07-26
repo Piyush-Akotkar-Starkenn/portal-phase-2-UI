@@ -1,24 +1,40 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { useState } from "react";
 import axios from "axios";
 import { AppContext } from "context/AppContext";
+import { Toast } from "primereact/toast";
 
-const AddFeatureSet = () => {
-  const [data, setData] = useState({});
+const AddFeatureSet = ({ onSuccess }) => {
+  const [data, setData] = useState({
+    detectStationaryObject: "",
+    allowCompleteBrake: "",
+    detectOncomingObstacle: "",
+    safetyMode: "",
+    protocolType: "",
+    acceleratorType: "",
+    brakeType: "",
+    speedSource: "",
+    braking: "",
+    vehicleType: "",
+  });
+  const toastRef = useRef(null);
+  const toastErr = useRef(null);
   const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+
   const [listCustomers, setListCustomers] = useState([]);
-  const { updateData, updateFunc } = useContext(AppContext);
+
+  const { updateFunc } = useContext(AppContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
   };
-
   useEffect(() => {
-    setData({ ...data, ["selectCustomer"]: [...customers] });
+    setData((prevData) => ({ ...prevData, selectCustomer: [...customers] }));
   }, [customers]);
 
   useEffect(() => {
@@ -34,7 +50,8 @@ const AddFeatureSet = () => {
   }, []);
 
   const handleSelectCustomer = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
+    setSelectedCustomer(value);
     setCustomers([...customers, value]);
   };
 
@@ -47,11 +64,22 @@ const AddFeatureSet = () => {
         .post("http://localhost:3001/api/featureset/featureset-add", data)
         .then((res) => {
           updateFunc();
-          console.log("successful");
+
+          console.log(res);
+          if (onSuccess) {
+            onSuccess();
+          }
         })
         .catch((err) => console.log(err));
     } catch (err) {
-      console.log("Error in Adding Featureset");
+      toastRef.current.show({
+        severity: "error",
+        summary: "Error",
+        detail:
+          err.response?.data?.message ||
+          "An error occurred. Please try again later.",
+        life: 3000,
+      });
     }
   };
 
@@ -133,6 +161,8 @@ const AddFeatureSet = () => {
 
   return (
     <>
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
+      <Toast ref={toastErr} className="bg-red-400" />
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="flex" style={{ flexDirection: "column" }}>
@@ -195,7 +225,9 @@ const AddFeatureSet = () => {
               options={Customersoptions()}
               optionLabel="label"
               optionValue="value"
+              placeholder="Tap to Select"
               className="md:w-14rem mt-2 w-full"
+              value={selectedCustomer}
             />
           </div>
           <p className="mt-4 font-bold ">System Type</p>
@@ -253,8 +285,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -266,6 +298,7 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              className="dark:bg-gray-900"
               placeholder="10"
               name="activationSpeed"
               onChange={handleChange}
@@ -273,8 +306,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Alarm Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -295,8 +328,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Brake Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -315,8 +348,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Brake Speed</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -342,6 +375,21 @@ const AddFeatureSet = () => {
               options={StationaryObjectoptions}
               optionLabel="label"
               optionValue="value"
+              value={data.detectStationaryObject}
+              placeholder={
+                data.detectStationaryObject
+                  ? data.detectStationaryObject
+                  : "Select an option"
+              }
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
               name="detectStationaryObject"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
@@ -363,7 +411,12 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={CompleteBrakeoptions}
-              placeholder="No"
+              value={data.allowCompleteBrake}
+              placeholder={
+                data.allowCompleteBrake
+                  ? data.allowCompleteBrake
+                  : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -386,7 +439,12 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={OncomingObstacleptions}
-              placeholder="No"
+              value={data.detectOncomingObstacle}
+              placeholder={
+                data.detectOncomingObstacle
+                  ? data.detectOncomingObstacle
+                  : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               onChange={handleChange}
@@ -408,7 +466,10 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={SafetyModeoptions}
-              placeholder="Normal"
+              value={data.safetyMode}
+              placeholder={
+                data.safetyMode ? data.safetyMode : "Select an option"
+              }
               onChange={handleChange}
               optionLabel="label"
               optionValue="value"
@@ -419,8 +480,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">TTC Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -439,8 +500,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Brake ON Duration</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -461,8 +522,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Brake OFF Duration</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -510,8 +571,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Pre Warning</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -530,8 +591,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Sleep Alert Interval</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -552,8 +613,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -572,8 +633,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Start Time</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -594,8 +655,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Stop Time</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -614,8 +675,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Brake Activate Time</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -638,6 +699,7 @@ const AddFeatureSet = () => {
             <label htmlFor="ecu">Braking</label>
             <Dropdown
               name="braking"
+              value={data.braking}
               onChange={handleChange}
               id="ecu"
               style={{
@@ -650,7 +712,7 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               options={Brakingoptions}
-              placeholder="No"
+              placeholder={data.braking ? data.braking : "Select an option"}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -686,8 +748,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Max Lane Change Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -706,8 +768,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Min Lane Change Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -728,8 +790,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Max Harsh Acceleration Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -748,8 +810,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Min Harsh Acceleration Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -770,8 +832,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Sudden Braking Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -790,8 +852,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Max Speed Bump Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -812,8 +874,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Min Speed Bump Threshold</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -860,8 +922,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Speed Limit</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -907,8 +969,8 @@ const AddFeatureSet = () => {
         </div>
         <div className="field my-3 w-[30vw]">
           <label htmlFor="ecu">Activation Speed</label>
-          <input
-            type="number"
+          <InputText
+            keyfilter="pint"
             id="username"
             aria-describedby="username-help"
             style={{
@@ -942,7 +1004,10 @@ const AddFeatureSet = () => {
               name="vehicleType"
               onChange={handleChange}
               options={VehicleTypeoptions}
-              placeholder="12V Pedal"
+              value={data.vehicleType}
+              placeholder={
+                data.vehicleType ? data.vehicleType : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -993,7 +1058,10 @@ const AddFeatureSet = () => {
               name="protocolType"
               onChange={handleChange}
               options={ProtocolTypeoptions}
-              placeholder="SAE J1393"
+              placeholder={
+                data.protocolType ? data.protocolType : "Select an option"
+              }
+              value={data.protocolType}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -1043,7 +1111,10 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="Sensor"
+              value={data.acceleratorType}
+              placeholder={
+                data.acceleratorType ? data.acceleratorType : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               name="acceleratorType"
@@ -1065,7 +1136,8 @@ const AddFeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="Cylinder"
+              value={data.brakeType}
+              placeholder={data.brakeType ? data.brakeType : "Select an option"}
               optionLabel="label"
               optionValue="value"
               name="brakeType"
@@ -1130,8 +1202,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">RF Angle</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1152,8 +1224,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1172,8 +1244,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Reserved 2</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1193,8 +1265,8 @@ const AddFeatureSet = () => {
         </div>
         <div className="field my-3 w-[30vw]">
           <label htmlFor="ecu">Reserved 3</label>
-          <input
-            type="number"
+          <InputText
+            keyfilter="pint"
             id="username"
             aria-describedby="username-help"
             style={{
@@ -1229,7 +1301,10 @@ const AddFeatureSet = () => {
                 borderTop: "none",
               }}
               name="speedSource"
-              placeholder="speedSource"
+              value={data.speedSource}
+              placeholder={
+                data.speedSource ? data.speedSource : "Select an option"
+              }
               options={SpeedSourceoptions}
               optionLabel="label"
               optionValue="value"
@@ -1241,8 +1316,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Slope</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1261,8 +1336,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Offset</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1284,8 +1359,8 @@ const AddFeatureSet = () => {
         <p className="mt-4 font-bold ">Shutdown Delay</p>
         <div className="field my-3 w-[30vw]">
           <label htmlFor="ecu">Delay</label>
-          <input
-            type="number"
+          <InputText
+            keyfilter="pint"
             id="username"
             aria-describedby="username-help"
             style={{
@@ -1333,8 +1408,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">No Alarm</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1353,8 +1428,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Speed</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1375,8 +1450,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Acceleration Bypass</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1399,8 +1474,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">RF Sensor Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1419,8 +1494,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Gyroscope Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1441,8 +1516,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">HMI Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1461,8 +1536,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Time Not Set</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1482,8 +1557,8 @@ const AddFeatureSet = () => {
         </div>
         <div className="field my-3 w-[30vw]">
           <label htmlFor="ecu">Acceleration Error</label>
-          <input
-            type="number"
+          <InputText
+            keyfilter="pint"
             id="username"
             aria-describedby="username-help"
             style={{
@@ -1503,8 +1578,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Brake Error</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1523,8 +1598,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">TPMS Error</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1545,8 +1620,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">OSIM Card Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1565,8 +1640,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Low battery</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1587,8 +1662,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Trip Not Started</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1607,8 +1682,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Bluetooth Conn Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1629,8 +1704,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">OBD Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1649,8 +1724,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">No Alarm</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1671,8 +1746,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Laser SensorAbsent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1691,8 +1766,8 @@ const AddFeatureSet = () => {
           </div>
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">RFID Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1713,8 +1788,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">IoT Absent</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1761,8 +1836,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1809,8 +1884,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
@@ -1857,8 +1932,8 @@ const AddFeatureSet = () => {
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
+            <InputText
+              keyfilter="pint"
               id="username"
               aria-describedby="username-help"
               style={{
