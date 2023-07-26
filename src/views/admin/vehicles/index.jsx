@@ -21,6 +21,7 @@ const VehiclesAdmin = () => {
         <h4 className="text-dark text-xl font-bold dark:text-white">
           Vehicles
         </h4>
+
         <div>
           <button
             className={`${

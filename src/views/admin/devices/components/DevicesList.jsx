@@ -22,7 +22,7 @@ export default function DevicesList({ data }) {
   const [listCustomers, setListCustomers] = useState([]);
   const [deviceData, setDeviceData] = useState();
   const [rowId, setRowId] = useState();
-  const { updateData, updateFunc, resetState } = useContext(AppContext);
+  const { updateFunc } = useContext(AppContext);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
