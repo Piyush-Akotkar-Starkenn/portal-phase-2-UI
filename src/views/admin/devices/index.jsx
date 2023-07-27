@@ -20,12 +20,14 @@ const DevicesAdmin = () => {
 
   useEffect(() => {
     fetchDevicesData();
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
     if (updateData === true) {
       fetchDevicesData();
     }
+    // eslint-disable-next-line
   }, [updateData]);
 
   //Fetching all data
@@ -77,7 +79,7 @@ const DevicesAdmin = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(Object.keys(addData).length);
-    if (Object.keys(addData).length == 5) {
+    if (Object.keys(addData).length === 5) {
       axios
         .post("http://localhost:3001/api/Admin/Devices/add-Device", addData)
         .then((res) => {

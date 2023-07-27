@@ -1,34 +1,58 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { useState } from "react";
 import axios from "axios";
+import { Toast } from "primereact/toast";
 import { useContext } from "react";
 import { AppContext } from "context/AppContext";
 
-const EditFeatureset = (parameters) => {
-  const [data, setData] = useState({});
+const EditFeatureset = ({ parameters, onSuccess }) => {
   const [customers, setCustomers] = useState([]);
   const [featuresetDetails, setFeaturesetDetails] = useState({});
-
+  const [allCustomers, setAllCustomers] = useState([]);
   const { updateFunc } = useContext(AppContext);
+  const [formData, setFormData] = useState({});
+  const [helpText, setHelpText] = useState("");
+  const toastErr = useRef(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setData({ ...data, [name]: value });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+    setHelpText("");
   };
 
   useEffect(() => {
-    setData((prevData) => ({ ...prevData, selectCustomer: [...customers] }));
+    setFormData((prevData) => ({
+      ...prevData,
+      selectCustomer: [...customers],
+    }));
     console.log(featuresetDetails);
-  }, [customers, featuresetDetails, setData]);
+  }, [customers, featuresetDetails, setFormData]);
+
+  useEffect(() => {
+    setFormData(featuresetDetails);
+  }, [featuresetDetails]);
 
   const handleSelectCustomer = (e) => {
     const { value } = e.target;
     setCustomers([...customers, value]);
   };
-
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/featureset/featureset-get-all-customers")
+      .then((res) => {
+        console.log(res);
+        setAllCustomers(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   useEffect(() => {
     axios
       .get(
@@ -45,21 +69,35 @@ const EditFeatureset = (parameters) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.mode) {
+      setHelpText("Please select options for all fields.");
+      return;
+    }
 
-    // console.log(Object.keys(data).length);
     try {
       axios
         .put(
           `http://localhost:3001/api/featureset/featureset-edit/${parameters?.propValue}`,
-          data
+          formData
         )
         .then((res) => {
           updateFunc();
+          console.log(res);
+          if (onSuccess) {
+            onSuccess();
+          }
           console.log(res);
         })
         .catch((err) => console.log(err));
     } catch (err) {
       console.log("Error in Adding Featureset");
+      console.error(err);
+      toastErr.current.show({
+        severity: "danger",
+        summary: "Error",
+        detail: err.response.data.message || "An error occurred",
+        life: 3000,
+      });
     }
   };
 
@@ -131,22 +169,23 @@ const EditFeatureset = (parameters) => {
     { label: "OBD", value: "OBD" },
     { label: "GPS", value: "GPS" },
   ];
-  const Customersoptions = [
-    { label: "Speed Wire", value: "Speed Wire" },
-    { label: "OBD", value: "OBD" },
-    { label: "GPS", value: "GPS" },
-  ];
+  const Customersoptions = () => {
+    return allCustomers?.map((el) => ({
+      label: el.first_name,
+      value: el.userId,
+    }));
+  };
 
   return (
     <>
+      <Toast ref={toastErr} className="bg-red-400" />
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="flex" style={{ flexDirection: "column" }}>
             <label htmlFor="username">Feature Set ID12345*</label>
             <InputText
               id="username"
-              placeholder={featuresetDetails?.featureSetId}
-              aria-describedby="username-help"
+              value={featuresetDetails?.featureSetId}
               le={{
                 width: "63vw",
                 borderBottom: "1px dashed #ced4da",
@@ -166,7 +205,6 @@ const EditFeatureset = (parameters) => {
             <label htmlFor="username">Feature Set Name*</label>
             <InputText
               id="username"
-              aria-describedby="username-help"
               le={{
                 width: "63vw",
                 borderBottom: "1px dashed #ced4da",
@@ -176,7 +214,7 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.featureSetName}
+              value={featuresetDetails?.featureSetName}
               name="featureSetName"
               onChange={handleChange}
             />
@@ -184,11 +222,11 @@ const EditFeatureset = (parameters) => {
           </div>
 
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Select Customer</label>
+            <label htmlFor="cust">Select Customer</label>
             <Dropdown
               name="selectCustomer"
               onChange={handleSelectCustomer}
-              id="ecu"
+              id="cust"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -198,8 +236,8 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              options={Customersoptions}
-              // placeholder={featuresetDetails?.selectCustomer}
+              options={Customersoptions()}
+              placeholder="select customer"
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -213,6 +251,7 @@ const EditFeatureset = (parameters) => {
                 name="mode"
                 onChange={handleChange}
                 value="Offline"
+                checked={formData?.mode === "Offline"}
               />
               <label htmlFor="ingredient1" className="ml-2">
                 Offline Mode
@@ -224,12 +263,14 @@ const EditFeatureset = (parameters) => {
                 name="mode"
                 onChange={handleChange}
                 value="Online"
+                checked={formData?.mode === "Online"}
               />
               <label htmlFor="ingredient2" className="ml-2">
                 Online Mode
               </label>
             </div>
           </div>
+          {helpText && <p className="text-red-500">{helpText}</p>}
         </div>
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Collision Avoidance System</p>
@@ -240,6 +281,7 @@ const EditFeatureset = (parameters) => {
               name="CASMode"
               value="Disable"
               onChange={handleChange}
+              checked={formData?.CASMode === "Disable"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -251,6 +293,7 @@ const EditFeatureset = (parameters) => {
               name="CASMode"
               value="Enable"
               onChange={handleChange}
+              checked={formData?.CASMode === "Enable"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -259,11 +302,10 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
+            <label>Activation Speed</label>
+            <InputText
+              keyfilter="pint"
               id="username"
-              aria-describedby="username-help"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -273,17 +315,20 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.activationSpeed}
+              value={formData?.activationSpeed || ""}
+              placeholder={
+                formData.activationSpeed
+                  ? formData.activationSpeed
+                  : "Enter a value"
+              }
               name="activationSpeed"
               onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Alarm Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Alarm Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -293,7 +338,12 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.alarmThreshold}
+              placeholder={
+                formData.alarmThreshold
+                  ? formData.alarmThreshold
+                  : "Enter a value"
+              }
+              value={formData?.alarmThreshold || ""}
               name="alarmThreshold"
               onChange={handleChange}
             />
@@ -301,11 +351,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Brake Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -315,17 +363,20 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.brakeThreshold}
+              value={formData?.brakeThreshold || ""}
+              placeholder={
+                formData.brakeThreshold
+                  ? formData.brakeThreshold
+                  : "Enter a value"
+              }
               name="brakeThreshold"
               onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Brake Speed</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -335,7 +386,10 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.brakeSpeed}
+              value={formData?.brakeSpeed || ""}
+              placeholder={
+                formData.brakeSpeed ? formData.brakeSpeed : "Enter a value"
+              }
               name="brakeSpeed"
               onChange={handleChange}
             />
@@ -343,24 +397,38 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[63vw]">
-            <label htmlFor="ecu">Detect Stationary Object</label>
+            <label htmlFor="stationaryobj">Detect Stationary Object</label>
             <Dropdown
-              id="ecu"
+              id="stationaryobj"
               options={StationaryObjectoptions}
               optionLabel="label"
               optionValue="value"
-              placeholder={featuresetDetails?.detectStationaryObject}
+              value={formData.detectStationaryObject}
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              placeholder={
+                formData.detectStationaryObject
+                  ? formData.detectStationaryObject
+                  : "Select an option"
+              }
               name="detectStationaryObject"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Allow Complete Brake</label>
+            <label htmlFor="combrake">Allow Complete Brake</label>
             <Dropdown
               name="allowCompleteBrake"
               onChange={handleChange}
-              id="ecu"
+              id="combrake"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -371,7 +439,12 @@ const EditFeatureset = (parameters) => {
                 borderTop: "none",
               }}
               options={CompleteBrakeoptions}
-              placeholder={featuresetDetails?.allowCompleteBrake}
+              value={formData.allowCompleteBrake}
+              placeholder={
+                formData.allowCompleteBrake
+                  ? formData.allowCompleteBrake
+                  : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -380,10 +453,10 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[63vw]">
-            <label htmlFor="ecu">Detect Oncoming Obstacle</label>
+            <label htmlFor="obstacle">Detect Oncoming Obstacle</label>
             <Dropdown
               name="detectOncomingObstacle"
-              id="ecu"
+              id="obstacle"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -394,7 +467,12 @@ const EditFeatureset = (parameters) => {
                 borderTop: "none",
               }}
               options={OncomingObstacleptions}
-              placeholder={featuresetDetails?.detectOncomingObstacles}
+              value={formData.detectOncomingObstacles}
+              placeholder={
+                formData.detectOncomingObstacles
+                  ? formData.detectOncomingObstacles
+                  : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               onChange={handleChange}
@@ -402,10 +480,10 @@ const EditFeatureset = (parameters) => {
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Safety Mode</label>
+            <label htmlFor="safety">Safety Mode</label>
             <Dropdown
               name="safetyMode"
-              id="ecu"
+              id="safety"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -416,7 +494,10 @@ const EditFeatureset = (parameters) => {
                 borderTop: "none",
               }}
               options={SafetyModeoptions}
-              placeholder={featuresetDetails?.safetyMode}
+              value={formData.safetyMode}
+              placeholder={
+                formData.safetyMode ? formData.safetyMode : "Select an option"
+              }
               onChange={handleChange}
               optionLabel="label"
               optionValue="value"
@@ -426,11 +507,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">TTC Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>TTC Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -440,17 +519,18 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.ttcThreshold}
+              value={formData?.ttcThreshold || ""}
+              placeholder={
+                formData.ttcThreshold ? formData.ttcThreshold : "Enter a value"
+              }
               name="ttcThreshold"
               onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake ON Duration</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Brake ON Duration</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -462,17 +542,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="brakeOnDuration"
               onChange={handleChange}
-              placeholder={featuresetDetails?.brakeOnDuration}
+              placeholder={
+                formData.brakeOnDuration
+                  ? formData.brakeOnDuration
+                  : "Enter a value"
+              }
+              value={formData?.brakeOnDuration || ""}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake OFF Duration</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Brake OFF Duration</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -484,7 +567,12 @@ const EditFeatureset = (parameters) => {
               }}
               name="brakeOffDuration"
               onChange={handleChange}
-              placeholder={featuresetDetails?.brakeOffDuration}
+              value={formData?.brakeOffDuration || ""}
+              placeholder={
+                formData.brakeOffDuration
+                  ? formData.brakeOffDuration
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -498,6 +586,7 @@ const EditFeatureset = (parameters) => {
               name="sleepAlertMode"
               onChange={handleChange}
               value="Offline"
+              checked={formData?.sleepAlertMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -509,6 +598,7 @@ const EditFeatureset = (parameters) => {
               name="sleepAlertMode"
               onChange={handleChange}
               value="Online"
+              checked={formData?.sleepAlertMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -517,11 +607,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Pre Warning</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Pre Warning</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -531,17 +619,18 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.preWarning}
+              value={formData?.preWarning || ""}
+              placeholder={
+                formData.preWarning ? formData.preWarning : "Enter a value"
+              }
               name="preWarning"
               onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Sleep Alert Interval</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Sleep Alert Interval</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -553,17 +642,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="sleepAlertInterval"
               onChange={handleChange}
-              placeholder={featuresetDetails?.sleepAlertInterval}
+              placeholder={
+                formData.sleepAlertInterval
+                  ? formData.sleepAlertInterval
+                  : "Enter a value"
+              }
+              value={formData?.sleepAlertInterval || ""}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Activation Speed</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -575,15 +667,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="activationSpeed"
               onChange={handleChange}
-              placeholder={featuresetDetails?.activationSpeed}
+              value={formData?.activationSpeed || ""}
+              placeholder={
+                formData.activationSpeed
+                  ? formData.activationSpeed
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Start Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Start Time</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -595,17 +690,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="startTime"
               onChange={handleChange}
-              placeholder={featuresetDetails?.startTime}
+              value={formData?.startTime || ""}
+              placeholder={
+                formData.startTime ? formData.startTime : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Stop Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Stop Time</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -617,15 +713,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="stopTime"
               onChange={handleChange}
-              placeholder={featuresetDetails?.stopTime}
+              value={formData?.stopTime || ""}
+              placeholder={
+                formData.stopTime ? formData.stopTime : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Activate Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Brake Activate Time</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -637,17 +734,22 @@ const EditFeatureset = (parameters) => {
               }}
               name="brakeActivateTime"
               onChange={handleChange}
-              placeholder={featuresetDetails?.brakeActivateTime}
+              value={formData?.brakeActivateTime || ""}
+              placeholder={
+                formData.brakeActivateTime
+                  ? formData.brakeActivateTime
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Braking</label>
+            <label htmlFor="braking">Braking</label>
             <Dropdown
               name="braking"
               onChange={handleChange}
-              id="ecu"
+              id="braking"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -658,7 +760,10 @@ const EditFeatureset = (parameters) => {
                 borderTop: "none",
               }}
               options={Brakingoptions}
-              placeholder={featuresetDetails?.braking}
+              value={formData.braking}
+              placeholder={
+                formData.braking ? formData.braking : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -674,6 +779,7 @@ const EditFeatureset = (parameters) => {
               name="driverEvalMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.driverEvalMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -685,6 +791,7 @@ const EditFeatureset = (parameters) => {
               name="driverEvalMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.driverEvalMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -693,11 +800,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Max Lane Change Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Max Lane Change Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -709,15 +814,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="maxLaneChangeThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.maxLaneChangeThreshold}
+              value={formData?.maxLaneChangeThreshold || ""}
+              placeholder={
+                formData.maxLaneChangeThreshold
+                  ? formData.maxLaneChangeThreshold
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Min Lane Change Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Min Lane Change Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -729,17 +837,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="minLaneChangeThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.minLaneChangeThreshold}
+              value={formData?.minLaneChangeThreshold || ""}
+              placeholder={
+                formData.minLaneChangeThreshold
+                  ? formData.minLaneChangeThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Max Harsh Acceleration Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Max Harsh Acceleration Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -751,15 +862,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="maxHarshAccelerationThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.maxHarshAccelerationThreshold}
+              value={formData?.maxHarshAccelerationThreshold || ""}
+              placeholder={
+                formData.maxHarshAccelerationThreshold
+                  ? formData.maxHarshAccelerationThreshold
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Min Harsh Acceleration Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Min Harsh Acceleration Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -771,17 +885,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="minHarshAccelerationThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.minHarshAccelerationThreshold}
+              value={formData?.minHarshAccelerationThreshold || ""}
+              placeholder={
+                formData.minHarshAccelerationThreshold
+                  ? formData.minHarshAccelerationThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Sudden Braking Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Sudden Braking Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -793,15 +910,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="suddenBrakingThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.suddenBrakingThreshold}
+              value={formData?.suddenBrakingThreshold || ""}
+              placeholder={
+                formData.suddenBrakingThreshold
+                  ? formData.suddenBrakingThreshold
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Max Speed Bump Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Max Speed Bump Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -813,17 +933,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="maxSpeedBumpThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.maxSpeedBumpThreshold}
+              value={formData?.maxSpeedBumpThreshold || ""}
+              placeholder={
+                formData.maxSpeedBumpThreshold
+                  ? formData.maxSpeedBumpThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Min Speed Bump Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Min Speed Bump Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -835,7 +958,12 @@ const EditFeatureset = (parameters) => {
               }}
               name="minSpeedBumpThreshold"
               onChange={handleChange}
-              placeholder={featuresetDetails?.minSpeedBumpThreshold}
+              value={formData?.minSpeedBumpThreshold || ""}
+              placeholder={
+                formData.minSpeedBumpThreshold
+                  ? formData.minSpeedBumpThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -848,6 +976,7 @@ const EditFeatureset = (parameters) => {
               name="GovernerMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.GovernerMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -859,6 +988,7 @@ const EditFeatureset = (parameters) => {
               onChange={handleChange}
               name="GovernerMode"
               value="Online"
+              checked={formData?.GovernerMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -867,11 +997,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Speed Limit</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Speed Limit</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -883,7 +1011,10 @@ const EditFeatureset = (parameters) => {
               }}
               name="speedLimit"
               onChange={handleChange}
-              placeholder={featuresetDetails?.speedLimit}
+              placeholder={
+                formData.speedLimit ? formData.speedLimit : "Enter a value"
+              }
+              value={formData?.speedLimit || ""}
             />
           </div>
         </div>
@@ -896,6 +1027,7 @@ const EditFeatureset = (parameters) => {
               onChange={handleChange}
               name="cruiseMode"
               value="Offline"
+              checked={formData?.cruiseMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -907,6 +1039,7 @@ const EditFeatureset = (parameters) => {
               name="cruiseMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.cruiseMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -914,11 +1047,9 @@ const EditFeatureset = (parameters) => {
           </div>
         </div>
         <div className="field my-3 w-[30vw]">
-          <label htmlFor="ecu">Activation Speed</label>
-          <input
-            type="number"
-            id="username"
-            aria-describedby="username-help"
+          <label>Activation Speed</label>
+          <InputText
+            keyfilter="pint"
             style={{
               width: "30vw",
               borderBottom: "1px dashed #ced4da",
@@ -930,14 +1061,19 @@ const EditFeatureset = (parameters) => {
             }}
             name="activationSpeed"
             onChange={handleChange}
-            placeholder={featuresetDetails?.activationSpeed}
+            value={formData?.activationSpeed || ""}
+            placeholder={
+              formData.activationSpeed
+                ? formData.activationSpeed
+                : "Enter a value"
+            }
           />
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Vehicle Type</label>
+            <label htmlFor="vehicle">Vehicle Type</label>
             <Dropdown
-              id="ecu"
+              id="vehicle"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -950,7 +1086,10 @@ const EditFeatureset = (parameters) => {
               name="vehicleType"
               onChange={handleChange}
               options={VehicleTypeoptions}
-              placeholder={featuresetDetails?.vehicleType}
+              value={formData.vehicleType}
+              placeholder={
+                formData.vehicleType ? formData.vehicleType : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -966,6 +1105,7 @@ const EditFeatureset = (parameters) => {
               name="obdMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.obdMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -977,6 +1117,7 @@ const EditFeatureset = (parameters) => {
               name="obdMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.obdMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -986,9 +1127,9 @@ const EditFeatureset = (parameters) => {
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Protocol Type</label>
+            <label htmlFor="protocol">Protocol Type</label>
             <Dropdown
-              id="ecu"
+              id="protocol"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1001,7 +1142,12 @@ const EditFeatureset = (parameters) => {
               name="protocolType"
               onChange={handleChange}
               options={ProtocolTypeoptions}
-              placeholder={featuresetDetails?.protocolType}
+              value={formData.protocolType}
+              placeholder={
+                formData.protocolType
+                  ? formData.protocolType
+                  : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
@@ -1017,6 +1163,7 @@ const EditFeatureset = (parameters) => {
               name="tpmsMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.tpmsMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1028,6 +1175,7 @@ const EditFeatureset = (parameters) => {
               name="tpmsMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.tpmsMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1039,9 +1187,9 @@ const EditFeatureset = (parameters) => {
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Accelerator Type</label>
+            <label htmlFor="acc">Accelerator Type</label>
             <Dropdown
-              id="ecu"
+              id="acc"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1051,7 +1199,12 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.acceleratorType}
+              value={formData.acceleratorType}
+              placeholder={
+                formData.acceleratorType
+                  ? formData.acceleratorType
+                  : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               name="acceleratorType"
@@ -1061,9 +1214,9 @@ const EditFeatureset = (parameters) => {
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Type</label>
+            <label htmlFor="brake">Brake Type</label>
             <Dropdown
-              id="ecu"
+              id="brake"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1073,10 +1226,13 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder={featuresetDetails?.brakeType}
+              placeholder={
+                formData.brakeType ? formData.brakeType : "Select an option"
+              }
               optionLabel="label"
               optionValue="value"
               name="brakeType"
+              value={formData.brakeType}
               onChange={handleChange}
               options={BrakeTypeoptions}
               className="md:w-14rem mt-2 w-full"
@@ -1093,6 +1249,7 @@ const EditFeatureset = (parameters) => {
               name="lazerMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.lazerMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1104,6 +1261,7 @@ const EditFeatureset = (parameters) => {
               name="lazerMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.lazerMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1118,6 +1276,7 @@ const EditFeatureset = (parameters) => {
               name="rfSensorMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.rfSensorMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1129,6 +1288,7 @@ const EditFeatureset = (parameters) => {
               name="rfSensorMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.rfSensorMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1137,11 +1297,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">RF Angle</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>RF Angle</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1153,17 +1311,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="rfAngle"
               onChange={handleChange}
-              placeholder={featuresetDetails?.rfAngle}
+              value={formData?.rfAngle || ""}
+              placeholder={
+                formData.rfAngle ? formData.rfAngle : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1175,15 +1334,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="reserved1"
               onChange={handleChange}
-              placeholder={featuresetDetails?.reserved1}
+              value={formData?.reserved1 || ""}
+              placeholder={
+                formData.reserved1 ? formData.reserved1 : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 2</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Reserved 2</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1195,16 +1355,17 @@ const EditFeatureset = (parameters) => {
               }}
               name="reserved2"
               onChange={handleChange}
-              placeholder={featuresetDetails?.reserved2}
+              value={formData?.reserved2 || ""}
+              placeholder={
+                formData.reserved2 ? formData.reserved2 : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="field my-3 w-[30vw]">
-          <label htmlFor="ecu">Reserved 3</label>
-          <input
-            type="number"
-            id="username"
-            aria-describedby="username-help"
+          <label>Reserved 3</label>
+          <InputText
+            keyfilter="pint"
             style={{
               width: "30vw",
               borderBottom: "1px dashed #ced4da",
@@ -1216,7 +1377,10 @@ const EditFeatureset = (parameters) => {
             }}
             name="reserved3"
             onChange={handleChange}
-            placeholder={featuresetDetails?.reserved3}
+            value={formData?.reserved3 || ""}
+            placeholder={
+              formData.reserved3 ? formData.reserved3 : "Enter a value"
+            }
           />
         </div>
         <hr style={{ borderColor: "#333" }} />
@@ -1224,9 +1388,9 @@ const EditFeatureset = (parameters) => {
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Speed Source</label>
+            <label htmlFor="speed">Speed Source</label>
             <Dropdown
-              id="ecu"
+              id="speed"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1237,7 +1401,10 @@ const EditFeatureset = (parameters) => {
                 borderTop: "none",
               }}
               name="speedSource"
-              placeholder={featuresetDetails?.speedSource}
+              value={formData.speedSource}
+              placeholder={
+                formData.speedSource ? formData.speedSource : "Select an option"
+              }
               options={SpeedSourceoptions}
               optionLabel="label"
               optionValue="value"
@@ -1248,11 +1415,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Slope</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Slope</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1264,15 +1429,14 @@ const EditFeatureset = (parameters) => {
               }}
               name="slope"
               onChange={handleChange}
-              placeholder={featuresetDetails?.slope}
+              value={formData?.slope || ""}
+              placeholder={formData.slope ? formData.slope : "Enter a value"}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Offset</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Offset</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1284,18 +1448,17 @@ const EditFeatureset = (parameters) => {
               }}
               name="offset"
               onChange={handleChange}
-              placeholder={featuresetDetails?.offset}
+              value={formData?.offset || ""}
+              placeholder={formData.offset ? formData.offset : "Enter a value"}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Shutdown Delay</p>
         <div className="field my-3 w-[30vw]">
-          <label htmlFor="ecu">Delay</label>
-          <input
-            type="number"
-            id="username"
-            aria-describedby="username-help"
+          <label>Delay</label>
+          <InputText
+            keyfilter="pint"
             style={{
               width: "30vw",
               borderBottom: "1px dashed #ced4da",
@@ -1307,7 +1470,8 @@ const EditFeatureset = (parameters) => {
             }}
             name="delay"
             onChange={handleChange}
-            placeholder={featuresetDetails?.delay}
+            value={formData?.delay || ""}
+            placeholder={formData.delay ? formData.delay : "Enter a value"}
           />
         </div>
         <hr style={{ borderColor: "#333" }} />
@@ -1319,6 +1483,7 @@ const EditFeatureset = (parameters) => {
               name="rfNameMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.rfNameMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1330,6 +1495,7 @@ const EditFeatureset = (parameters) => {
               name="rfNameMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.rfNameMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1340,11 +1506,9 @@ const EditFeatureset = (parameters) => {
         <p className="mt-4 font-bold ">Time Based Errors</p>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">No Alarm</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>No Alarm</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1356,15 +1520,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="noAlarm"
               onChange={handleChange}
-              placeholder={featuresetDetails?.noAlarm}
+              value={formData?.noAlarm || ""}
+              placeholder={
+                formData.noAlarm ? formData.noAlarm : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Speed</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1376,17 +1541,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="speed"
               onChange={handleChange}
-              placeholder={featuresetDetails?.speed}
+              value={formData?.speed || ""}
+              placeholder={formData.speed ? formData.speed : "Enter a value"}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Acceleration Bypass</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Acceleration Bypass</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1396,9 +1560,14 @@ const EditFeatureset = (parameters) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              value={formData?.accelerationBypass || ""}
+              placeholder={
+                formData.accelerationBypass
+                  ? formData.accelerationBypass
+                  : "Enter a value"
+              }
               name="accelerationBypass"
               onChange={handleChange}
-              placeholder={featuresetDetails?.accelerationBypass}
             />
           </div>
         </div>
@@ -1406,11 +1575,9 @@ const EditFeatureset = (parameters) => {
         <p className="mt-4 font-bold ">Speed Based Errors</p>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">RF Sensor Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>RF Sensor Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1422,15 +1589,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="rfSensorAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.rfSensorAbsent}
+              value={formData?.rfSensorAbsent || ""}
+              placeholder={
+                formData.rfSensorAbsent
+                  ? formData.rfSensorAbsent
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Gyroscope Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Gyroscope Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1442,17 +1612,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="gyroscopeAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.gyroscopeAbsent}
+              value={formData?.gyroscopeAbsent || ""}
+              placeholder={
+                formData.gyroscopeAbsent
+                  ? formData.gyroscopeAbsent
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">HMI Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>HMI Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1464,15 +1637,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="hmiAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.hmiAbsent}
+              value={formData?.hmiAbsent || ""}
+              placeholder={
+                formData.hmiAbsent ? formData.hmiAbsent : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Time Not Set</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Time Not Set</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1484,16 +1658,17 @@ const EditFeatureset = (parameters) => {
               }}
               name="timeNotSet"
               onChange={handleChange}
-              placeholder={featuresetDetails?.timeNotSet}
+              value={formData?.timeNotSet || ""}
+              placeholder={
+                formData.timeNotSet ? formData.timeNotSet : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="field my-3 w-[30vw]">
-          <label htmlFor="ecu">Acceleration Error</label>
-          <input
-            type="number"
-            id="username"
-            aria-describedby="username-help"
+          <label>Acceleration Error</label>
+          <InputText
+            keyfilter="pint"
             style={{
               width: "30vw",
               borderBottom: "1px dashed #ced4da",
@@ -1505,16 +1680,19 @@ const EditFeatureset = (parameters) => {
             }}
             name="accelerationError"
             onChange={handleChange}
-            placeholder={featuresetDetails?.accelerationError}
+            value={formData?.accelerationError || ""}
+            placeholder={
+              formData.accelerationError
+                ? formData.accelerationError
+                : "Enter a value"
+            }
           />
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Error</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Brake Error</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1526,15 +1704,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="brakeError"
               onChange={handleChange}
-              placeholder={featuresetDetails?.brakeError}
+              value={formData?.brakeError || ""}
+              placeholder={
+                formData.brakeError ? formData.brakeError : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">TPMS Error</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>TPMS Error</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1546,17 +1725,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="tpmsError"
               onChange={handleChange}
-              placeholder={featuresetDetails?.tpmsError}
+              value={formData?.tpmsError || ""}
+              placeholder={
+                formData.tpmsError ? formData.tpmsError : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">OSIM Card Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>OSIM Card Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1568,15 +1748,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="simCardAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.simCardAbsent}
+              value={formData?.simCardAbsent || ""}
+              placeholder={
+                formData.simCardAbsent
+                  ? formData.simCardAbsent
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Low battery</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Low battery</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1588,17 +1771,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="lowBattery"
               onChange={handleChange}
-              placeholder={featuresetDetails?.lowBattery}
+              value={formData?.lowBattery || ""}
+              placeholder={
+                formData.lowBattery ? formData.lowBattery : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Trip Not Started</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Trip Not Started</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1610,15 +1794,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="tripNotStarted"
               onChange={handleChange}
-              placeholder={featuresetDetails?.tripNotStarted}
+              placeholder={
+                formData.tripNotStarted
+                  ? formData.tripNotStarted
+                  : "Enter a value"
+              }
+              value={formData?.tripNotStarted || ""}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Bluetooth Conn Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Bluetooth Conn Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1630,17 +1817,20 @@ const EditFeatureset = (parameters) => {
               }}
               name="bluetoothConnAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.bluetoothConnAbsent}
+              value={formData?.bluetoothConnAbsent || ""}
+              placeholder={
+                formData.bluetoothConnAbsent
+                  ? formData.bluetoothConnAbsent
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">OBD Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>OBD Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1652,15 +1842,16 @@ const EditFeatureset = (parameters) => {
               }}
               name="obdAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.obdAbsent}
+              value={formData?.obdAbsent || ""}
+              placeholder={
+                formData.obdAbsent ? formData.obdAbsent : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">No Alarm</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>No Alarm</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1672,17 +1863,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="noAlarm"
               onChange={handleChange}
-              placeholder={featuresetDetails?.noAlarm}
+              value={formData?.noAlarm || ""}
+              placeholder={
+                formData.noAlarm ? formData.noAlarm : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Laser SensorAbsent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Laser SensorAbsent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1694,15 +1886,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="laserSensorAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.laserSensorAbsent}
+              value={formData?.laserSensorAbsent || ""}
+              placeholder={
+                formData.laserSensorAbsent
+                  ? formData.laserSensorAbsent
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">RFID Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>RFID Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1714,17 +1909,18 @@ const EditFeatureset = (parameters) => {
               }}
               name="rfidAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.rfidAbsent}
+              value={formData?.rfidAbsent || ""}
+              placeholder={
+                formData.rfidAbsent ? formData.rfidAbsent : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">IoT Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>IoT Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1736,7 +1932,10 @@ const EditFeatureset = (parameters) => {
               }}
               name="iotAbsent"
               onChange={handleChange}
-              placeholder={featuresetDetails?.iotAbsent}
+              value={formData?.iotAbsent || ""}
+              placeholder={
+                formData.iotAbsent ? formData.iotAbsent : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -1749,8 +1948,9 @@ const EditFeatureset = (parameters) => {
               name="firmwareOtaUpdate"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.firmwareOtaUpdate === "Offline"}
             />
-            <label htmlFor="ingredient1" className="ml-2">
+            <label htmlFor="firmwareOtaUpdate1" className="ml-2">
               Not Available
             </label>
           </div>
@@ -1760,19 +1960,18 @@ const EditFeatureset = (parameters) => {
               name="firmwareOtaUpdate"
               value="Online"
               onChange={handleChange}
+              checked={formData?.firmwareOtaUpdate === "Online"}
             />
-            <label htmlFor="ingredient2" className="ml-2">
+            <label htmlFor="firmwareOtaUpdate2" className="ml-2">
               Available
             </label>
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1784,7 +1983,12 @@ const EditFeatureset = (parameters) => {
               }}
               name="firewarereserver1"
               onChange={handleChange}
-              placeholder={featuresetDetails?.firewarereserver1}
+              value={formData?.firewarereserver1 || ""}
+              placeholder={
+                formData.firewarereserver1
+                  ? formData.firewarereserver1
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -1797,6 +2001,7 @@ const EditFeatureset = (parameters) => {
               name="alcoholDetectionMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.alcoholDetectionMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Not Available
@@ -1808,6 +2013,7 @@ const EditFeatureset = (parameters) => {
               name="alcoholDetectionMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.alcoholDetectionMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Available
@@ -1816,11 +2022,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1832,7 +2036,12 @@ const EditFeatureset = (parameters) => {
               }}
               name="alcoholreserved1"
               onChange={handleChange}
-              placeholder={featuresetDetails?.alcoholreserved1}
+              value={formData?.alcoholreserved1 || ""}
+              placeholder={
+                formData.alcoholreserved1
+                  ? formData.alcoholreserved1
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -1845,6 +2054,7 @@ const EditFeatureset = (parameters) => {
               name="driverDrowsinessMode"
               value="Offline"
               onChange={handleChange}
+              checked={formData?.driverDrowsinessMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Not Available
@@ -1856,6 +2066,7 @@ const EditFeatureset = (parameters) => {
               name="driverDrowsinessMode"
               value="Online"
               onChange={handleChange}
+              checked={formData?.driverDrowsinessMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Available
@@ -1864,11 +2075,9 @@ const EditFeatureset = (parameters) => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1880,7 +2089,12 @@ const EditFeatureset = (parameters) => {
               }}
               name="driverreserved1"
               onChange={handleChange}
-              placeholder={featuresetDetails?.driverreserved1}
+              value={formData?.driverreserved1 || ""}
+              placeholder={
+                formData.driverreserved1
+                  ? formData.driverreserved1
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
