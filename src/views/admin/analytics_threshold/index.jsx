@@ -339,7 +339,7 @@ const AnalyticsThreshold = () => {
             Halt
           </p>
           <div className="card p-fluid mt-6 flex flex-wrap gap-3">
-            <div>
+            <div className="w-[390px]">
               <span className="p-float-label">
                 <InputText
                   keyfilter="pint"

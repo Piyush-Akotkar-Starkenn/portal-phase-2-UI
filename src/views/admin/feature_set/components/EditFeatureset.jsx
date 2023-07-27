@@ -131,16 +131,10 @@ const EditFeatureset = (parameters) => {
     { label: "OBD", value: "OBD" },
     { label: "GPS", value: "GPS" },
   ];
-
   const Customersoptions = [
-    {
-      label: "Harshal",
-      value: "Harshal",
-    },
-    {
-      label: "Starkenn",
-      value: "Starkenn",
-    },
+    { label: "Speed Wire", value: "Speed Wire" },
+    { label: "OBD", value: "OBD" },
+    { label: "GPS", value: "GPS" },
   ];
 
   return (
@@ -205,7 +199,7 @@ const EditFeatureset = (parameters) => {
                 borderTop: "none",
               }}
               options={Customersoptions}
-              placeholder={featuresetDetails?.selectCustomer}
+              // placeholder={featuresetDetails?.selectCustomer}
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
