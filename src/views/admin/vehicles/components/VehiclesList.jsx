@@ -13,21 +13,6 @@ import FeatureSet from "./FeatureSet";
 import VehicleTrips from "./VehicleTrips";
 
 export default function VehiclesList() {
-  let emptyProduct = {
-    id: null,
-    vehicle_name: "",
-    vehicle_registration: "",
-    dms: "",
-    iot: "",
-    ecu: "",
-    status: "",
-  };
-
-  const [products, setProducts] = useState(null);
-  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  const [editDialogVisible, setEditDialogVisible] = useState(false);
-  const [product, setProduct] = useState(emptyProduct);
-  const [editedProduct, setEditedProduct] = useState(emptyProduct);
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const toast = useRef(null);
@@ -54,14 +39,6 @@ export default function VehiclesList() {
       });
   }, []);
 
-  const hideDeleteProductDialog = () => {
-    setDeleteProductDialog(false);
-  };
-
-  const hideEditDialog = () => {
-    setEditDialogVisible(false);
-  };
-
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -77,49 +54,6 @@ export default function VehiclesList() {
     const _filters = { ...filters };
     _filters["global"].value = null;
     setFilters(_filters);
-  };
-
-  const confirmDeleteProduct = (product) => {
-    setProduct(product);
-    setDeleteProductDialog(true);
-  };
-
-  const deleteProduct = () => {
-    let _products = products.filter((val) => val.id !== product.id);
-
-    setProducts(_products);
-    setDeleteProductDialog(false);
-    setProduct(emptyProduct);
-    toast.current.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Product Deleted",
-      life: 3000,
-    });
-  };
-
-  const editProduct = (product) => {
-    setEditedProduct(product);
-    setEditDialogVisible(true);
-  };
-
-  const saveEditedProduct = () => {
-    // Update the products state with the edited product
-    const updatedProducts = products.map((p) =>
-      p.id === editedProduct.id ? editedProduct : p
-    );
-    setProducts(updatedProducts);
-
-    // Show a toast message or perform any other actions
-    toast.current.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Product Updated",
-      life: 3000,
-    });
-
-    setEditedProduct(emptyProduct);
-    setEditDialogVisible(false);
   };
 
   const statusBodyTemplate = (rowData) => {
@@ -141,14 +75,6 @@ export default function VehiclesList() {
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
-        <Button
-          icon="pi pi-trash"
-          rounded
-          outlined
-          className="mr-2 text-red-500 dark:text-red-500"
-          style={{ width: "2rem", height: "2rem" }}
-          onClick={() => confirmDeleteProduct(rowData)}
-        />
         <Button
           icon="pi pi-eye"
           rounded
@@ -193,24 +119,6 @@ export default function VehiclesList() {
         )}
       </span>
     </div>
-  );
-
-  const deleteProductDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteProductDialog}
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        outlined
-        onClick={deleteProduct}
-      />
-    </React.Fragment>
   );
 
   return (
@@ -298,28 +206,6 @@ export default function VehiclesList() {
           ></Column>
         </DataTable>
       </div>
-
-      <Dialog
-        visible={deleteProductDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={deleteProductDialogFooter}
-        onHide={hideDeleteProductDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {product && (
-            <span>
-              Are you sure you want to delete <b>{product.name}</b>?
-            </span>
-          )}
-        </div>
-      </Dialog>
 
       <Dialog
         header="Vehicle Details"

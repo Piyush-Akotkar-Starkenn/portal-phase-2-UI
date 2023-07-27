@@ -141,6 +141,15 @@ const FeatureList = () => {
       life: 3000,
     });
   };
+  const handleEditSuccess = () => {
+    setIsDialogVisible1(false);
+    toastRef.current.show({
+      severity: "success",
+      summary: "Success",
+      detail: "Feature Set updated successfully",
+      life: 3000,
+    });
+  };
   const openDialog = () => {
     setIsDialogVisible(true);
   };
@@ -289,7 +298,20 @@ const FeatureList = () => {
           onSuccess={handleUnAssignSuccess}
         />
       </Dialog>
-
+      <Dialog
+        visible={isDialogVisible1}
+        onHide={closeDialog1}
+        style={{ width: "70vw" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Featureset Details"
+        modal
+        className="p-fluid dark:bg-gray-900"
+      >
+        <EditFeatureset
+          parameters={{ propValue: myData?.featureSetId }}
+          onSuccess={handleEditSuccess}
+        />
+      </Dialog>
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}
@@ -301,17 +323,7 @@ const FeatureList = () => {
       >
         <AddFeatureSet onSuccess={handleAddSuccess} />
       </Dialog>
-      <Dialog
-        visible={isDialogVisible1}
-        onHide={closeDialog1}
-        style={{ width: "70vw" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Featureset Details"
-        modal
-        className="p-fluid dark:bg-gray-900"
-      >
-        <EditFeatureset propValue={myData?.featureSetId} />
-      </Dialog>
+
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <Toast ref={toastErr} className="bg-red-400" />
       <Dialog
