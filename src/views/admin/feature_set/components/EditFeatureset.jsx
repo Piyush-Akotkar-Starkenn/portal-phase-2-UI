@@ -17,6 +17,7 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   const [helpText, setHelpText] = useState("");
   const toastErr = useRef(null);
 
+  const [matchedFirstNames, setMatchedFirstNames] = useState([]);
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevFormData) => ({
@@ -176,6 +177,23 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
     }));
   };
 
+  useEffect(() => {
+    const getFirstNameByUserId = (userId) => {
+      const customer = allCustomers.find(
+        (customer) => customer.userId === userId
+      );
+      return customer ? customer.first_name : "";
+    };
+
+    const selectCustomers = featuresetDetails.selectCustomer || [];
+
+    const matchedNames = selectCustomers.map((customerId) =>
+      getFirstNameByUserId(customerId)
+    );
+
+    setMatchedFirstNames(matchedNames);
+  }, [featuresetDetails, allCustomers]);
+
   return (
     <>
       <Toast ref={toastErr} className="bg-red-400" />
@@ -221,27 +239,17 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
             <small id="username-help">Unique id to identify feature set</small>
           </div>
 
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="cust">Select Customer</label>
-            <Dropdown
-              name="selectCustomer"
-              onChange={handleSelectCustomer}
-              id="cust"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              options={Customersoptions()}
-              placeholder="select customer"
-              optionLabel="label"
-              optionValue="value"
-              className="md:w-14rem mt-2 w-full"
-            />
+          <div className="field my-3  w-[30vw]">
+            <label htmlFor="cust">Selected Customer</label>
+            <div>
+              {matchedFirstNames.length > 0 ? (
+                matchedFirstNames.map((firstName, index) => (
+                  <span key={index}> {`${firstName} `} </span>
+                ))
+              ) : (
+                <p>No matching customers</p>
+              )}
+            </div>
           </div>
           <p className="mt-4 font-bold ">System Type</p>
           <div className="my-3 flex flex-wrap gap-3">
