@@ -6,8 +6,6 @@ import { InputText } from "primereact/inputtext";
 import { CiMenuKebab } from "react-icons/ci";
 import { Menu } from "primereact/menu";
 import { Toast } from "primereact/toast";
-
-import axios from "axios";
 import { Dialog } from "primereact/dialog";
 
 const applyFilters = (filters, allData) => {
@@ -36,7 +34,7 @@ const applyFilters = (filters, allData) => {
   return filteredData;
 };
 
-export default function CustomersGrid({ data }) {
+export default function CustomersGrid({ data, onDelete, onUpdate }) {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -93,11 +91,7 @@ export default function CustomersGrid({ data }) {
 
   const confirmDelete = async () => {
     try {
-      const response = await axios.put(
-        `http://localhost:3001/api/Admin/delete/${selectedCustomer.userId}`,
-        { status: false }
-      );
-      console.log("Delete success:", response.data.user.userId);
+      await onDelete(selectedCustomer.userId);
 
       const updatedData = allData.filter(
         (customer) => customer.userId !== selectedCustomer.userId
@@ -235,11 +229,7 @@ export default function CustomersGrid({ data }) {
 
     const onSave = async () => {
       try {
-        const response = await axios.put(
-          `http://localhost:3001/api/Admin/update/${customer.userId}`,
-          editedCustomerData
-        );
-        console.log("Save success:", response.data);
+        await onUpdate(customer.userId, editedCustomerData);
 
         const updatedData = allData.map((item) =>
           item.userId === customer.userId

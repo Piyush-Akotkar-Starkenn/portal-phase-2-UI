@@ -214,6 +214,7 @@ input:checked.defaultCheckbox::before {
   background: #111c44;
   color: #fefefe;
 }
+
 .dark .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
   color: #fefefe;
 }
@@ -352,6 +353,9 @@ body
 .dark .p-tabview .p-tabview-panels {
   background: transparent;
 }
+.dark .p-paginator .p-dropdown .p-dropdown-label {
+  color: #111c44;
+}
 .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
   background: none;
 }
@@ -386,7 +390,12 @@ body
 .card-actions button {
   margin-right: 8px;
 }
-
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  padding: 0rem 1rem;
+}
+.p-dropdown-panel .p-dropdown-items {
+  text-align: left;
+}
 .card-actions button:last-child {
   margin-right: 0;
 }

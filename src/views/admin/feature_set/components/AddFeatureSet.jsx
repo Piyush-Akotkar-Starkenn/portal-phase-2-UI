@@ -55,31 +55,40 @@ const AddFeatureSet = ({ onSuccess }) => {
     setCustomers([...customers, value]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     console.log(Object.keys(data).length);
     try {
-      axios
-        .post("http://localhost:3001/api/featureset/featureset-add", data)
-        .then((res) => {
-          updateFunc();
-
-          console.log(res);
-          if (onSuccess) {
-            onSuccess();
-          }
-        })
-        .catch((err) => console.log(err));
-    } catch (err) {
+      const response = await axios.post(
+        "http://localhost:3001/api/featureset/featureset-add",
+        data
+      );
+      // Assuming you have access to the toastRef
       toastRef.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: response.data.message || `Feature Set  added successfully`,
+        life: 3000,
+      });
+
+      updateFunc();
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (err) {
+      // Assuming you have access to the toastRef
+      toastErr.current.show({
         severity: "error",
         summary: "Error",
         detail:
-          err.response?.data?.message ||
+          err.response?.data?.error ||
           "An error occurred. Please try again later.",
         life: 3000,
       });
+
+      console.error("Error:", err);
     }
   };
 
@@ -162,7 +171,7 @@ const AddFeatureSet = ({ onSuccess }) => {
   return (
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
-      <Toast ref={toastErr} className="bg-red-400" />
+      <Toast ref={toastErr} />
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="flex" style={{ flexDirection: "column" }}>

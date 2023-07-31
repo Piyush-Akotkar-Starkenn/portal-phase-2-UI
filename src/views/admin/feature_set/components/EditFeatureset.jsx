@@ -14,7 +14,6 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   const [allCustomers, setAllCustomers] = useState([]);
   const { updateFunc } = useContext(AppContext);
   const [formData, setFormData] = useState({});
-  const [helpText, setHelpText] = useState("");
   const toastErr = useRef(null);
 
   const handleChange = (event) => {
@@ -23,7 +22,6 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
       ...prevFormData,
       [name]: value,
     }));
-    setHelpText("");
   };
 
   useEffect(() => {
@@ -69,11 +67,8 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.mode) {
-      setHelpText("Please select options for all fields.");
-      return;
-    }
-
+    console.log(formData);
+    // console.log(Object.keys(data).length);
     try {
       axios
         .put(
@@ -270,7 +265,6 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
               </label>
             </div>
           </div>
-          {helpText && <p className="text-red-500">{helpText}</p>}
         </div>
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Collision Avoidance System</p>
