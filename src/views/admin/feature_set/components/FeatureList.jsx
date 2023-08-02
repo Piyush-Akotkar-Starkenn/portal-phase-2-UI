@@ -347,7 +347,9 @@ const FeatureList = () => {
           </div>
         }
       >
-        <div>Are you sure you want to delete this feature set?</div>
+        <div>
+          Are you sure you want to delete {selectedFeature?.featureSetName}?
+        </div>
       </Dialog>
       <DataTable
         removableSort

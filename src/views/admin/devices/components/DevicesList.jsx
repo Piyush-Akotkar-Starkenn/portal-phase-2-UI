@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { DataTable } from "primereact/datatable";
+import { Toast } from "primereact/toast";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
@@ -8,10 +9,8 @@ import { MultiSelect } from "primereact/multiselect";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import axios from "axios";
-import { useContext } from "react";
-import { AppContext } from "context/AppContext";
 
-export default function DevicesList({ data }) {
+export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
@@ -22,8 +21,10 @@ export default function DevicesList({ data }) {
   const [listCustomers, setListCustomers] = useState([]);
   const [deviceData, setDeviceData] = useState();
   const [rowId, setRowId] = useState();
-  const { updateFunc } = useContext(AppContext);
 
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const toastRef = useRef(null);
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -40,7 +41,10 @@ export default function DevicesList({ data }) {
     _filters["global"].value = null; // Clear the global filter value
     setFilters(_filters);
   };
-
+  const openDeleteDialog = (rowData) => {
+    setSelectedDevice(rowData);
+    setDeleteDialogVisible(true);
+  };
   const renderHeader = () => {
     return (
       <div className="my-4 flex justify-end">
@@ -92,7 +96,6 @@ export default function DevicesList({ data }) {
   const representativesItemTemplate = (option) => {
     return (
       <div className="align-items-center flex gap-2">
-        <p>hii</p>
         <span>{option}</span>
         <p>{option.device_type}</p>
       </div>
@@ -116,7 +119,7 @@ export default function DevicesList({ data }) {
           outlined
           style={{ width: "2rem", height: "2rem" }}
           severity="danger"
-          onClick={() => handleDelete(rowData)}
+          onClick={() => openDeleteDialog(rowData)}
         />
       </React.Fragment>
     );
@@ -124,24 +127,42 @@ export default function DevicesList({ data }) {
 
   const header = renderHeader();
   //handle Delete
-  const handleDelete = (rowData) => {
-    axios
-      .put(
-        `http://localhost:3001/api/Admin/Devices/delete-Device/${rowData?.device_id}`
-      )
-      .then((res) => {
-        console.log(res);
-        updateFunc();
-        alert("Deleted successfully");
-      })
-      .catch((err) => {
-        if (err.response.request.status === 404) {
-          console.log(err.response.data.error);
+  const DeleteDeviceDialog = ({ visible, onHide }) => {
+    const handleConfirmDelete = async () => {
+      try {
+        await onDeleteDevice(selectedDevice?.device_id);
+        onHide();
+      } catch (error) {
+        console.error(error);
+        onHide();
+      }
+    };
+
+    return (
+      <Dialog
+        visible={visible}
+        onHide={onHide}
+        header="Confirm Delete"
+        footer={
+          <div>
+            <Button
+              label="Delete"
+              icon="pi pi-times"
+              className="p-button-danger px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={handleConfirmDelete}
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-check"
+              className="p-button-secondary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={onHide}
+            />
+          </div>
         }
-        if (err.response.request.status === 500) {
-          console.log(err.response.data.error);
-        }
-      });
+      >
+        <div>Are you sure you want to delete {selectedDevice?.device_id}?</div>
+      </Dialog>
+    );
   };
 
   //edit device
@@ -149,6 +170,7 @@ export default function DevicesList({ data }) {
   const openDialog = (rowData) => {
     setIsDialogVisible(true);
     getDeviceData(rowData);
+    setEditData(rowData);
     setRowId(rowData);
   };
 
@@ -166,40 +188,65 @@ export default function DevicesList({ data }) {
     { label: "Active", value: "true" },
     { label: "Deactive", value: "false" },
   ];
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .put(
-        `http://localhost:3001/api/Admin/Devices/update-Device/${rowId?.device_id}`,
-        editData
-      )
-      .then((res) => {
-        console.log(res.data.message);
-        updateFunc();
-        alert("Updated successfully");
-        closeDialog();
-      })
-      .catch((err) => {
-        if (err.response.data === 404) {
-          console.log(err.response.data.error);
-        }
-        if (err.response.data === 500) {
-          console.log(err.response.data.error);
-        }
-      });
+    onEditDevice(rowId?.device_id, editData);
+    closeDialog();
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditData({ ...editData, [name]: value });
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   axios
+  //     .put(
+  //       `http://localhost:3001/api/Admin/Devices/update-Device/${rowId?.device_id}`,
+  //       editData
+  //     )
+  //     .then((res) => {
+  //       console.log(res.data.message);
+  //       updateFunc();
+  //       // alert("Updated successfully");
+  //       toastRef.current.show({
+  //         severity: "success",
+  //         summary: "Success",
+  //         detail: `Device ${editData.device_id} updated successfully`,
+  //         life: 3000,
+  //       });
+  //       closeDialog();
+  //     })
+  //     .catch((err) => {
+  //       if (err.response.data === 404) {
+  //         console.log(err.response.data.error);
+  //         toastRef.current.show({
+  //           severity: "warn",
+  //           summary: "Warning",
+  //           detail: "Device not found",
+  //           life: 3000,
+  //         });
+  //       }
+  //       if (err.response.data === 500) {
+  //         toastRef.current.show({
+  //           severity: "danger",
+  //           summary: "Error",
+  //           detail: "Failed to update device",
+  //           life: 3000,
+  //         });
+  //       }
+  //     });
+  // };
+
+  // ... (rest of the component)
+  const handleChange = (e, name) => {
+    const value = e.target ? e.target.value : e.value;
+    setEditData((prevEditData) => ({
+      ...prevEditData,
+      [name]: value,
+    }));
   };
 
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/Admin/Devices/get-customers")
       .then((res) => {
-        console.log(res);
         setListCustomers(res.data);
       })
       .catch((err) => {
@@ -234,38 +281,37 @@ export default function DevicesList({ data }) {
         onHide={closeDialog}
         style={{ width: "40rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Add the Device"
+        header="Edit the Device"
         modal
         className="p-fluid dark:bg-gray-900"
       >
         <form onSubmit={handleSubmit} className="mx-auto">
-          <div className="flex justify-around">
-            <div className="card justify-content-center mt-5 flex">
-              <span className="p-float-label">
-                <InputText
-                  id="device_id"
-                  name="device_id"
-                  onChange={handleChange}
-                  placeholder={deviceData?.device.device_id}
-                />
-                <label htmlFor="device_id">DeviceId</label>
-              </span>
-            </div>
-            <div className="card justify-content-center mt-5 flex">
-              <span className="p-float-label">
-                <Dropdown
-                  id="device_type"
-                  name="device_type"
-                  options={devicesOptions}
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder={deviceData?.device.device_type}
-                  className="p-dropdown"
-                  onChange={handleChange}
-                />
-                <label htmlFor="device_type">Device_type</label>
-              </span>
-            </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="device_id"
+                name="device_id"
+                onChange={(e) => handleChange(e, "device_id")}
+                value={editData?.device_id || ""}
+              />
+              <label htmlFor="device_id">DeviceId</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <Dropdown
+                id="device_type"
+                name="device_type"
+                options={devicesOptions}
+                optionLabel="label"
+                optionValue="value"
+                value={editData?.device_type || ""}
+                placeholder={deviceData?.device.device_type}
+                className="p-dropdown"
+                onChange={(e) => handleChange(e, "device_type")}
+              />
+              <label htmlFor="device_type">Device_type</label>
+            </span>
           </div>
 
           <div className="mx-auto mt-8 w-[34.5vw]">
@@ -277,8 +323,10 @@ export default function DevicesList({ data }) {
                 optionLabel="label"
                 optionValue="value"
                 className="p-dropdown"
-                onChange={handleChange}
+                value={editData?.customer_id || ""}
+                onChange={(e) => handleChange(e, "customer_id")}
               />
+
               <label htmlFor="customer_id">Customer List</label>
             </span>
           </div>
@@ -291,11 +339,10 @@ export default function DevicesList({ data }) {
                 optionLabel="label"
                 optionValue="value"
                 className="p-dropdown"
-                placeholder={
-                  deviceData?.device.status !== true ? "Active" : "Deactive"
-                }
-                onChange={handleChange}
-              />{" "}
+                value={editData?.status || ""}
+                placeholder={deviceData?.device.status}
+                onChange={(e) => handleChange(e, "status")}
+              />
               <label htmlFor="status">Status</label>
             </span>
           </div>
@@ -304,23 +351,25 @@ export default function DevicesList({ data }) {
               <InputText
                 id="sim_number"
                 name="sim_number"
-                type="number"
+                keyfilter="pint"
+                value={editData?.sim_number || ""}
                 placeholder={deviceData?.device.sim_number}
-                onChange={handleChange}
+                onChange={(e) => handleChange(e, "sim_number")}
               />
-              <label htmlFor="device_id">Sim Number</label>
+              <label htmlFor="sim_number">Sim Number</label>
             </span>
           </div>
           <div className="mt-6 flex justify-center">
             <button
               type="submit"
-              className="w-[34.5vw] rounded bg-blue-600 px-4 py-2 font-semibold text-white  hover:bg-blue-600"
+              className="rounded bg-blue-600 px-4 py-2 font-semibold text-white  hover:bg-blue-600"
             >
               Edit Device
             </button>
           </div>
         </form>
       </Dialog>
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <DataTable
         value={data}
         removableSort
@@ -391,6 +440,10 @@ export default function DevicesList({ data }) {
           style={{ minWidth: "6rem" }}
         ></Column>
       </DataTable>
+      <DeleteDeviceDialog
+        visible={deleteDialogVisible}
+        onHide={() => setDeleteDialogVisible(false)}
+      />
     </div>
   );
 }

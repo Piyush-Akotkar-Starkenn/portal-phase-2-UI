@@ -16,6 +16,7 @@ const AnalyticsThreshold = () => {
       .then((response) => {
         if (response.data && Array.isArray(response.data.data)) {
           setCustomers(response.data.data);
+          console.log(response.data.data)
         } else {
           console.error("Invalid API response:", response.data);
         }

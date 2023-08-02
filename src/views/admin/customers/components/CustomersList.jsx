@@ -8,9 +8,8 @@ import { Menu } from "primereact/menu";
 import { Dialog } from "primereact/dialog";
 import { CiMenuKebab } from "react-icons/ci";
 import { Toast } from "primereact/toast";
-import axios from "axios";
 
-const CustomersList = ({ data }) => {
+const CustomersList = ({ data, onDelete, onUpdate }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -41,11 +40,7 @@ const CustomersList = ({ data }) => {
 
     const onSave = async () => {
       try {
-        const response = await axios.put(
-          `http://localhost:3001/api/Admin/update/${customer.userId}`,
-          editedCustomerData
-        );
-        console.log("Save success:", response.data);
+        await onUpdate(customer.userId, editedCustomerData);
 
         const updatedData = customerData.map((customer) => {
           if (customer.userId === editedCustomerData.userId) {
@@ -63,7 +58,7 @@ const CustomersList = ({ data }) => {
         toastRef.current.show({
           severity: "success",
           summary: "Success",
-          detail: "User updated successfully",
+          detail: `User  ${editedCustomerData?.full_name} updated successfully`,
           life: 3000,
         });
       } catch (error) {
@@ -79,6 +74,7 @@ const CustomersList = ({ data }) => {
 
     const handleInputChange = (e) => {
       const { name, value } = e.target;
+
       if (name === "first_name") {
         setEditedCustomerData((prevState) => ({
           ...prevState,
@@ -91,12 +87,25 @@ const CustomersList = ({ data }) => {
           last_name: value,
           full_name: `${prevState.first_name} ${value}`,
         }));
+      } else if (
+        name === "address" ||
+        name === "city" ||
+        name === "state" ||
+        name === "pincode"
+      ) {
+        setEditedCustomerData((prevState) => ({
+          ...prevState,
+          [name]: value,
+          full_address: `${prevState.address || ""}, ${prevState.city || ""}, ${
+            prevState.state || ""
+          }, ${prevState.pincode || ""}`,
+        }));
+      } else {
+        setEditedCustomerData((prevState) => ({
+          ...prevState,
+          [name]: value,
+        }));
       }
-
-      setEditedCustomerData((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
     };
 
     return (
@@ -164,16 +173,55 @@ const CustomersList = ({ data }) => {
               <label htmlFor="company_name">Company Name</label>
             </span>
           </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
+          <div className="mx-auto mt-6 w-[34.5vw]">
+            <span>Address:</span>
+          </div>
+          <div className="mx-auto mt-6 w-[34.5vw]">
             <span className="p-float-label">
               <InputText
-                id="full_address"
+                id="address"
                 type="text"
-                name="full_address"
-                value={editedCustomerData?.full_address || ""}
+                name="address"
+                value={editedCustomerData?.address || ""}
                 onChange={handleInputChange}
               />
-              <label htmlFor="full_address">Full Address</label>
+              <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-6 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="city"
+                type="text"
+                name="city"
+                value={editedCustomerData?.city || ""}
+                onChange={handleInputChange}
+              />
+              <label htmlFor="city">City</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-6 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="state"
+                type="text"
+                name="state"
+                value={editedCustomerData?.state || ""}
+                onChange={handleInputChange}
+              />
+              <label htmlFor="state">State</label>
+            </span>
+          </div>
+          <div className="mx-auto mt-6 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="pincode"
+                type="text"
+                name="pincode"
+                value={editedCustomerData?.pincode || ""}
+                onChange={handleInputChange}
+              />
+              <label htmlFor="pincode">Pincode</label>
             </span>
           </div>
           <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
@@ -197,12 +245,10 @@ const CustomersList = ({ data }) => {
   const DeleteCustomerDialog = ({ visible, onHide, customer }) => {
     const handleConfirmDelete = async () => {
       try {
-        const response = await axios.put(
-          `http://localhost:3001/api/Admin/delete/${customer.userId}`,
-          { status: false }
-        );
-        console.log("Delete success:", response.data.user.userId);
+        // Send the delete request using the onDelete prop
+        await onDelete(customer.userId);
 
+        // If the delete is successful, update the customerData state to remove the deleted customer
         const updatedData = customerData
           .filter((c) => c.userId !== customer.userId)
           .map((customer, index) => ({
@@ -216,7 +262,7 @@ const CustomersList = ({ data }) => {
         toastRef.current.show({
           severity: "success",
           summary: "Success",
-          detail: "User deleted successfully",
+          detail: `Customer ${selectedProduct?.full_name} deleted successfully`,
           life: 3000,
         });
       } catch (error) {
@@ -253,7 +299,7 @@ const CustomersList = ({ data }) => {
           </div>
         }
       >
-        <div>Are you sure you want to delete this customer?</div>
+        <div>Are you sure you want to delete {selectedProduct?.full_name}?</div>
       </Dialog>
     );
   };
@@ -321,6 +367,7 @@ const CustomersList = ({ data }) => {
           icon="pi pi-trash"
           rounded
           outlined
+          severity="danger"
           className="text-red-500 dark:text-red-500"
           style={{ width: "2rem", height: "2rem" }}
           onClick={handleDelete}
@@ -385,7 +432,13 @@ const CustomersList = ({ data }) => {
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
         filterDisplay="menu"
         filters={filters}
-        globalFilterFields={["full_name", "address", "company_name", "phone"]}
+        globalFilterFields={[
+          "full_name",
+          "address",
+          "email",
+          "company_name",
+          "phone",
+        ]}
         emptyMessage="No customers found."
         header={header}
       >

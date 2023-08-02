@@ -48,6 +48,41 @@ const Customers = () => {
       });
   };
 
+  const handleDeleteCustomer = async (customerId) => {
+    try {
+      await axios.put(`http://localhost:3001/api/Admin/delete/${customerId}`, {
+        status: false,
+      });
+
+      // Remove the deleted customer from the state
+      setData((prevData) =>
+        prevData.filter((customer) => customer.userId !== customerId)
+      );
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+    }
+  };
+
+  const handleUpdateCustomer = async (customerId, updatedData) => {
+    try {
+      await axios.put(
+        `http://localhost:3001/api/Admin/update/${customerId}`,
+        updatedData
+      );
+
+      // Update the customer data in the state
+      setData((prevData) =>
+        prevData.map((customer) =>
+          customer.userId === customerId
+            ? { ...customer, ...updatedData }
+            : customer
+        )
+      );
+    } catch (error) {
+      console.error("Error updating customer:", error);
+    }
+  };
+
   const handleListView = () => {
     setIsListView(true);
   };
@@ -129,7 +164,9 @@ const Customers = () => {
         toastRef.current.show({
           severity: "success",
           summary: "Success",
-          detail: "User Added successfully",
+          detail: `User ${
+            data.first_name + " " + data.last_name
+          } Added successfully`,
           life: 3000,
         });
         fetchCustomersData();
@@ -263,10 +300,20 @@ const Customers = () => {
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
         onClick={openDialog}
       />
-      {!isListView && <CustomersGrid data={data} />}
+      {!isListView && (
+        <CustomersGrid
+          data={data}
+          onDelete={handleDeleteCustomer}
+          onUpdate={handleUpdateCustomer}
+        />
+      )}
       {isListView && (
         <div className="opacity-100 transition-opacity duration-500">
-          <CustomersList data={data} />
+          <CustomersList
+            data={data}
+            onDelete={handleDeleteCustomer}
+            onUpdate={handleUpdateCustomer}
+          />
         </div>
       )}
       <Dialog

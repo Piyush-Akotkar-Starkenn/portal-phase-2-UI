@@ -1,34 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DevicesList from "./components/DevicesList";
 import DevicesGrid from "./components/DevicesGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 import { Button } from "primereact/button";
 import axios from "axios";
+import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { useContext } from "react";
-import { AppContext } from "context/AppContext";
 
 const DevicesAdmin = () => {
   const [data, setData] = useState([]);
   const [isListView, setIsListView] = useState(true);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const [addData, setAddData] = useState();
+
+  const [addData, setAddData] = useState({
+    device_id: "",
+    device_type: "",
+    customer_id: "",
+    status: "",
+    sim_number: "",
+  });
   const [listCustomers, setListCustomers] = useState([]);
-  const { updateData, resetState } = useContext(AppContext);
+  const toastRef = useRef(null);
 
   useEffect(() => {
     fetchDevicesData();
-    // eslint-disable-next-line
   }, []);
-
-  useEffect(() => {
-    if (updateData === true) {
-      fetchDevicesData();
-    }
-    // eslint-disable-next-line
-  }, [updateData]);
 
   //Fetching all data
   const fetchDevicesData = () => {
@@ -40,13 +38,80 @@ const DevicesAdmin = () => {
           serialNo: index + 1,
         }));
         setData(formattedData);
-        resetState();
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
+  const handleEditDevice = (deviceId, editedDevice) => {
+    axios
+      .put(
+        `http://localhost:3001/api/Admin/Devices/update-Device/${deviceId}`,
+        editedDevice
+      )
+      .then((res) => {
+        fetchDevicesData();
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: `Device ${deviceId} updated successfully`,
+          life: 3000,
+        });
+      })
+      .catch((err) => {
+        if (err.response.data === 404) {
+          console.log(err.response.data.error);
+          toastRef.current.show({
+            severity: "warn",
+            summary: "Warning",
+            detail: "Device not found",
+            life: 3000,
+          });
+        }
+        if (err.response.data === 500) {
+          toastRef.current.show({
+            severity: "danger",
+            summary: "Error",
+            detail: "Failed to update device",
+            life: 3000,
+          });
+        }
+      });
+  };
+
+  const handleDeleteDevice = (deviceId) => {
+    axios
+      .put(`http://localhost:3001/api/Admin/Devices/delete-Device/${deviceId}`)
+      .then((res) => {
+        fetchDevicesData();
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: `Device ${deviceId} deleted successfully`,
+          life: 3000,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        toastRef.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to delete device. Please try again later.",
+          life: 3000,
+        });
+      });
+  };
+
+  const resetFormData = () => {
+    setAddData({
+      device_id: "",
+      device_type: "",
+      customer_id: "",
+      status: "",
+      sim_number: "",
+    });
+  };
   const handleListView = () => {
     setIsListView(true);
   };
@@ -56,10 +121,12 @@ const DevicesAdmin = () => {
   };
 
   const openDialog = () => {
+    resetFormData();
     setIsDialogVisible(true);
   };
 
   const closeDialog = () => {
+    resetFormData();
     setIsDialogVisible(false);
   };
 
@@ -83,14 +150,33 @@ const DevicesAdmin = () => {
       axios
         .post("http://localhost:3001/api/Admin/Devices/add-Device", addData)
         .then((res) => {
-          console.log(res);
           fetchDevicesData();
+          toastRef.current.show({
+            severity: "success",
+            summary: "Success",
+            detail: `Device ${addData.device_id} Added successfully`,
+            life: 3000,
+          });
+          closeDialog();
         })
         .catch((err) => {
           console.log(err);
+          toastRef.current.show({
+            severity: "error",
+            summary: "Error",
+            detail:
+              err.response?.data ||
+              "An error occurred. Please try again later.",
+            life: 3000,
+          });
         });
     } else {
-      alert("Fill all input fields");
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Incomplete form",
+        detail: "Fill all fields.",
+        life: 3000,
+      });
     }
   };
 
@@ -103,8 +189,8 @@ const DevicesAdmin = () => {
     axios
       .get("http://localhost:3001/api/Admin/Devices/get-customers")
       .then((res) => {
-        console.log(res);
         setListCustomers(res.data);
+        console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -120,6 +206,7 @@ const DevicesAdmin = () => {
 
   return (
     <>
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <div className="flex justify-between">
         <h4 className="text-dark text-xl font-bold dark:text-white">Devices</h4>
         <Dialog
@@ -132,31 +219,30 @@ const DevicesAdmin = () => {
           className="p-fluid dark:bg-gray-900"
         >
           <form onSubmit={handleSubmit} className="mx-auto">
-            <div className="flex justify-around">
-              <div className="card justify-content-center mt-5 flex">
-                <span className="p-float-label">
-                  <InputText
-                    id="device_id"
-                    name="device_id"
-                    onChange={handleChange}
-                  />
-                  <label htmlFor="device_id">DeviceId</label>
-                </span>
-              </div>
-              <div className="card justify-content-center mt-5 flex">
-                <span className="p-float-label">
-                  <Dropdown
-                    id="device_type"
-                    name="device_type"
-                    options={devicesOptions}
-                    optionLabel="label"
-                    optionValue="value"
-                    className="p-dropdown"
-                    onChange={handleChange}
-                  />
-                  <label htmlFor="device_type">Device_type</label>
-                </span>
-              </div>
+            <div className="mx-auto mt-8 w-[34.5vw]">
+              <span className="p-float-label">
+                <InputText
+                  id="device_id"
+                  name="device_id"
+                  onChange={handleChange}
+                />
+                <label htmlFor="device_id">DeviceId</label>
+              </span>
+            </div>
+            <div className="mx-auto mt-8 w-[34.5vw]">
+              <span className="p-float-label">
+                <Dropdown
+                  id="device_type"
+                  name="device_type"
+                  options={devicesOptions}
+                  optionLabel="label"
+                  optionValue="value"
+                  className="p-dropdown"
+                  onChange={handleChange}
+                  value={addData.device_type}
+                />
+                <label htmlFor="device_type">Device_type</label>
+              </span>
             </div>
 
             <div className="mx-auto mt-8 w-[34.5vw]">
@@ -169,6 +255,7 @@ const DevicesAdmin = () => {
                   optionValue="value"
                   className="p-dropdown"
                   onChange={handleChange}
+                  value={addData.customer_id}
                 />
                 <label htmlFor="customer_id">Customer List</label>
               </span>
@@ -183,7 +270,8 @@ const DevicesAdmin = () => {
                   optionValue="value"
                   className="p-dropdown"
                   onChange={handleChange}
-                />{" "}
+                  value={addData.status}
+                />
                 <label htmlFor="status">Status</label>
               </span>
             </div>
@@ -192,7 +280,7 @@ const DevicesAdmin = () => {
                 <InputText
                   id="sim_number"
                   name="sim_number"
-                  type="number"
+                  keyfilter="pint"
                   onChange={handleChange}
                 />
                 <label htmlFor="device_id">Sim Number</label>
@@ -238,10 +326,20 @@ const DevicesAdmin = () => {
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
         onClick={openDialog}
       />
-      {!isListView && <DevicesGrid data={data} />}
+      {!isListView && (
+        <DevicesGrid
+          data={data}
+          onEditDevice={handleEditDevice}
+          onDeleteDevice={handleDeleteDevice}
+        />
+      )}
       {isListView && (
         <div className="opacity-100 transition-opacity duration-500">
-          <DevicesList data={data} />
+          <DevicesList
+            data={data}
+            onEditDevice={handleEditDevice}
+            onDeleteDevice={handleDeleteDevice}
+          />
         </div>
       )}
     </>
