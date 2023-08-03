@@ -7,6 +7,7 @@ import axios from "axios";
 import { Toast } from "primereact/toast";
 import { useContext } from "react";
 import { AppContext } from "context/AppContext";
+import { MultiSelect } from "primereact/multiselect";
 
 const EditFeatureset = ({ parameters, onSuccess }) => {
   const [customers, setCustomers] = useState([]);
@@ -16,7 +17,7 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   const [formData, setFormData] = useState({});
   const toastErr = useRef(null);
 
-  const [matchedFirstNames, setMatchedFirstNames] = useState([]);
+  
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevFormData) => ({
@@ -30,17 +31,14 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
       ...prevData,
       selectCustomer: [...customers],
     }));
-    console.log(featuresetDetails);
+    console.log(setCustomers);
   }, [customers, featuresetDetails, setFormData]);
 
   useEffect(() => {
     setFormData(featuresetDetails);
   }, [featuresetDetails]);
 
-  const handleSelectCustomer = (e) => {
-    const { value } = e.target;
-    setCustomers([...customers, value]);
-  };
+  
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/featureset/featureset-get-all-customers")
@@ -52,19 +50,22 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
         console.log(err);
       });
   }, []);
+
+
+
   useEffect(() => {
-    axios
-      .get(
-        `http://localhost:3001/api/featureset/featureset/${parameters?.propValue}`
-      )
-      .then((res) => {
-        setFeaturesetDetails(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  axios
+    .get(
+      `http://localhost:3001/api/featureset/featureset/${parameters?.propValue}`
+    )
+    .then((res) => {
+      setFeaturesetDetails(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}, [parameters?.propValue]); 
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -96,6 +97,8 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
       });
     }
   };
+
+  console.log(featuresetDetails);
 
   const StationaryObjectoptions = [
     { label: "Yes", value: 0 },
@@ -167,27 +170,12 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   ];
   const Customersoptions = () => {
     return allCustomers?.map((el) => ({
-      label: el.first_name,
+      label: el.first_name +" "+ el.last_name,
       value: el.userId,
     }));
   };
 
-  useEffect(() => {
-    const getFirstNameByUserId = (userId) => {
-      const customer = allCustomers.find(
-        (customer) => customer.userId === userId
-      );
-      return customer ? customer.first_name : "";
-    };
 
-    const selectCustomers = featuresetDetails.selectCustomer || [];
-
-    const matchedNames = selectCustomers.map((customerId) =>
-      getFirstNameByUserId(customerId)
-    );
-
-    setMatchedFirstNames(matchedNames);
-  }, [featuresetDetails, allCustomers]);
 
   return (
     <>
@@ -236,15 +224,29 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
 
           <div className="field my-3  w-[30vw]">
             <label htmlFor="cust">Selected Customer</label>
-            <div>
-              {matchedFirstNames.length > 0 ? (
-                matchedFirstNames.map((firstName, index) => (
-                  <span key={index}> {`${firstName} `} </span>
-                ))
-              ) : (
-                <p>No matching customers</p>
-              )}
-            </div>
+           
+           <MultiSelect
+              value={formData.selectCustomer} 
+              options={Customersoptions()}
+              onChange={(e) => setFormData((prevData) => ({
+                ...prevData,
+                selectCustomer: e.value, 
+              }))}
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              optionLabel="label"
+              placeholder="Select Customers"
+              className="dark:bg-gray-900"
+              filter
+            />
+         
           </div>
           <p className="mt-4 font-bold ">System Type</p>
           <div className="my-3 flex flex-wrap gap-3">

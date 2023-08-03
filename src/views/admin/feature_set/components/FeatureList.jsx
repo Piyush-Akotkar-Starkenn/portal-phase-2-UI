@@ -369,18 +369,18 @@ const FeatureList = () => {
         <Column
           field="serialNo"
           className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "4rem", textAlign: "center" }}
+          style={{ minWidth: "7rem", textAlign: "center" }}
         />
         <Column
           field="featureSetId"
           header="ID"
-          style={{ minWidth: "8rem" }}
+          style={{ minWidth: "16rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column
           field="featureSetName"
           header="Name"
-          style={{ minWidth: "12rem" }}
+          style={{ minWidth: "26rem" }}
           className="border-none dark:bg-gray-900 dark:text-gray-200"
         />
         <Column

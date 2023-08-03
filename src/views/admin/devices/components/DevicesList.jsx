@@ -76,7 +76,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     label: deviceType,
     value: deviceType,
   }));
-
+  console.log(deviceTypeOptions);
   const representativeFilterTemplate = (options) => {
     return (
       <React.Fragment>
@@ -194,47 +194,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     closeDialog();
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   axios
-  //     .put(
-  //       `http://localhost:3001/api/Admin/Devices/update-Device/${rowId?.device_id}`,
-  //       editData
-  //     )
-  //     .then((res) => {
-  //       console.log(res.data.message);
-  //       updateFunc();
-  //       // alert("Updated successfully");
-  //       toastRef.current.show({
-  //         severity: "success",
-  //         summary: "Success",
-  //         detail: `Device ${editData.device_id} updated successfully`,
-  //         life: 3000,
-  //       });
-  //       closeDialog();
-  //     })
-  //     .catch((err) => {
-  //       if (err.response.data === 404) {
-  //         console.log(err.response.data.error);
-  //         toastRef.current.show({
-  //           severity: "warn",
-  //           summary: "Warning",
-  //           detail: "Device not found",
-  //           life: 3000,
-  //         });
-  //       }
-  //       if (err.response.data === 500) {
-  //         toastRef.current.show({
-  //           severity: "danger",
-  //           summary: "Error",
-  //           detail: "Failed to update device",
-  //           life: 3000,
-  //         });
-  //       }
-  //     });
-  // };
-
-  // ... (rest of the component)
   const handleChange = (e, name) => {
     const value = e.target ? e.target.value : e.value;
     setEditData((prevEditData) => ({
@@ -269,7 +228,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
 
   const Customersoptions = () => {
     return listCustomers?.map((el) => ({
-      label: el.first_name,
+      label: el.first_name + " " + el.last_name,
       value: el.userId,
     }));
   };
@@ -381,8 +340,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
         filters={filters}
         filterDisplay="menu"
         globalFilterFields={[
-          "vehicle_name",
-          "vehicle_id",
+          "device_id",
           "device_type",
           "sim_number",
           "customer_id",

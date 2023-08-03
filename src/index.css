@@ -412,8 +412,15 @@ body
 .pi-pencil {
   color: #a9abf8;
 }
+
 .edit:hover {
   border: 1px solid #a9abf8 !important;
+}
+.dark
+  .p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item.p-highlight {
+  background: transparent;
 }
 
 @media (max-width: 767px) {
