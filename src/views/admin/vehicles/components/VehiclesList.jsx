@@ -17,6 +17,7 @@ export default function VehiclesList() {
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const toast = useRef(null);
   const [visible, setVisible] = useState(false);
+  const [myData, setMyData] = useState();
 
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -72,6 +73,15 @@ export default function VehiclesList() {
     );
   };
 
+  const openDialog = (rowData) => {
+    setMyData(rowData);
+    setVisible(true);
+  };
+
+  const closeDialog = () => {
+    setVisible(false);
+  };
+
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
@@ -81,7 +91,7 @@ export default function VehiclesList() {
           outlined
           className="text-red-500 dark:text-blue-500"
           style={{ width: "2rem", height: "2rem" }}
-          onClick={() => setVisible(true)}
+          onClick={() => openDialog(rowData)}
         />
       </React.Fragment>
     );
@@ -208,17 +218,17 @@ export default function VehiclesList() {
       </div>
 
       <Dialog
-        header="Vehicle Details"
         visible={visible}
+        onHide={closeDialog}
+        header="Vehicle Details"
         style={{ width: "70vw" }}
-        onHide={() => setVisible(false)}
       >
         <TabView>
           <TabPanel header="Vehicle's Trips" leftIcon="pi pi-truck mr-2">
             <VehicleTrips />
           </TabPanel>
           <TabPanel header="Feature Set" leftIcon="pi pi-cog mr-2">
-            <FeatureSet />
+            <FeatureSet parameters={{ propValue: myData?._id }} />
           </TabPanel>
         </TabView>
       </Dialog>
