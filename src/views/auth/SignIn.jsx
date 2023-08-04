@@ -39,9 +39,14 @@ export default function SignIn() {
         .then((res) => {
           const token = res.data.accessToken;
           const user_type = res.data.data.user_type;
+          const userId = res.data.data.userId;
           const expirationTime = new Date();
           expirationTime.setDate(expirationTime.getDate() + 7); // Cookie expires in 1 week
           Cookies.set("token", token, {
+            expires: expirationTime,
+            sameSite: "strict",
+          });
+          Cookies.set("userId", userId, {
             expires: expirationTime,
             sameSite: "strict",
           });

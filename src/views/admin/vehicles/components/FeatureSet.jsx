@@ -1,45 +1,134 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { RadioButton } from "primereact/radiobutton";
-import Dropdown from "components/dropdown";
+import { Dropdown } from "primereact/dropdown";
+import { useState } from "react";
+import axios from "axios";
 
-const FeatureSet = () => {
-  const [editingEnabled, setEditingEnabled] = useState(false);
-  // eslint-disable-next-line
-  const [visible, setVisible] = useState(false);
+const FeatureSet = ({ parameters }) => {
+  console.log(parameters.propValue);
+  const [featuresetDetails, setFeaturesetDetails] = useState({});
+  const [formData, setFormData] = useState({});
 
-  // Function to toggle editing mode
-  const toggleEditingMode = () => {
-    setEditingEnabled((prevEditingEnabled) => !prevEditingEnabled);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
+
   useEffect(() => {
-    if (!visible) {
-      setEditingEnabled(false);
-    }
-  }, [visible]);
+    setFormData(featuresetDetails);
+  }, [featuresetDetails]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+
+    axios
+      .put(
+        `http://localhost:3001/api/featureset/featureset-edit-vehiclefeatureset/${parameters?.propValue}`,
+        formData
+      )
+      .then((res) => {
+        if (res.request.status === 200) {
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    axios
+      .get(
+        `http://localhost:3001/api/featureset/featureset-vehicleFeaturest-details/${parameters?.propValue}`
+      )
+      .then((res) => {
+        setFeaturesetDetails(res.data.vehicleData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  const StationaryObjectoptions = [
+    { label: "Yes", value: 0 },
+    { label: "No", value: 1 },
+  ];
+
+  const CompleteBrakeoptions = [
+    { label: "Yes", value: 1 },
+    { label: "No", value: 0 },
+  ];
+
+  const OncomingObstacleptions = [
+    { label: "Yes", value: 1 },
+    { label: "No", value: 0 },
+  ];
+
+  const SafetyModeoptions = [
+    { label: "Normal", value: "Normal" },
+    { label: "Relaxed", value: "Relaxed" },
+    {
+      label: "Strict",
+      value: "Strict",
+    },
+  ];
+
+  const Brakingoptions = [
+    { label: "Yes", value: 1 },
+    { label: "No", value: 0 },
+  ];
+
+  const VehicleTypeoptions = [{ label: "12V Pedal", value: "12V Pedal" }];
+
+  const AcceleratorTypeoptions = [
+    {
+      label: "Sensor",
+      value: "Sensor",
+    },
+    {
+      label: "Cylinder",
+      value: "Cylinder",
+    },
+    {
+      label: "Solenoid",
+      value: "Solenoid",
+    },
+  ];
+
+  const ProtocolTypeoptions = [
+    { label: "SAEJ1939", value: "SAEJ1939" },
+    {
+      label: "CAN",
+      value: "CAN",
+    },
+  ];
+
+  const BrakeTypeoptions = [
+    { label: "Cylinder", value: "Cylinder" },
+    { label: "Internal Braking", value: "Internal Braking" },
+    {
+      label: "Electromagnetic",
+      value: "Electromagnetic",
+    },
+  ];
+
+  const SpeedSourceoptions = [
+    { label: "Speed Wire", value: "Speed Wire" },
+    { label: "OBD", value: "OBD" },
+    { label: "GPS", value: "GPS" },
+  ];
 
   return (
     <>
-      <div className="mb-2 flex justify-end">
-        {/* Toggler for enabling/disabling editing */}
-        <Button
-          icon={editingEnabled ? "pi pi-lock-open" : "pi pi-lock"}
-          className={`p-button-rounded p-button-text ${
-            editingEnabled ? "p-button-success" : "p-button-danger"
-          }`}
-          onClick={toggleEditingMode}
-        />
-      </div>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="flex" style={{ flexDirection: "column" }}>
-            <label htmlFor="username">Feature Set ID*</label>
+            <label htmlFor="username">Feature Set ID12345*</label>
             <InputText
               id="username"
-              aria-describedby="username-help"
-              disabled
-              style={{
+              value={featuresetDetails?.featureSetId}
+              le={{
                 width: "63vw",
                 borderBottom: "1px dashed #ced4da",
                 borderRadius: "0px",
@@ -48,7 +137,8 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              value="Demo ID"
+              name="featureSetId"
+              onChange={handleChange}
             />
             <small id="username-help">Unique id to identify feature set</small>
           </div>
@@ -57,9 +147,7 @@ const FeatureSet = () => {
             <label htmlFor="username">Feature Set Name*</label>
             <InputText
               id="username"
-              aria-describedby="username-help"
-              disabled
-              style={{
+              le={{
                 width: "63vw",
                 borderBottom: "1px dashed #ced4da",
                 borderRadius: "0px",
@@ -68,29 +156,34 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              value="Demo Name"
+              value={featuresetDetails?.featureSetName}
+              name="featureSetName"
+              onChange={handleChange}
             />
             <small id="username-help">Unique id to identify feature set</small>
           </div>
+
           <p className="mt-4 font-bold ">System Type</p>
           <div className="my-3 flex flex-wrap gap-3">
             <div className="align-items-center flex">
-              <RadioButton
-                inputId="ingredient1"
-                name="offline"
+              <input
+                type="radio"
+                name="mode"
+                onChange={handleChange}
                 value="Offline"
-                disabled={!editingEnabled}
+                checked={formData?.mode === "Offline"}
               />
               <label htmlFor="ingredient1" className="ml-2">
                 Offline Mode
               </label>
             </div>
             <div className="align-items-center flex">
-              <RadioButton
-                inputId="ingredient2"
-                name="online"
+              <input
+                type="radio"
+                name="mode"
+                onChange={handleChange}
                 value="Online"
-                disabled={!editingEnabled}
+                checked={formData?.mode === "Online"}
               />
               <label htmlFor="ingredient2" className="ml-2">
                 Online Mode
@@ -99,46 +192,27 @@ const FeatureSet = () => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <div className="field my-3 w-[63vw]">
-          <label htmlFor="ecu">Version*</label>
-          <Dropdown
-            name="ecu"
-            id="ecu"
-            style={{
-              width: "63vw",
-              borderBottom: "1px dashed #ced4da",
-              borderRadius: "0px",
-              padding: "0.30px",
-              borderRight: "none",
-              borderLeft: "none",
-              borderTop: "none",
-            }}
-            disabled={!editingEnabled}
-            placeholder="Tap To Select"
-            optionLabel="ecu"
-            className="md:w-14rem mt-2 w-full"
-          />
-        </div>
-        <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Collision Avoidance System</p>
         <div className="card justify-content-center mt-5 flex gap-4">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
-              value="Offline"
-              disabled={!editingEnabled}
+            <input
+              type="radio"
+              name="CASMode"
+              value="Disable"
+              onChange={handleChange}
+              checked={formData?.CASMode === "Disable"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
-              value="Online"
-              disabled={!editingEnabled}
+            <input
+              type="radio"
+              name="CASMode"
+              value="Enable"
+              onChange={handleChange}
+              checked={formData?.CASMode === "Enable"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -147,12 +221,10 @@ const FeatureSet = () => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
+            <label>Activation Speed</label>
+            <InputText
+              keyfilter="pint"
               id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -162,16 +234,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="10"
+              value={formData?.activationSpeed || ""}
+              placeholder={
+                formData.activationSpeed
+                  ? formData.activationSpeed
+                  : "Enter a value"
+              }
+              name="activationSpeed"
+              onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Alarm Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Alarm Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -181,18 +257,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="1.5"
+              placeholder={
+                formData.alarmThreshold
+                  ? formData.alarmThreshold
+                  : "Enter a value"
+              }
+              value={formData?.alarmThreshold || ""}
+              name="alarmThreshold"
+              onChange={handleChange}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Brake Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -202,16 +282,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0.4"
+              value={formData?.brakeThreshold || ""}
+              placeholder={
+                formData.brakeThreshold
+                  ? formData.brakeThreshold
+                  : "Enter a value"
+              }
+              name="brakeThreshold"
+              onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Brake Speed</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -221,58 +305,24 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="40"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[63vw]">
-            <label htmlFor="ecu">Detect Stationary Object</label>
-            <Dropdown
-              name="ecu"
-              id="ecu"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              disabled={!editingEnabled}
-              placeholder="No"
-              optionLabel="ecu"
-              className="md:w-14rem mt-2 w-full"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Allow Complete Brake</label>
-            <Dropdown
-              name="ecu"
-              id="ecu"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              disabled={!editingEnabled}
-              placeholder="No"
-              optionLabel="ecu"
-              className="md:w-14rem mt-2 w-full"
+              value={formData?.brakeSpeed || ""}
+              placeholder={
+                formData.brakeSpeed ? formData.brakeSpeed : "Enter a value"
+              }
+              name="brakeSpeed"
+              onChange={handleChange}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[63vw]">
-            <label htmlFor="ecu">Detect Oncoming Obstacle</label>
+            <label htmlFor="stationaryobj">Detect Stationary Object</label>
             <Dropdown
-              name="ecu"
-              id="ecu"
+              id="stationaryobj"
+              options={StationaryObjectoptions}
+              optionLabel="label"
+              optionValue="value"
+              value={formData.detectStationaryObject}
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -282,17 +332,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              disabled={!editingEnabled}
-              placeholder="No"
-              optionLabel="ecu"
+              placeholder={
+                formData.detectStationaryObject
+                  ? formData.detectStationaryObject
+                  : "Select an option"
+              }
+              name="detectStationaryObject"
+              onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Safety Mode</label>
+            <label htmlFor="combrake">Allow Complete Brake</label>
             <Dropdown
-              name="ecu"
-              id="ecu"
+              name="allowCompleteBrake"
+              onChange={handleChange}
+              id="combrake"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -302,21 +357,78 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              disabled={!editingEnabled}
-              placeholder="Normal"
-              optionLabel="ecu"
+              options={CompleteBrakeoptions}
+              value={formData.allowCompleteBrake}
+              placeholder={
+                formData.allowCompleteBrake
+                  ? formData.allowCompleteBrake
+                  : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
+              className="md:w-14rem mt-2 w-full"
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[63vw]">
+            <label htmlFor="obstacle">Detect Oncoming Obstacle</label>
+            <Dropdown
+              name="detectOncomingObstacle"
+              id="obstacle"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              options={OncomingObstacleptions}
+              value={formData.detectOncomingObstacles}
+              placeholder={
+                formData.detectOncomingObstacles
+                  ? formData.detectOncomingObstacles
+                  : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
+              onChange={handleChange}
+              className="md:w-14rem mt-2 w-full"
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label htmlFor="safety">Safety Mode</label>
+            <Dropdown
+              name="safetyMode"
+              id="safety"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              options={SafetyModeoptions}
+              value={formData.safetyMode}
+              placeholder={
+                formData.safetyMode ? formData.safetyMode : "Select an option"
+              }
+              onChange={handleChange}
+              optionLabel="label"
+              optionValue="value"
               className="md:w-14rem mt-2 w-full"
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">TTC Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>TTC Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -326,16 +438,18 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="175"
+              value={formData?.ttcThreshold || ""}
+              placeholder={
+                formData.ttcThreshold ? formData.ttcThreshold : "Enter a value"
+              }
+              name="ttcThreshold"
+              onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake ON Duration</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Brake ON Duration</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -345,18 +459,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="1000"
+              name="brakeOnDuration"
+              onChange={handleChange}
+              placeholder={
+                formData.brakeOnDuration
+                  ? formData.brakeOnDuration
+                  : "Enter a value"
+              }
+              value={formData?.brakeOnDuration || ""}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake OFF Duration</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Brake OFF Duration</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -366,70 +484,40 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="1000"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Start Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="12"
+              name="brakeOffDuration"
+              onChange={handleChange}
+              value={formData?.brakeOffDuration || ""}
+              placeholder={
+                formData.brakeOffDuration
+                  ? formData.brakeOffDuration
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Stop Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="12"
-            />
-          </div>
-        </div>
+
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">Sleep Alert</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="sleepAlertMode"
+              onChange={handleChange}
               value="Offline"
-              disabled={!editingEnabled}
+              checked={formData?.sleepAlertMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="sleepAlertMode"
+              onChange={handleChange}
               value="Online"
-              disabled={!editingEnabled}
+              checked={formData?.sleepAlertMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -438,12 +526,9 @@ const FeatureSet = () => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Pre Warning</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Pre Warning</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -453,16 +538,18 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="5"
+              value={formData?.preWarning || ""}
+              placeholder={
+                formData.preWarning ? formData.preWarning : "Enter a value"
+              }
+              name="preWarning"
+              onChange={handleChange}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Sleep Alert Interval</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Sleep Alert Interval</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -472,58 +559,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="60"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="40"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Start Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="23"
+              name="sleepAlertInterval"
+              onChange={handleChange}
+              placeholder={
+                formData.sleepAlertInterval
+                  ? formData.sleepAlertInterval
+                  : "Enter a value"
+              }
+              value={formData?.sleepAlertInterval || ""}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Stop Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Activation Speed</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -533,16 +584,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="6"
+              name="activationSpeed"
+              onChange={handleChange}
+              value={formData?.activationSpeed || ""}
+              placeholder={
+                formData.activationSpeed
+                  ? formData.activationSpeed
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Activate Time</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Start Time</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -552,16 +607,68 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="10"
+              name="startTime"
+              onChange={handleChange}
+              value={formData?.startTime || ""}
+              placeholder={
+                formData.startTime ? formData.startTime : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Braking</label>
+            <label>Stop Time</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="stopTime"
+              onChange={handleChange}
+              value={formData?.stopTime || ""}
+              placeholder={
+                formData.stopTime ? formData.stopTime : "Enter a value"
+              }
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label>Brake Activate Time</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="brakeActivateTime"
+              onChange={handleChange}
+              value={formData?.brakeActivateTime || ""}
+              placeholder={
+                formData.brakeActivateTime
+                  ? formData.brakeActivateTime
+                  : "Enter a value"
+              }
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label htmlFor="braking">Braking</label>
             <Dropdown
-              name="ecu"
-              id="ecu"
+              name="braking"
+              onChange={handleChange}
+              id="braking"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -571,9 +678,13 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              disabled={!editingEnabled}
-              placeholder="No"
-              optionLabel="ecu"
+              options={Brakingoptions}
+              value={formData.braking}
+              placeholder={
+                formData.braking ? formData.braking : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
               className="md:w-14rem mt-2 w-full"
             />
           </div>
@@ -582,22 +693,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Driver Evaluation</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="driverEvalMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.driverEvalMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="driverEvalMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.driverEvalMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -606,12 +719,9 @@ const FeatureSet = () => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Max Lane Change Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Max Lane Change Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -621,16 +731,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0.35"
+              name="maxLaneChangeThreshold"
+              onChange={handleChange}
+              value={formData?.maxLaneChangeThreshold || ""}
+              placeholder={
+                formData.maxLaneChangeThreshold
+                  ? formData.maxLaneChangeThreshold
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Min Lane Change Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Min Lane Change Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -640,58 +754,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="-0.35"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Max Harsh Acceleration Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0.25"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Min Harsh Acceleration Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0"
+              name="minLaneChangeThreshold"
+              onChange={handleChange}
+              value={formData?.minLaneChangeThreshold || ""}
+              placeholder={
+                formData.minLaneChangeThreshold
+                  ? formData.minLaneChangeThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Sudden Braking Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Max Harsh Acceleration Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -701,16 +779,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="-0.4"
+              name="maxHarshAccelerationThreshold"
+              onChange={handleChange}
+              value={formData?.maxHarshAccelerationThreshold || ""}
+              placeholder={
+                formData.maxHarshAccelerationThreshold
+                  ? formData.maxHarshAccelerationThreshold
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Max Speed Bump Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Min Harsh Acceleration Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -720,18 +802,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0.5"
+              name="minHarshAccelerationThreshold"
+              onChange={handleChange}
+              value={formData?.minHarshAccelerationThreshold || ""}
+              placeholder={
+                formData.minHarshAccelerationThreshold
+                  ? formData.minHarshAccelerationThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Min Speed Bump Threshold</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Sudden Braking Threshold</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -741,7 +827,62 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="10"
+              name="suddenBrakingThreshold"
+              onChange={handleChange}
+              value={formData?.suddenBrakingThreshold || ""}
+              placeholder={
+                formData.suddenBrakingThreshold
+                  ? formData.suddenBrakingThreshold
+                  : "Enter a value"
+              }
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label>Max Speed Bump Threshold</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="maxSpeedBumpThreshold"
+              onChange={handleChange}
+              value={formData?.maxSpeedBumpThreshold || ""}
+              placeholder={
+                formData.maxSpeedBumpThreshold
+                  ? formData.maxSpeedBumpThreshold
+                  : "Enter a value"
+              }
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>Min Speed Bump Threshold</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="minSpeedBumpThreshold"
+              onChange={handleChange}
+              value={formData?.minSpeedBumpThreshold || ""}
+              placeholder={
+                formData.minSpeedBumpThreshold
+                  ? formData.minSpeedBumpThreshold
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -749,22 +890,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Speed Governor</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="GovernerMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.GovernerMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              onChange={handleChange}
+              name="GovernerMode"
               value="Online"
-              disabled={!editingEnabled}
+              checked={formData?.GovernerMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -773,12 +916,9 @@ const FeatureSet = () => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Speed Limit</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Speed Limit</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -788,7 +928,12 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="100"
+              name="speedLimit"
+              onChange={handleChange}
+              placeholder={
+                formData.speedLimit ? formData.speedLimit : "Enter a value"
+              }
+              value={formData?.speedLimit || ""}
             />
           </div>
         </div>
@@ -796,22 +941,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Cruise</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              onChange={handleChange}
+              name="cruiseMode"
               value="Offline"
-              disabled={!editingEnabled}
+              checked={formData?.cruiseMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="cruiseMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.cruiseMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -819,12 +966,9 @@ const FeatureSet = () => {
           </div>
         </div>
         <div className="field my-3 w-[30vw]">
-          <label htmlFor="ecu">Speed Limit</label>
-          <input
-            type="number"
-            id="username"
-            aria-describedby="username-help"
-            disabled={!editingEnabled}
+          <label>Activation Speed</label>
+          <InputText
+            keyfilter="pint"
             style={{
               width: "30vw",
               borderBottom: "1px dashed #ced4da",
@@ -834,15 +978,21 @@ const FeatureSet = () => {
               borderLeft: "none",
               borderTop: "none",
             }}
-            placeholder="100"
+            name="activationSpeed"
+            onChange={handleChange}
+            value={formData?.activationSpeed || ""}
+            placeholder={
+              formData.activationSpeed
+                ? formData.activationSpeed
+                : "Enter a value"
+            }
           />
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Vehicle Type</label>
+            <label htmlFor="vehicle">Vehicle Type</label>
             <Dropdown
-              name="ecu"
-              id="ecu"
+              id="vehicle"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -852,9 +1002,15 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              disabled={!editingEnabled}
-              placeholder="12V Pedal"
-              optionLabel="ecu"
+              name="vehicleType"
+              onChange={handleChange}
+              options={VehicleTypeoptions}
+              value={formData.vehicleType}
+              placeholder={
+                formData.vehicleType ? formData.vehicleType : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
               className="md:w-14rem mt-2 w-full"
             />
           </div>
@@ -863,22 +1019,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">OBD</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="obdMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.obdMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="obdMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.obdMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -888,10 +1046,9 @@ const FeatureSet = () => {
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Protocol Type</label>
+            <label htmlFor="protocol">Protocol Type</label>
             <Dropdown
-              name="ecu"
-              id="ecu"
+              id="protocol"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -901,9 +1058,17 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              disabled={!editingEnabled}
-              placeholder="SAE J1393"
-              optionLabel="ecu"
+              name="protocolType"
+              onChange={handleChange}
+              options={ProtocolTypeoptions}
+              value={formData.protocolType}
+              placeholder={
+                formData.protocolType
+                  ? formData.protocolType
+                  : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
               className="md:w-14rem mt-2 w-full"
             />
           </div>
@@ -912,22 +1077,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">TPMS</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="tpmsMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.tpmsMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="tpmsMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.tpmsMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -939,10 +1106,9 @@ const FeatureSet = () => {
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Accelerator Type</label>
+            <label htmlFor="acc">Accelerator Type</label>
             <Dropdown
-              name="ecu"
-              id="ecu"
+              id="acc"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -952,9 +1118,42 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              disabled={!editingEnabled}
-              placeholder="Sensor"
-              optionLabel="ecu"
+              value={formData.acceleratorType}
+              placeholder={
+                formData.acceleratorType
+                  ? formData.acceleratorType
+                  : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
+              name="acceleratorType"
+              onChange={handleChange}
+              options={AcceleratorTypeoptions}
+              className="md:w-14rem mt-2 w-full"
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label htmlFor="brake">Brake Type</label>
+            <Dropdown
+              id="brake"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              placeholder={
+                formData.brakeType ? formData.brakeType : "Select an option"
+              }
+              optionLabel="label"
+              optionValue="value"
+              name="brakeType"
+              value={formData.brakeType}
+              onChange={handleChange}
+              options={BrakeTypeoptions}
               className="md:w-14rem mt-2 w-full"
             />
           </div>
@@ -964,22 +1163,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Laser Sensor</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="lazerMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.lazerMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="lazerMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.lazerMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -989,22 +1190,24 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">RF Sensor</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="rfSensorMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.rfSensorMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="rfSensorMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.rfSensorMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1013,12 +1216,9 @@ const FeatureSet = () => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">RF Angle</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>RF Angle</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1028,37 +1228,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Activation Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="1"
+              name="rfAngle"
+              onChange={handleChange}
+              value={formData?.rfAngle || ""}
+              placeholder={
+                formData.rfAngle ? formData.rfAngle : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1068,16 +1251,18 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="reserved1"
+              onChange={handleChange}
+              value={formData?.reserved1 || ""}
+              placeholder={
+                formData.reserved1 ? formData.reserved1 : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 2</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Reserved 2</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1087,84 +1272,19 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="reserved2"
+              onChange={handleChange}
+              value={formData?.reserved2 || ""}
+              placeholder={
+                formData.reserved2 ? formData.reserved2 : "Enter a value"
+              }
             />
           </div>
         </div>
-        <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Speed Settings</p>
-
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Speed Source</label>
-            <Dropdown
-              name="ecu"
-              id="ecu"
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              disabled={!editingEnabled}
-              placeholder="Speed Wire"
-              optionLabel="ecu"
-              className="md:w-14rem mt-2 w-full"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Slope</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0.51"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Offset</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="4.08"
-            />
-          </div>
-        </div>
-        <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Shutdown Delay</p>
         <div className="field my-3 w-[30vw]">
-          <label htmlFor="ecu">Delay</label>
-          <input
-            type="number"
-            id="username"
-            aria-describedby="username-help"
-            disabled={!editingEnabled}
+          <label>Reserved 3</label>
+          <InputText
+            keyfilter="pint"
             style={{
               width: "30vw",
               borderBottom: "1px dashed #ced4da",
@@ -1174,29 +1294,127 @@ const FeatureSet = () => {
               borderLeft: "none",
               borderTop: "none",
             }}
-            placeholder="30"
+            name="reserved3"
+            onChange={handleChange}
+            value={formData?.reserved3 || ""}
+            placeholder={
+              formData.reserved3 ? formData.reserved3 : "Enter a value"
+            }
+          />
+        </div>
+        <hr style={{ borderColor: "#333" }} />
+        <p className="mt-4 font-bold ">Speed Settings</p>
+
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label htmlFor="speed">Speed Source</label>
+            <Dropdown
+              id="speed"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="speedSource"
+              value={formData.speedSource}
+              placeholder={
+                formData.speedSource ? formData.speedSource : "Select an option"
+              }
+              options={SpeedSourceoptions}
+              optionLabel="label"
+              optionValue="value"
+              onChange={handleChange}
+              className="md:w-14rem mt-2 w-full"
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>Slope</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="slope"
+              onChange={handleChange}
+              value={formData?.slope || ""}
+              placeholder={formData.slope ? formData.slope : "Enter a value"}
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label>Offset</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="offset"
+              onChange={handleChange}
+              value={formData?.offset || ""}
+              placeholder={formData.offset ? formData.offset : "Enter a value"}
+            />
+          </div>
+        </div>
+        <hr style={{ borderColor: "#333" }} />
+        <p className="mt-4 font-bold ">Shutdown Delay</p>
+        <div className="field my-3 w-[30vw]">
+          <label>Delay</label>
+          <InputText
+            keyfilter="pint"
+            style={{
+              width: "30vw",
+              borderBottom: "1px dashed #ced4da",
+              borderRadius: "0px",
+              padding: "0.30px",
+              borderRight: "none",
+              borderLeft: "none",
+              borderTop: "none",
+            }}
+            name="delay"
+            onChange={handleChange}
+            value={formData?.delay || ""}
+            placeholder={formData.delay ? formData.delay : "Enter a value"}
           />
         </div>
         <hr style={{ borderColor: "#333" }} />
         <p className="mt-4 font-bold ">RF Name</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="rfNameMode"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.rfNameMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="rfNameMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.rfNameMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1207,12 +1425,9 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Time Based Errors</p>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">No Alarm</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>No Alarm</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1222,16 +1437,18 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="noAlarm"
+              onChange={handleChange}
+              value={formData?.noAlarm || ""}
+              placeholder={
+                formData.noAlarm ? formData.noAlarm : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Speed</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Speed</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1241,18 +1458,18 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="speed"
+              onChange={handleChange}
+              value={formData?.speed || ""}
+              placeholder={formData.speed ? formData.speed : "Enter a value"}
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Acceleration Bypass</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Acceleration Bypass</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1262,26 +1479,14 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">TPMS</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0"
+              value={formData?.accelerationBypass || ""}
+              placeholder={
+                formData.accelerationBypass
+                  ? formData.accelerationBypass
+                  : "Enter a value"
+              }
+              name="accelerationBypass"
+              onChange={handleChange}
             />
           </div>
         </div>
@@ -1289,12 +1494,9 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Speed Based Errors</p>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">RF Sensor Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>RF Sensor Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1304,16 +1506,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="100"
+              name="rfSensorAbsent"
+              onChange={handleChange}
+              value={formData?.rfSensorAbsent || ""}
+              placeholder={
+                formData.rfSensorAbsent
+                  ? formData.rfSensorAbsent
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Gyroscope Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Gyroscope Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1323,58 +1529,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="100"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">HMI Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="100"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Time Not Set</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="100"
+              name="gyroscopeAbsent"
+              onChange={handleChange}
+              value={formData?.gyroscopeAbsent || ""}
+              placeholder={
+                formData.gyroscopeAbsent
+                  ? formData.gyroscopeAbsent
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Brake Error</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>HMI Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1384,16 +1554,18 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="hmiAbsent"
+              onChange={handleChange}
+              value={formData?.hmiAbsent || ""}
+              placeholder={
+                formData.hmiAbsent ? formData.hmiAbsent : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">TPMS Error</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Time Not Set</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1403,18 +1575,87 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="timeNotSet"
+              onChange={handleChange}
+              value={formData?.timeNotSet || ""}
+              placeholder={
+                formData.timeNotSet ? formData.timeNotSet : "Enter a value"
+              }
+            />
+          </div>
+        </div>
+        <div className="field my-3 w-[30vw]">
+          <label>Acceleration Error</label>
+          <InputText
+            keyfilter="pint"
+            style={{
+              width: "30vw",
+              borderBottom: "1px dashed #ced4da",
+              borderRadius: "0px",
+              padding: "0.30px",
+              borderRight: "none",
+              borderLeft: "none",
+              borderTop: "none",
+            }}
+            name="accelerationError"
+            onChange={handleChange}
+            value={formData?.accelerationError || ""}
+            placeholder={
+              formData.accelerationError
+                ? formData.accelerationError
+                : "Enter a value"
+            }
+          />
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>Brake Error</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="brakeError"
+              onChange={handleChange}
+              value={formData?.brakeError || ""}
+              placeholder={
+                formData.brakeError ? formData.brakeError : "Enter a value"
+              }
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label>TPMS Error</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="tpmsError"
+              onChange={handleChange}
+              value={formData?.tpmsError || ""}
+              placeholder={
+                formData.tpmsError ? formData.tpmsError : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">OBD Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>OSIM Card Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1424,16 +1665,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="simCardAbsent"
+              onChange={handleChange}
+              value={formData?.simCardAbsent || ""}
+              placeholder={
+                formData.simCardAbsent
+                  ? formData.simCardAbsent
+                  : "Enter a value"
+              }
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">No Alarm</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Low battery</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1443,58 +1688,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Laser Sensor Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">RFID Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0"
+              name="lowBattery"
+              onChange={handleChange}
+              value={formData?.lowBattery || ""}
+              placeholder={
+                formData.lowBattery ? formData.lowBattery : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">IOT Absent</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Trip Not Started</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1504,16 +1711,20 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="tripNotStarted"
+              onChange={handleChange}
+              placeholder={
+                formData.tripNotStarted
+                  ? formData.tripNotStarted
+                  : "Enter a value"
+              }
+              value={formData?.tripNotStarted || ""}
             />
           </div>
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Accessory Board</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Bluetooth Conn Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1523,58 +1734,22 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
-            />
-          </div>
-        </div>
-        <div className="flex justify-between">
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">DD Module Disconnected</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="60"
-            />
-          </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Alcohol Sensor Disconnected</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
-              style={{
-                width: "30vw",
-                borderBottom: "1px dashed #ced4da",
-                borderRadius: "0px",
-                padding: "0.30px",
-                borderRight: "none",
-                borderLeft: "none",
-                borderTop: "none",
-              }}
-              placeholder="0"
+              name="bluetoothConnAbsent"
+              onChange={handleChange}
+              value={formData?.bluetoothConnAbsent || ""}
+              placeholder={
+                formData.bluetoothConnAbsent
+                  ? formData.bluetoothConnAbsent
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Temperature Sensor Disconnected</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>OBD Absent</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1584,7 +1759,102 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="obdAbsent"
+              onChange={handleChange}
+              value={formData?.obdAbsent || ""}
+              placeholder={
+                formData.obdAbsent ? formData.obdAbsent : "Enter a value"
+              }
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label>No Alarm</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="noAlarm"
+              onChange={handleChange}
+              value={formData?.noAlarm || ""}
+              placeholder={
+                formData.noAlarm ? formData.noAlarm : "Enter a value"
+              }
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>Laser SensorAbsent</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="laserSensorAbsent"
+              onChange={handleChange}
+              value={formData?.laserSensorAbsent || ""}
+              placeholder={
+                formData.laserSensorAbsent
+                  ? formData.laserSensorAbsent
+                  : "Enter a value"
+              }
+            />
+          </div>
+          <div className="field my-3 w-[30vw]">
+            <label>RFID Absent</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="rfidAbsent"
+              onChange={handleChange}
+              value={formData?.rfidAbsent || ""}
+              placeholder={
+                formData.rfidAbsent ? formData.rfidAbsent : "Enter a value"
+              }
+            />
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>IoT Absent</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="iotAbsent"
+              onChange={handleChange}
+              value={formData?.iotAbsent || ""}
+              placeholder={
+                formData.iotAbsent ? formData.iotAbsent : "Enter a value"
+              }
             />
           </div>
         </div>
@@ -1592,22 +1862,77 @@ const FeatureSet = () => {
         <p className="mt-4 font-bold ">Firmware OTA Update</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient1"
-              name="offline"
+            <input
+              type="radio"
+              name="firmwareOtaUpdate"
               value="Offline"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.firmwareOtaUpdate === "Offline"}
+            />
+            <label htmlFor="firmwareOtaUpdate1" className="ml-2">
+              Not Available
+            </label>
+          </div>
+          <div className="align-items-center flex">
+            <input
+              type="radio"
+              name="firmwareOtaUpdate"
+              value="Online"
+              onChange={handleChange}
+              checked={formData?.firmwareOtaUpdate === "Online"}
+            />
+            <label htmlFor="firmwareOtaUpdate2" className="ml-2">
+              Available
+            </label>
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
+              style={{
+                width: "30vw",
+                borderBottom: "1px dashed #ced4da",
+                borderRadius: "0px",
+                padding: "0.30px",
+                borderRight: "none",
+                borderLeft: "none",
+                borderTop: "none",
+              }}
+              name="firewarereserver1"
+              onChange={handleChange}
+              value={formData?.firewarereserver1 || ""}
+              placeholder={
+                formData.firewarereserver1
+                  ? formData.firewarereserver1
+                  : "Enter a value"
+              }
+            />
+          </div>
+        </div>
+        <hr style={{ borderColor: "#333" }} />
+        <p className="mt-4 font-bold ">Alcohol Detection</p>
+        <div className="my-3 flex flex-wrap gap-3">
+          <div className="align-items-center flex">
+            <input
+              type="radio"
+              name="alcoholDetectionMode"
+              value="Offline"
+              onChange={handleChange}
+              checked={formData?.alcoholDetectionMode === "Offline"}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Not Available
             </label>
           </div>
           <div className="align-items-center flex">
-            <RadioButton
-              inputId="ingredient2"
-              name="online"
+            <input
+              type="radio"
+              name="alcoholDetectionMode"
               value="Online"
-              disabled={!editingEnabled}
+              onChange={handleChange}
+              checked={formData?.alcoholDetectionMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Available
@@ -1616,12 +1941,9 @@ const FeatureSet = () => {
         </div>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 1</label>
-            <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1631,16 +1953,50 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="alcoholreserved1"
+              onChange={handleChange}
+              value={formData?.alcoholreserved1 || ""}
+              placeholder={
+                formData.alcoholreserved1
+                  ? formData.alcoholreserved1
+                  : "Enter a value"
+              }
             />
           </div>
-          <div className="field my-3 w-[30vw]">
-            <label htmlFor="ecu">Reserved 2</label>
+        </div>
+        <hr style={{ borderColor: "#333" }} />
+        <p className="mt-4 font-bold ">Driver Drowsiness</p>
+        <div className="my-3 flex flex-wrap gap-3">
+          <div className="align-items-center flex">
             <input
-              type="number"
-              id="username"
-              aria-describedby="username-help"
-              disabled={!editingEnabled}
+              type="radio"
+              name="driverDrowsinessMode"
+              value="Offline"
+              onChange={handleChange}
+              checked={formData?.driverDrowsinessMode === "Offline"}
+            />
+            <label htmlFor="ingredient1" className="ml-2">
+              Not Available
+            </label>
+          </div>
+          <div className="align-items-center flex">
+            <input
+              type="radio"
+              name="driverDrowsinessMode"
+              value="Online"
+              onChange={handleChange}
+              checked={formData?.driverDrowsinessMode === "Online"}
+            />
+            <label htmlFor="ingredient2" className="ml-2">
+              Available
+            </label>
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div className="field my-3 w-[30vw]">
+            <label>Reserved 1</label>
+            <InputText
+              keyfilter="pint"
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -1650,15 +2006,24 @@ const FeatureSet = () => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
-              placeholder="0"
+              name="driverreserved1"
+              onChange={handleChange}
+              value={formData?.driverreserved1 || ""}
+              placeholder={
+                formData.driverreserved1
+                  ? formData.driverreserved1
+                  : "Enter a value"
+              }
             />
           </div>
         </div>
         <div className="text-right">
           <Button
-            label="Update"
+            label="Update Feature Set"
             icon="pi pi-check"
-            className="p-button-primary px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
+            type="submit"
+            className="px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
+            style={{ width: "fit-content", background: "#2152FF" }}
           />
         </div>
       </form>
