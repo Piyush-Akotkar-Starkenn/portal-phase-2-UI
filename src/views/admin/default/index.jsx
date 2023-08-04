@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [customersCount, setCustomersCount] = useState();
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Customers/Vehicles/getAllVehicle")
+      .get(`${process.env.REACT_APP_API_URL}/Customers/Vehicles/getAllVehicle`)
 
       .then((res, res2) => {
         console.log(res);
@@ -24,7 +24,7 @@ const Dashboard = () => {
   }, []);
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-all-devices`)
 
       .then((res) => {
         console.log(res);
@@ -36,7 +36,7 @@ const Dashboard = () => {
   }, []);
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Admin/GetAll")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/GetAll`)
 
       .then((res) => {
         console.log(res);

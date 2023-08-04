@@ -4,15 +4,18 @@ import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Tag } from "primereact/tag";
-import axios from "axios";
 
-const VehicleTrips = () => {
+import axios from "axios";
+import { Dialog } from "primereact/dialog";
+
+const ReportList = () => {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
   const [data, setData] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   useEffect(() => {
     axios
@@ -66,32 +69,62 @@ const VehicleTrips = () => {
       </span>
     </div>
   );
-  const getSeverity = (data) => {
-    switch (data.status) {
-      case "1":
-        return "success";
 
-      case "0":
-        return "danger";
-
-      default:
-        return null;
-    }
+  const openDeleteDialog = (rowData) => {
+    setSelectedReport(rowData);
+    setDeleteDialogVisible(true);
   };
 
-  const statusBodyTemplate = (rowData) => {
+  const actionBodyTemplate = (rowData) => {
     return (
-      <Tag
-        className="px-3"
-        value={
-          parseInt(rowData.status) === 1
-            ? "Active"
-            : parseInt(rowData.status) === 0
-            ? "Deactive"
-            : undefined
+      <React.Fragment>
+        <Button
+          icon="pi pi-trash"
+          rounded
+          outlined
+          style={{ width: "2rem", height: "2rem" }}
+          severity="danger"
+          onClick={() => openDeleteDialog(rowData)}
+        />
+      </React.Fragment>
+    );
+  };
+
+  const DeleteDeviceDialog = ({ visible, onHide }) => {
+    const handleConfirmDelete = async () => {
+      try {
+        // await onDeleteDevice(selectedDevice?.device_id);
+        onHide();
+      } catch (error) {
+        console.error(error);
+        onHide();
+      }
+    };
+
+    return (
+      <Dialog
+        visible={visible}
+        onHide={onHide}
+        header="Confirm Delete"
+        footer={
+          <div>
+            <Button
+              label="Delete"
+              icon="pi pi-times"
+              className="p-button-danger px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={handleConfirmDelete}
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-check"
+              className="p-button-secondary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
+              onClick={onHide}
+            />
+          </div>
         }
-        severity={getSeverity(rowData)}
-      ></Tag>
+      >
+        <div>Are you sure you want to delete {selectedReport?.title}?</div>
+      </Dialog>
     );
   };
   return (
@@ -114,7 +147,7 @@ const VehicleTrips = () => {
           "iot",
           "ecu",
         ]}
-        emptyMessage="No vehicles found."
+        emptyMessage="No reports found."
         header={header}
       >
         <Column
@@ -124,7 +157,7 @@ const VehicleTrips = () => {
         ></Column>
         <Column
           field="vehicle_name"
-          header="Vehicle Name"
+          header="Report ID"
           sortable
           className="border-none dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "10rem", border: "none !important" }}
@@ -132,43 +165,31 @@ const VehicleTrips = () => {
 
         <Column
           field="vehicle_registration"
-          header="Registration No."
+          header="Report Title"
           sortable
           className="border-none dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "12rem" }}
         ></Column>
         <Column
           field="dms"
-          header="DMS"
+          header="Created On"
           sortable
           className="border-none dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "9rem" }}
         ></Column>
         <Column
-          field="iot"
-          header="IoT"
-          sortable
-          className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "9rem" }}
-        ></Column>
-        <Column
-          field="ecu"
-          header="ECU"
-          sortable
-          className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "9rem" }}
-        ></Column>
-        <Column
-          field="status"
-          header="Status"
-          body={statusBodyTemplate}
-          sortable
-          className="border-none dark:bg-gray-900 dark:text-gray-200"
-          style={{ minWidth: "7rem" }}
+          body={actionBodyTemplate}
+          header="Action"
+          className="dark:bg-gray-900 dark:text-gray-200"
+          style={{ minWidth: "6rem" }}
         ></Column>
       </DataTable>
+      <DeleteDeviceDialog
+        visible={deleteDialogVisible}
+        onHide={() => setDeleteDialogVisible(false)}
+      />
     </>
   );
 };
 
-export default VehicleTrips;
+export default ReportList;

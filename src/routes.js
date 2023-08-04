@@ -23,6 +23,7 @@ import {
   MdOutlineDashboard,
   MdWebhook,
   MdOutlineFeaturedPlayList,
+  MdContactPhone,
 } from "react-icons/md";
 import { BsTruck, BsFillCpuFill } from "react-icons/bs";
 import { AiOutlineCheckSquare } from "react-icons/ai";
@@ -32,6 +33,7 @@ import { BiRfid } from "react-icons/bi";
 import { HiOutlineUsers } from "react-icons/hi";
 import AdminProtected from "authorization/AdminProteted";
 import CustomerProtected from "authorization/CustomerProtected";
+import { DiDatabase } from "react-icons/di";
 
 //routes for Admin panel
 export const routes_admin = [
@@ -127,6 +129,30 @@ export const routes_customer = [
   },
   {
     name: "",
+    title: "Devices",
+    layout: "/customer",
+    icon: <BsFillCpuFill className="h-7 w-7" />,
+    path: "devices",
+    component: (
+      <CustomerProtected>
+        <Devices />
+      </CustomerProtected>
+    ),
+  },
+  {
+    name: "",
+    title: "Drivers",
+    layout: "/customer",
+    path: "Drivers",
+    icon: <RiContactsLine className="h-7 w-7" />,
+    component: (
+      <CustomerProtected>
+        <RFIDs />
+      </CustomerProtected>
+    ),
+  },
+  {
+    name: "",
     title: "Vehicles",
     layout: "/customer",
     path: "vehicles",
@@ -140,13 +166,13 @@ export const routes_customer = [
   },
   {
     name: "",
-    title: "Devices",
+    title: "Vehicle Logs",
     layout: "/customer",
-    icon: <BsFillCpuFill className="h-7 w-7" />,
-    path: "devices",
+    path: "vehicle-logs",
+    icon: <DiDatabase className="h-7 w-7" />,
     component: (
       <CustomerProtected>
-        <Devices />
+        <RFIDs />
       </CustomerProtected>
     ),
   },
@@ -188,13 +214,13 @@ export const routes_customer = [
   },
   {
     name: "",
-    title: "Contacts",
+    title: "RFIDs",
     layout: "/customer",
-    path: "contacts",
-    icon: <RiContactsLine className="h-7 w-7" />,
+    path: "RFIDs",
+    icon: <BiRfid className="h-7 w-7" />,
     component: (
       <CustomerProtected>
-        <Contacts />
+        <RFIDs />
       </CustomerProtected>
     ),
   },
@@ -212,13 +238,13 @@ export const routes_customer = [
   },
   {
     name: "",
-    title: "RFIDs",
+    title: "Contacts",
     layout: "/customer",
-    path: "RFIDs",
-    icon: <BiRfid className="h-7 w-7" />,
+    path: "contacts",
+    icon: <MdContactPhone className="h-7 w-7" />,
     component: (
       <CustomerProtected>
-        <RFIDs />
+        <Contacts />
       </CustomerProtected>
     ),
   },

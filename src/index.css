@@ -279,17 +279,7 @@ input:checked.defaultCheckbox::before {
 .dark .p-menu .p-menuitem-link .p-menuitem-text {
   color: #ddd;
 }
-.custom-datepicker .p-datepicker {
-  width: 200px; /* Set the desired width */
-}
 
-.custom-datepicker .p-datepicker-calendar-container {
-  width: 200px; /* Set the desired width */
-}
-
-.custom-datepicker .p-datepicker-calendar {
-  width: 100%;
-}
 body
   > div.p-datepicker.p-component.p-ripple-disabled.p-connected-overlay-enter-done {
   width: 250px;
@@ -306,8 +296,8 @@ body
   border-radius: 0px;
 }
 .p-calendar .p-inputtext {
-  padding: 10px 0px;
-  text-align: center;
+  padding: 10px 10px;
+  text-align: left;
 }
 .p-tabview-nav {
   justify-content: center;
@@ -412,7 +402,10 @@ body
 .pi-pencil {
   color: #a9abf8;
 }
-
+.p-dataview .p-paginator-bottom {
+  border-width: 0px;
+  border-radius: 0;
+}
 .edit:hover {
   border: 1px solid #a9abf8 !important;
 }

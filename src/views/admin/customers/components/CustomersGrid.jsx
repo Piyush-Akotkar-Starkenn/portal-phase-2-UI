@@ -47,6 +47,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
   const [editedCustomer, setEditedCustomer] = useState(null);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const totalItems = filteredData.length;
   const toastRef = useRef(null);
   const toastErr = useRef(null);
 
@@ -455,8 +456,11 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
         value={filteredData}
         itemTemplate={itemTemplate}
         layout="grid"
-        className="p-grid p-nogutter"
+        paginator
+        rows={6}
+        emptyMessage="No customers found."
       />
+      <p className="text-center text-gray-700">Total Items : {totalItems}</p>
       <Dialog
         visible={isDeleteDialogVisible}
         onHide={() => setIsDeleteDialogVisible(false)}

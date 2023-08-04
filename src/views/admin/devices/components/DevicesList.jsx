@@ -204,7 +204,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Admin/Devices/get-customers")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
       .then((res) => {
         setListCustomers(res.data);
       })
@@ -216,7 +216,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   const getDeviceData = (rowData) => {
     axios
       .get(
-        `http://localhost:3001/api/Admin/Devices/get-Device/${rowData.device_id}`
+        `${process.env.REACT_APP_API_URL}/Admin/Devices/get-Device/${rowData.device_id}`
       )
       .then((res) => {
         setDeviceData(res.data.data);

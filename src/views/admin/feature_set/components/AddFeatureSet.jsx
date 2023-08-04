@@ -39,7 +39,9 @@ const AddFeatureSet = ({ onSuccess }) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/featureset/featureset-get-all-customers")
+      .get(
+        `${process.env.REACT_APP_API_URL}/featureset/featureset-get-all-customers`
+      )
       .then((res) => {
         console.log(res);
         setListCustomers(res.data);
@@ -61,7 +63,7 @@ const AddFeatureSet = ({ onSuccess }) => {
     console.log(Object.keys(data).length);
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/featureset/featureset-add",
+        `${process.env.REACT_APP_API_URL}/featureset/featureset-add`,
         data
       );
       // Assuming you have access to the toastRef

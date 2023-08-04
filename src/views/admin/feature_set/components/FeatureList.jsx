@@ -41,7 +41,7 @@ const FeatureList = () => {
 
   const getListData = () => {
     axios
-      .get("http://localhost:3001/api/featureset/featureset-list")
+      .get(`${process.env.REACT_APP_API_URL}/featureset/featureset-list`)
       .then((res) => {
         const formattedData = res.data.map((item, index) => ({
           ...item,
@@ -66,7 +66,7 @@ const FeatureList = () => {
     if (selectedFeature) {
       try {
         const response = await axios.put(
-          `http://localhost:3001/api/featureset/featureset-delete/${selectedFeature?.featureSetId}`
+          `${process.env.REACT_APP_API_URL}/featureset/featureset-delete/${selectedFeature?.featureSetId}`
         );
         const { featureSetName } = response.data;
         console.log("Delete success:", response.data);
