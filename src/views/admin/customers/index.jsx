@@ -18,9 +18,28 @@ const Customers = () => {
   const [userType, setUserType] = useState(null);
   const toastRef = useRef(null);
   const toastErr = useRef(null);
+  const [formErrors, setFormErrors] = useState({
+    f_name: false,
+    l_name: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+    user_type: false,
+    phone: false,
+    company_name: false,
+    address: false,
+    city: false,
+    state: false,
+    pincode: false,
+  });
   const handleChange = (event) => {
     setUserType(event.value);
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      user_type: null,
+    }));
   };
+
   //User Type options
   const options = [
     { label: "Customer", value: 2 },
@@ -97,9 +116,11 @@ const Customers = () => {
 
   const closeDialog = () => {
     setIsDialogVisible(false);
+    setFormErrors(false);
     setUserType(null);
   };
   //Add Customer form
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -126,6 +147,50 @@ const Customers = () => {
       const phonePattern = /^\d{10}$/;
       return phonePattern.test(phoneNumber);
     };
+    setFormErrors({
+      f_name: data.first_name === "",
+      l_name: data.last_name === "",
+      email: data.email === "",
+      phone: data.phone === "" || !isValidPhoneNumber(data.phone),
+      company_name: data.company_name === "",
+      user_type: data.user_type === "",
+      password: data.password === "",
+      confirmPassword:
+        data.password !== data.confirmPassword || data.password === "",
+      address: data.address === "",
+      city: data.city === "",
+      state: data.state === "",
+      pincode: data.pincode === "",
+    });
+
+    const requiredFields = [
+      "f_name",
+      "l_name",
+      "email",
+      "password",
+      "confirmPassword",
+      "user_type",
+      "phone",
+      "company_name",
+      "address",
+      "city",
+      "state",
+      "pincode",
+    ];
+
+    const isAnyFieldEmpty = requiredFields.some(
+      (fieldName) => data[fieldName] === ""
+    );
+
+    if (isAnyFieldEmpty) {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Fill Required Fields",
+        detail: "Please fill in all the required details.",
+        life: 3000,
+      });
+      return;
+    }
     // Validate the phone number
     if (!isValidPhoneNumber(data.phone)) {
       toastRef.current.show({
@@ -329,20 +394,33 @@ const Customers = () => {
           <div className="flex justify-evenly">
             <div className="card justify-content-center mt-5 flex">
               <span className="p-float-label">
-                <InputText id="f_name" name="f_name" />
+                <InputText
+                  id="f_name"
+                  name="f_name"
+                  className={formErrors.f_name ? "p-invalid" : ""}
+                />
                 <label htmlFor="f_name">First Name</label>
               </span>
             </div>
             <div className="card justify-content-center mt-5 flex">
               <span className="p-float-label">
-                <InputText id="l_name" name="l_name" required />
+                <InputText
+                  id="l_name"
+                  name="l_name"
+                  className={formErrors.l_name ? "p-invalid" : ""}
+                />
                 <label htmlFor="l_name">Last Name</label>
               </span>
             </div>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="email" type="email" name="email" />
+              <InputText
+                id="email"
+                type="email"
+                name="email"
+                className={formErrors.email ? "p-invalid" : ""}
+              />
               <label htmlFor="email">Email</label>
             </span>
           </div>
@@ -352,6 +430,7 @@ const Customers = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 name="password"
+                className={formErrors.password ? "p-invalid" : ""}
               />
               <label htmlFor="password">Password</label>
               <div className="absolute right-2.5 top-4">
@@ -375,12 +454,17 @@ const Customers = () => {
                 id="confirmPassword"
                 type="password"
                 name="confirmPassword"
+                className={formErrors.confirmPassword ? "p-invalid" : ""}
               />
               <label htmlFor="confirmPassword">Confirm Password</label>
             </span>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
+            <span
+              className={`p-float-label ${
+                formErrors.user_type ? "p-invalid" : ""
+              }`}
+            >
               <Dropdown
                 id="user_type"
                 name="user_type"
@@ -389,20 +473,30 @@ const Customers = () => {
                 optionLabel="label"
                 optionValue="value"
                 onChange={handleChange}
-                className="p-dropdown"
+                className={formErrors.user_type ? "p-invalid" : ""}
               />
               <label htmlFor="user_type">User Type</label>
             </span>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="company_name" type="text" name="company_name" />
+              <InputText
+                id="company_name"
+                type="text"
+                name="company_name"
+                className={formErrors.company_name ? "p-invalid" : ""}
+              />
               <label htmlFor="company_name">Company Name</label>
             </span>
           </div>
           <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="phone" type="tel" name="phone" />
+              <InputText
+                id="phone"
+                type="tel"
+                name="phone"
+                className={formErrors.phone ? "p-invalid" : ""}
+              />
               <label htmlFor="phone">Contact Number</label>
             </span>
           </div>
@@ -411,19 +505,34 @@ const Customers = () => {
           </div>
           <div className="mx-auto mt-6 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="address" type="text" name="address" />
+              <InputText
+                id="address"
+                type="text"
+                name="address"
+                className={formErrors.address ? "p-invalid" : ""}
+              />
               <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
             </span>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="city" type="text" name="city" />
+              <InputText
+                id="city"
+                type="text"
+                name="city"
+                className={formErrors.city ? "p-invalid" : ""}
+              />
               <label htmlFor="city">City</label>
             </span>
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <InputText id="state" type="text" name="state" />
+              <InputText
+                id="state"
+                type="text"
+                name="state"
+                className={formErrors.state ? "p-invalid" : ""}
+              />
               <label htmlFor="state">State</label>
             </span>
           </div>
@@ -434,6 +543,7 @@ const Customers = () => {
                 type="text"
                 name="pincode"
                 keyfilter="pint"
+                className={formErrors.pincode ? "p-invalid" : ""}
                 onChange={(e) => {
                   const value = e.target.value;
                   const formattedValue = value.replace(/\D/g, "").slice(0, 6); // Remove non-digits and limit to 6 characters

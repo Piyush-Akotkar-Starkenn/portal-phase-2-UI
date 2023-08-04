@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FilterMatchMode } from "primereact/api";
 import { DataView } from "primereact/dataview";
@@ -7,20 +7,41 @@ import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { MdOnDeviceTraining } from "react-icons/md";
+import { Toast } from "primereact/toast";
 
-export default function DevicesGrid(onEditDevice, onDeleteDevice) {
+const applyFilters = (filters, allData) => {
+  let filteredData = allData;
+
+  if (filters.global.value) {
+    filteredData = filteredData.filter((item) =>
+      Object.entries(item).some(
+        ([key, value]) =>
+          key !== "created_at" &&
+          key !== "updated_at" &&
+          key !== "_id" &&
+          key !== "status" &&
+          String(value)
+            .toLowerCase()
+            .includes(filters.global.value.toLowerCase())
+      )
+    );
+  }
+
+  return filteredData;
+};
+export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
   const [allData, setAllData] = useState([]);
-  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-
+  const [editedDevice, setEditedDevice] = useState(null);
   const [selectedDevice, setSelectedDevice] = useState(null);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [editDialogVisible, setEditDialogVisible] = useState(false);
-  const [editData, setEditData] = useState({});
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
+  // const [editData, setEditData] = useState({});
   const [listCustomers, setListCustomers] = useState([]);
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
@@ -32,25 +53,13 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
     { label: "Active", value: "true" },
     { label: "Deactive", value: "false" },
   ];
-  // const toastRef = useRef(null);
+  const toastRef = useRef(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
-      .then((res) => {
-        console.log(res.data.data.device);
-        setAllData(res.data.data.device);
-
-        const formattedData = res.data.data.device.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-        }));
-        setData(formattedData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    setAllData(data);
+    const filteredData = applyFilters(filters, data);
+    setFilteredData(filteredData);
+  }, [data, filters]);
 
   useEffect(() => {
     axios
@@ -65,45 +74,72 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
 
   const Customersoptions = () => {
     return listCustomers?.map((el) => ({
-      label: el.first_name,
+      label: el.first_name + " " + el.last_name,
       value: el.userId,
     }));
   };
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
-    let _filters = { ...filters };
-    _filters["global"].value = value;
-    setFilters(_filters);
     setGlobalFilterValue(value);
-    applyFilters(_filters); // Apply filters after global search value changes
+    const updatedFilters = {
+      ...filters,
+      global: { value, matchMode: FilterMatchMode.CONTAINS },
+    };
+    const filteredData = applyFilters(updatedFilters, allData);
+    setFilters(updatedFilters);
+    setFilteredData(filteredData);
   };
 
   const clearSearch = () => {
     setGlobalFilterValue("");
-    const _filters = { ...filters };
-    _filters["global"].value = null;
-    setFilters(_filters);
-    applyFilters(_filters); // Apply filters after clearing search
+    const updatedFilters = {
+      ...filters,
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    };
+    const filteredData = applyFilters(updatedFilters, allData);
+    setFilters(updatedFilters);
+    setFilteredData(filteredData);
   };
 
-  const applyFilters = (filters) => {
-    let filteredData = allData;
-    if (filters.global.value) {
-      filteredData = filteredData.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value)
-            .toLowerCase()
-            .includes(filters.global.value.toLowerCase())
-        )
+  const handleEdit = (device) => {
+    setEditedDevice(device);
+    setIsEditDialogVisible(true);
+  };
+
+  const handleDelete = (device) => {
+    setSelectedDevice(device);
+    setIsDeleteDialogVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await onDeleteDevice(selectedDevice.device_id);
+
+      const updatedData = allData.filter(
+        (device) => device.device_id !== selectedDevice.device_id
       );
+
+      setAllData(updatedData);
+      const filteredData = applyFilters(filters, updatedData);
+      setFilteredData(filteredData);
+      setSelectedDevice(null);
+      setIsDeleteDialogVisible(false);
+      toastRef.current.show({
+        severity: "success",
+        summary: "Device Deleted",
+        detail: "Customer has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Delete error:", error);
+      setIsDeleteDialogVisible(false);
+      toastRef.current.show({
+        severity: "danger",
+        summary: "Error",
+        detail: "Error while deleting",
+        life: 3000,
+      });
     }
-    if (filters.device_type.value) {
-      filteredData = filteredData.filter((item) =>
-        filters.device_type.value.includes(item.device_type)
-      );
-    }
-    setData(filteredData);
   };
 
   const itemTemplate = (item) => {
@@ -160,7 +196,7 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
                     width: "2.2rem",
                     height: "2.2rem",
                   }}
-                  onClick={() => openEditDialog(item)}
+                  onClick={() => handleEdit(item)}
                 />
                 <Button
                   icon="pi pi-trash"
@@ -172,7 +208,7 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
                     height: "2.2rem",
                   }}
                   className="p-button-rounded p-button-text p-button-danger"
-                  onClick={() => openDeleteDialog(item)}
+                  onClick={() => handleDelete(item)}
                 />
               </div>
             </div>
@@ -183,75 +219,50 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
   };
 
   // Delete Dialog
-  const openDeleteDialog = (item) => {
-    setSelectedDevice(item);
-    setDeleteDialogVisible(true);
-  };
-
-  const DeleteDeviceDialog = ({ visible, onHide }) => {
-    const handleConfirmDelete = async () => {
-      try {
-        // Call the onDeleteDevice prop to handle delete logic in the parent component
-        await onDeleteDevice(selectedDevice.device_id);
-        setDeleteDialogVisible(false);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    return (
-      <Dialog
-        visible={visible}
-        onHide={onHide}
-        header="Confirm Delete"
-        modal
-        footer={
-          <div>
-            <Button
-              label="Delete"
-              icon="pi pi-times"
-              className="p-button-danger px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
-              onClick={handleConfirmDelete}
-            />
-            <Button
-              label="Cancel"
-              icon="pi pi-check"
-              className="p-button-secondary px-3 py-2 hover:bg-none dark:hover:bg-gray-50"
-              onClick={() => setDeleteDialogVisible(false)}
-            />
-          </div>
-        }
-      >
-        Are you sure you want to delete {selectedDevice?.device_id}??
-      </Dialog>
-    );
-  };
 
   // Edit Dialog
-  const openEditDialog = (rowData) => {
-    setSelectedDevice(rowData);
-    setEditData(rowData);
-    setEditDialogVisible(true);
-  };
 
-  const handleChange = (e, fieldName) => {
-    const { value } = e.target;
-    setEditData((prevData) => ({
-      ...prevData,
-      [fieldName]: value,
-    }));
-  };
+  const EditDeviceDialog = ({ visible, onHide, device }) => {
+    const [editedDeviceData, setEditedDeviceData] = useState(device);
 
-  const handleEditSubmit = async () => {
-    try {
-      // Call the onEditDevice prop to handle edit logic in the parent component
-      await onEditDevice(editData.device_id, editData);
-      setEditDialogVisible(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    const onSave = async () => {
+      try {
+        await onEditDevice(device.device_id, editedDeviceData);
 
-  const EditDeviceDialog = ({ visible, onHide }) => {
+        const updatedData = allData.map((item) =>
+          item.device_id === device.device_id
+            ? { ...item, ...editedDeviceData }
+            : item
+        );
+
+        setAllData(updatedData);
+        const filteredData = applyFilters(filters, updatedData);
+        setFilteredData(filteredData);
+        setEditedDevice(null);
+        setIsEditDialogVisible(false);
+        toastRef.current.show({
+          severity: "success",
+          summary: "Customer Updated",
+          detail: "Customer information has been updated successfully.",
+        });
+      } catch (error) {
+        console.error("Save error:", error);
+        toastRef.current.show({
+          severity: "danger",
+          summary: "Error",
+          detail: "Error while saving",
+          life: 3000,
+        });
+      }
+    };
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setEditedDeviceData((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    };
     return (
       <Dialog
         visible={visible}
@@ -262,89 +273,88 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
         modal
         className="p-fluid dark:bg-gray-900"
       >
-        <form onSubmit={handleEditSubmit} className="mx-auto">
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText
-                id="device_id"
-                name="device_id"
-                onChange={(e) => handleChange(e, "device_id")}
-                value={editData?.device_id || ""}
-              />
-              <label htmlFor="device_id">DeviceId</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <Dropdown
-                id="device_type"
-                name="device_type"
-                options={devicesOptions}
-                optionLabel="label"
-                optionValue="value"
-                value={editData?.device_type || ""}
-                placeholder={selectedDevice?.device_type}
-                className="p-dropdown"
-                onChange={(e) => handleChange(e, "device_type")}
-              />
-              <label htmlFor="device_type">Device_type</label>
-            </span>
-          </div>
+        <div className="mx-auto mt-8 w-[34.5vw]">
+          <span className="p-float-label">
+            <InputText
+              id="device_id"
+              name="device_id"
+              onChange={handleInputChange}
+              value={editedDeviceData?.device_id || ""}
+            />
+            <label htmlFor="device_id">DeviceId</label>
+          </span>
+        </div>
+        <div className="mx-auto mt-8 w-[34.5vw]">
+          <span className="p-float-label">
+            <Dropdown
+              id="device_type"
+              name="device_type"
+              options={devicesOptions}
+              optionLabel="label"
+              optionValue="value"
+              value={editedDeviceData?.device_type || ""}
+              placeholder={selectedDevice?.device_type}
+              className="p-dropdown"
+              onChange={handleInputChange}
+            />
+            <label htmlFor="device_type">Device_type</label>
+          </span>
+        </div>
 
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <Dropdown
-                id="customer_id"
-                name="customer_id"
-                options={Customersoptions()}
-                optionLabel="label"
-                optionValue="value"
-                className="p-dropdown"
-                value={editData?.customer_id || ""}
-                onChange={(e) => handleChange(e, "customer_id")}
-              />
+        <div className="mx-auto mt-8 w-[34.5vw]">
+          <span className="p-float-label">
+            <Dropdown
+              id="customer_id"
+              name="customer_id"
+              options={Customersoptions()}
+              optionLabel="label"
+              optionValue="value"
+              className="p-dropdown"
+              value={editedDeviceData?.customer_id || ""}
+              onChange={handleInputChange}
+            />
 
-              <label htmlFor="customer_id">Customer List</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <Dropdown
-                id="status"
-                name="status"
-                options={stateOptions}
-                optionLabel="label"
-                optionValue="value"
-                className="p-dropdown"
-                value={editData?.status || ""}
-                placeholder={selectedDevice?.status}
-                onChange={(e) => handleChange(e, "status")}
-              />
-              <label htmlFor="status">Status</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText
-                id="sim_number"
-                name="sim_number"
-                keyfilter="pint"
-                value={editData?.sim_number || ""}
-                placeholder={selectedDevice?.sim_number}
-                onChange={(e) => handleChange(e, "sim_number")}
-              />
-              <label htmlFor="sim_number">Sim Number</label>
-            </span>
-          </div>
-          <div className="mt-6 flex justify-center">
-            <button
-              type="submit"
-              className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
-            >
-              Edit Device
-            </button>
-          </div>
-        </form>
+            <label htmlFor="customer_id">Customer List</label>
+          </span>
+        </div>
+        <div className="mx-auto mt-8 w-[34.5vw]">
+          <span className="p-float-label">
+            <Dropdown
+              id="status"
+              name="status"
+              options={stateOptions}
+              optionLabel="label"
+              optionValue="value"
+              className="p-dropdown"
+              value={editedDeviceData?.status || ""}
+              placeholder={selectedDevice?.status}
+              onChange={handleInputChange}
+            />
+            <label htmlFor="status">Status</label>
+          </span>
+        </div>
+        <div className="mx-auto mt-8 w-[34.5vw]">
+          <span className="p-float-label">
+            <InputText
+              id="sim_number"
+              name="sim_number"
+              keyfilter="pint"
+              value={editedDeviceData?.sim_number || ""}
+              placeholder={selectedDevice?.sim_number}
+              onChange={handleInputChange}
+            />
+            <label htmlFor="sim_number">Sim Number</label>
+          </span>
+        </div>
+        <div className="mt-6 flex justify-center">
+          <button
+            type="submit"
+            className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+            onClick={onSave}
+          >
+            Edit Device
+          </button>
+        </div>
       </Dialog>
     );
   };
@@ -371,9 +381,9 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
           </span>
         </div>
       </div>
-
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <DataView
-        value={data}
+        value={filteredData}
         layout="grid"
         itemTemplate={itemTemplate}
         paginator
@@ -383,15 +393,34 @@ export default function DevicesGrid(onEditDevice, onDeleteDevice) {
       />
 
       {/* Add the delete dialog component */}
-      <DeleteDeviceDialog
-        visible={deleteDialogVisible}
-        onHide={() => setDeleteDialogVisible(false)}
-      />
-
+      <Dialog
+        visible={isDeleteDialogVisible}
+        onHide={() => setIsDeleteDialogVisible(false)}
+        header="Confirm Delete"
+        footer={
+          <div>
+            <Button
+              label="Delete"
+              icon="pi pi-times"
+              className="p-button-danger"
+              onClick={confirmDelete}
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-check"
+              className="p-button-secondary"
+              onClick={() => setIsDeleteDialogVisible(false)}
+            />
+          </div>
+        }
+      >
+        <div>Are you sure you want to delete ${selectedDevice?.device_id}?</div>
+      </Dialog>
       {/* Add the edit dialog component */}
       <EditDeviceDialog
-        visible={editDialogVisible}
-        onHide={() => setEditDialogVisible(false)}
+        visible={isEditDialogVisible}
+        onHide={() => setIsEditDialogVisible(false)}
+        device={editedDevice}
       />
     </div>
   );

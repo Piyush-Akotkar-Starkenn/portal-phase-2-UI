@@ -80,7 +80,7 @@ const UnAssignCustomer = ({ parameters, onSuccess }) => {
           )}
           <div className="mt-4 text-right">
             <Button
-              label="Assign"
+              label="Unassign"
               icon="pi pi-check"
               type="submit"
               className="px-3 py-2 text-right hover:bg-none dark:hover:bg-gray-50"
