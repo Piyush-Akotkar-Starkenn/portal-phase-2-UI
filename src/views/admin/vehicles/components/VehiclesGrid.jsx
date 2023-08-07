@@ -15,7 +15,7 @@ export default function VehiclesGrid() {
   const [allData, setAllData] = useState([]);
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(false);
-
+  const totalItems = data.length;
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
   const toast = useRef(null);
   const [filters, setFilters] = useState({
@@ -48,7 +48,7 @@ export default function VehiclesGrid() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Customers/Vehicles/getAllVehicle")
+      .get(`${process.env.REACT_APP_API_URL}/Customers/Vehicles/getAllVehicle`)
       .then((res) => {
         setAllData(res.data.data);
 
@@ -283,6 +283,7 @@ export default function VehiclesGrid() {
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         emptyMessage="No vehicles found."
       />
+      <p className="text-center text-gray-700">Total Items : {totalItems}</p>
       <Dialog
         visible={deleteProductDialog}
         style={{ width: "32rem" }}

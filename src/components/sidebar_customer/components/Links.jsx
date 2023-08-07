@@ -24,7 +24,7 @@ export function SidebarLinks(props) {
           <Link key={index} to={route.layout + "/" + route.path}>
             <div className="relative mb-5 flex">
               <li
-                className={`tooltip-button-${index} mx-auto my-[12px] flex items-center`}
+                className={`tooltip-button-${index} mx-auto my-auto flex items-center py-[1.4px]`}
                 key={index}
               >
                 <span
@@ -54,7 +54,7 @@ export function SidebarLinks(props) {
                 </p> */}
               </li>
               {activeRoute(route.path) ? (
-                <div class="absolute right-0 top-[8px] h-9 w-1 rounded-lg bg-brand-500 dark:bg-brand-400" />
+                <div class="absolute right-0 top-[2.4px] h-7 w-1 rounded-lg bg-brand-500 dark:bg-brand-400" />
               ) : null}
             </div>
           </Link>

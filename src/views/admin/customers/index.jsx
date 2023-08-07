@@ -52,7 +52,7 @@ const Customers = () => {
   //Fetching all data
   const fetchCustomersData = () => {
     axios
-      .get("http://localhost:3001/api/Admin/GetAll")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/GetAll`)
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
@@ -69,9 +69,12 @@ const Customers = () => {
 
   const handleDeleteCustomer = async (customerId) => {
     try {
-      await axios.put(`http://localhost:3001/api/Admin/delete/${customerId}`, {
-        status: false,
-      });
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/Admin/delete/${customerId}`,
+        {
+          status: false,
+        }
+      );
 
       // Remove the deleted customer from the state
       setData((prevData) =>
@@ -85,7 +88,7 @@ const Customers = () => {
   const handleUpdateCustomer = async (customerId, updatedData) => {
     try {
       await axios.put(
-        `http://localhost:3001/api/Admin/update/${customerId}`,
+        `${process.env.REACT_APP_API_URL}/Admin/update/${customerId}`,
         updatedData
       );
 
@@ -213,7 +216,7 @@ const Customers = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/Admin/Signup",
+        `${process.env.REACT_APP_API_URL}/Admin/Signup`,
         data,
         {
           headers: {

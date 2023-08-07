@@ -44,7 +44,7 @@ const DevicesAdmin = () => {
   //Fetching all data
   const fetchDevicesData = () => {
     axios
-      .get("http://localhost:3001/api/Admin/Devices/get-all-devices")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-all-devices`)
       .then((res) => {
         const formattedData = res.data.data.device.map((item, index) => ({
           ...item,
@@ -61,7 +61,7 @@ const DevicesAdmin = () => {
   const handleEditDevice = (deviceId, editedDevice) => {
     axios
       .put(
-        `http://localhost:3001/api/Admin/Devices/update-Device/${deviceId}`,
+        `${process.env.REACT_APP_API_URL}/Admin/Devices/update-Device/${deviceId}`,
         editedDevice
       )
       .then((res) => {
@@ -96,7 +96,9 @@ const DevicesAdmin = () => {
 
   const handleDeleteDevice = (deviceId) => {
     axios
-      .put(`http://localhost:3001/api/Admin/Devices/delete-Device/${deviceId}`)
+      .put(
+        `${process.env.REACT_APP_API_URL}/Admin/Devices/delete-Device/${deviceId}`
+      )
       .then((res) => {
         fetchDevicesData();
         toastRef.current.show({
@@ -161,7 +163,10 @@ const DevicesAdmin = () => {
     e.preventDefault();
     if (isFormValid()) {
       axios
-        .post("http://localhost:3001/api/Admin/Devices/add-Device", addData)
+        .post(
+          `${process.env.REACT_APP_API_URL}/Admin/Devices/add-Device`,
+          addData
+        )
         .then((res) => {
           fetchDevicesData();
           toastRef.current.show({
@@ -218,7 +223,7 @@ const DevicesAdmin = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Admin/Devices/get-customers")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
       .then((res) => {
         setListCustomers(res.data);
         console.log(res.data);

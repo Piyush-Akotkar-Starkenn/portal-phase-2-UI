@@ -43,6 +43,7 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   // const [editData, setEditData] = useState({});
   const [listCustomers, setListCustomers] = useState([]);
+  const totalItems = filteredData.length;
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
     { label: "IoT", value: "IoT" },
@@ -63,7 +64,7 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/Admin/Devices/get-customers")
+      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
       .then((res) => {
         setListCustomers(res.data);
       })
@@ -388,10 +389,9 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
         itemTemplate={itemTemplate}
         paginator
         rows={6}
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         emptyMessage="No devices found."
       />
-
+      <p className="text-center text-gray-700">Total Items : {totalItems}</p>
       {/* Add the delete dialog component */}
       <Dialog
         visible={isDeleteDialogVisible}

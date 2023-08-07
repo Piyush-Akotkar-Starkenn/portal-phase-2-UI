@@ -27,8 +27,11 @@ export default function VehiclesList() {
   useEffect(() => {
     // Fetch vehicles data
     axios
-      .get("http://localhost:3001/api/Customers/Vehicles/getAllVehicle")
+      .get(
+        `${process.env.REACT_APP_API_URL}/customers/vehicles/get-all-vehicle`
+      )
       .then((res) => {
+        console.log(res.data);
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,

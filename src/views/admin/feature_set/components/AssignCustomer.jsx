@@ -14,7 +14,7 @@ const AssignCustomer = ({ parameters, onSuccess }) => {
   useEffect(() => {
     axios
       .get(
-        `http://localhost:3001/api/featureset/featureset-not-assign-customerlist/${parameters.propValue}`
+        `${process.env.REACT_APP_API_URL}/featureset/featureset-not-assign-customerlist/${parameters.propValue}`
       )
       .then((res) => {
         setData(res.data);
@@ -40,7 +40,7 @@ const AssignCustomer = ({ parameters, onSuccess }) => {
 
     axios
       .put(
-        `http://localhost:3001/api/featureset/featureset-assign-customer/${parameters.propValue}`,
+        `${process.env.REACT_APP_API_URL}/featureset/featureset-assign-customer/${parameters.propValue}`,
         requestData
       )
       .then((res) => {

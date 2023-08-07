@@ -1,151 +1,250 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Calendar } from "primereact/calendar";
-import "react-datepicker/dist/react-datepicker.css";
-import { Toast } from "primereact/toast";
+import { InputText } from "primereact/inputtext";
+import { MultiSelect } from "primereact/multiselect";
+import { RadioButton } from "primereact/radiobutton";
 
 const Generate = () => {
-  const [currentOperation, setCurrentOperation] = useState(1);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
-  const [operationsStatus, setOperationsStatus] = useState({
-    1: false, // Start Date operation completion status
-    2: false, // End Date operation completion status
-    3: false, // Options operation completion status
-  });
-  const [optionsCompleted, setOptionsCompleted] = useState(false);
-  const toast = useRef(null);
+  const [selectedOption, setSelectedOption] = useState(" ");
+  const [selectedVehicles, setSelectedVehicles] = useState([]);
+  const [selectedDrivers, setSelectedDrivers] = useState([]);
+  const [vehicleParams, setVehicleParams] = useState([]);
+  const [driverParams, setDriverParams] = useState([]);
+  const [recipient, setRecipient] = useState([]);
 
-  useEffect(() => {
-    if (selectedStartDate && selectedEndDate) {
-      setOperationsStatus((prevState) => ({
-        ...prevState,
-        1: true,
-      }));
-    } else {
-      setOperationsStatus((prevState) => ({
-        ...prevState,
-        1: false,
-      }));
-    }
-  }, [selectedStartDate, selectedEndDate]);
+  const vehicles = [
+    { name: "Vehicle 1", id: 1 },
+    { name: "Vehicle 2", id: 2 },
+    // Add more vehicles as needed
+  ];
+  const vehicleparams = [
+    { name: "Vehicle 1", id: 1 },
+    { name: "Vehicle 2", id: 2 },
+    // Add more vehicles as needed
+  ];
 
-  useEffect(() => {
-    if (currentOperation === 3) {
-      if (operationsStatus[1] && operationsStatus[2]) {
-        setOptionsCompleted(true);
-      } else {
-        setOptionsCompleted(false);
-      }
-    }
-  }, [currentOperation, operationsStatus]);
+  const drivers = [
+    { name: "Driver 1", id: 1 },
+    { name: "Driver 2", id: 2 },
+    // Add more drivers as needed
+  ];
 
-  const handleStartDateChange = (e) => {
-    setSelectedStartDate(e.value);
-  };
-
-  const handleEndDateChange = (e) => {
-    setSelectedEndDate(e.value);
-  };
-
-  const showToastError = () => {
-    toast.current.show({
-      severity: "error",
-      summary: "Operation incomplete",
-      detail: "Please complete the current operation before proceeding.",
-      life: 3000,
-    });
-  };
-
-  const renderOperation = () => {
-    // const currentStatus = operationsStatus[currentOperation];
-    switch (currentOperation) {
-      case 1:
-        return (
-          <div className="flex justify-evenly">
-            <div className="text-center font-semibold">
-              <label>Select Start Date</label>
-              <div className="custom-datepicker mt-2">
-                <Calendar
-                  value={selectedStartDate}
-                  onChange={handleStartDateChange}
-                  showIcon
-                  dateFormat="dd/mm/yy"
-                  placeholder="Tap to select"
-                  maxDate={new Date()}
-                />
-              </div>
-            </div>
-            <div className="text-center font-semibold">
-              <label>Select End Date</label>
-              <div className="custom-datepicker mt-2">
-                <Calendar
-                  value={selectedEndDate}
-                  onChange={handleEndDateChange}
-                  showIcon
-                  dateFormat="dd/mm/yy"
-                  placeholder="Tap to select"
-                  maxDate={new Date()}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div>
-            <h1>Select End Date</h1>
-            {/* Implement your End Date selection component here */}
-          </div>
-        );
-      case 3:
-        return (
-          <div>
-            <h1>Select Options</h1>
-            {/* Implement your Options selection component here */}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const handleNextOperation = () => {
-    if (currentOperation === 3) {
-      if (optionsCompleted) {
-        setCurrentOperation(1);
-        showToast();
-      } else {
-        showToastError();
-      }
-    } else {
-      setCurrentOperation(currentOperation + 1);
-    }
-  };
-
-  const showToast = () => {
-    toast.current.show({
-      severity: "success",
-      summary: "Process completed",
-      detail: "You have finished the operations!",
-      life: 3000,
-    });
-  };
+  const driverparams = [
+    { name: "Score", id: 1 },
+    // Add more vehicles as needed
+  ];
 
   return (
-    <>
-      <div className="mt-8 flex flex-col items-center">
-        <Toast ref={toast} />
-        <div className="w-100 h-64 rounded-lg bg-gray-200 p-4 shadow-lg">
-          <div className="mb-4 flex justify-center">{renderOperation()}</div>
+    <div>
+      <p className="text-right text-sm text-red-400">
+        All Fields Are Required<span className="text-red-500">**</span>
+      </p>
+      <form>
+        <div className="mb-6">
+          <div className="card p-fluid mt-6 flex flex-wrap gap-3">
+            <div className="flex-auto">
+              <span className="p-float-label">
+                <Calendar
+                  inputId="start_date"
+                  value={selectedStartDate}
+                  onChange={(e) => setSelectedStartDate(e.value)}
+                />
+                <label
+                  htmlFor="start_date"
+                  className="text-gray-150 dark:text-gray-150"
+                >
+                  From
+                </label>
+              </span>
+
+              <small className="text-gray-400 dark:text-gray-150">
+                Click to Select
+              </small>
+            </div>
+            <div className="flex-auto">
+              <span className="p-float-label">
+                <Calendar
+                  inputId="end_date"
+                  value={selectedEndDate}
+                  onChange={(e) => setSelectedEndDate(e.value)}
+                />
+                <label
+                  htmlFor="start_date"
+                  className="text-gray-150 dark:text-gray-150"
+                >
+                  To
+                </label>
+              </span>
+
+              <small className="text-gray-400 dark:text-gray-150">
+                Click to Select
+              </small>
+            </div>
+            <div className="flex-auto">
+              <div className="mt-2 flex flex-wrap gap-5">
+                <p className="text-gray-600">You want to generate report for</p>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="vehicle"
+                    name="vehicle"
+                    value="Vehicle"
+                    onChange={() => setSelectedOption("Vehicle")}
+                    checked={selectedOption === "Vehicle"}
+                  />
+                  <label htmlFor="vehicle" className="ml-2">
+                    Vehicle
+                  </label>
+                </div>
+                <div className="align-items-center flex">
+                  <RadioButton
+                    inputId="driver"
+                    name="driver"
+                    value="Driver"
+                    onChange={() => setSelectedOption("Driver")}
+                    checked={selectedOption === "Driver"}
+                  />
+                  <label htmlFor="driver" className="ml-2">
+                    Driver
+                  </label>
+                </div>
+              </div>
+            </div>
+            {selectedOption === "Vehicle" && (
+              <div className="mt-3 w-[42vw]">
+                <span className="p-float-label">
+                  <MultiSelect
+                    value={selectedVehicles}
+                    options={vehicles}
+                    onChange={(e) => setSelectedVehicles(e.value)}
+                    optionLabel="name"
+                    optionValue="id"
+                    className="rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
+                  />
+                  <label
+                    htmlFor="vehicle"
+                    className="text-gray-150 dark:text-gray-150"
+                  >
+                    Select Vehicles
+                  </label>
+                </span>
+                <span className="p-float-label mt-8">
+                  <MultiSelect
+                    value={vehicleParams}
+                    options={vehicleparams}
+                    onChange={(e) => setVehicleParams(e.value)}
+                    optionLabel="name"
+                    optionValue="id"
+                    className="rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
+                  />
+                  <label
+                    htmlFor="vehicle"
+                    className="text-gray-150 dark:text-gray-150"
+                  >
+                    Select Parameters
+                  </label>
+                </span>
+              </div>
+            )}
+            {selectedOption === "Driver" && (
+              <div className="mt-3 w-[42vw]">
+                <span className="p-float-label">
+                  <MultiSelect
+                    value={selectedDrivers}
+                    options={drivers}
+                    onChange={(e) => setSelectedDrivers(e.value)}
+                    optionLabel="name"
+                    optionValue="id"
+                    className="rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
+                  />
+                  <label
+                    htmlFor="vehicle"
+                    className="text-gray-150 dark:text-gray-150"
+                  >
+                    Select Drivers
+                  </label>
+                </span>
+                <span className="p-float-label mt-8">
+                  <MultiSelect
+                    value={driverParams}
+                    options={driverparams}
+                    onChange={(e) => setDriverParams(e.value)}
+                    optionLabel="name"
+                    optionValue="id"
+                    className="rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
+                  />
+                  <label
+                    htmlFor="vehicle"
+                    className="text-gray-150 dark:text-gray-150"
+                  >
+                    Select Parameters
+                  </label>
+                </span>
+              </div>
+            )}
+            <div className="mt-3 w-[42vw]">
+              <p className="text-gray-600">Select Recipient</p>
+              <span className="p-float-label mt-6">
+                <InputText name="name" />
+                <label
+                  htmlFor="name"
+                  className="text-gray-150 dark:text-gray-150"
+                >
+                  Name of Recipient
+                </label>
+              </span>
+            </div>
+            <div className="align-items-center mt-6 flex">
+              <RadioButton
+                inputId="mobile"
+                name="mobile"
+                value="Mobile"
+                onChange={() => setRecipient("Mobile")}
+                checked={recipient === "Mobile"}
+              />
+              <label htmlFor="ingredient1" className="ml-2">
+                Mobile
+              </label>
+            </div>
+            {recipient === "Mobile" && (
+              <div className="mt-3">
+                <InputText name="name" placeholder="Enter mobile no." />
+              </div>
+            )}
+            <div className="align-items-center mt-6 flex">
+              <RadioButton
+                inputId="email"
+                name="email"
+                value="Email"
+                onChange={() => setRecipient("Email")}
+                checked={recipient === "Email"}
+              />
+              <label htmlFor="ingredient2" className="ml-2">
+                Email
+              </label>
+            </div>
+            {recipient === "Email" && (
+              <div className="mt-3">
+                <InputText
+                  name="name"
+                  keyfilter="email"
+                  placeholder="Enter email ID"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="text-center">
           <button
-            className="rounded-lg bg-blue-500 px-4 py-2 text-white transition-opacity duration-500 hover:bg-blue-700"
-            onClick={handleNextOperation}
+            type="submit"
+            className="rounded-lg bg-blue-700 px-4 py-1.5 text-lg font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
-            Next
+            Generate
           </button>
         </div>
-      </div>
-    </>
+      </form>
+    </div>
   );
 };
 

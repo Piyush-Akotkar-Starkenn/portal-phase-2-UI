@@ -17,7 +17,6 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   const [formData, setFormData] = useState({});
   const toastErr = useRef(null);
 
-  
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevFormData) => ({
@@ -38,10 +37,11 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
     setFormData(featuresetDetails);
   }, [featuresetDetails]);
 
-  
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/featureset/featureset-get-all-customers")
+      .get(
+        `${process.env.REACT_APP_API_URL}/featureset/featureset-get-all-customers`
+      )
       .then((res) => {
         console.log(res);
         setAllCustomers(res.data);
@@ -51,21 +51,18 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
       });
   }, []);
 
-
-
   useEffect(() => {
-  axios
-    .get(
-      `http://localhost:3001/api/featureset/featureset/${parameters?.propValue}`
-    )
-    .then((res) => {
-      setFeaturesetDetails(res.data);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-}, [parameters?.propValue]); 
-
+    axios
+      .get(
+        `${process.env.REACT_APP_API_URL}/featureset/featureset/${parameters?.propValue}`
+      )
+      .then((res) => {
+        setFeaturesetDetails(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [parameters?.propValue]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -74,7 +71,7 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
     try {
       axios
         .put(
-          `http://localhost:3001/api/featureset/featureset-edit/${parameters?.propValue}`,
+          `${process.env.REACT_APP_API_URL}/featureset/featureset-edit/${parameters?.propValue}`,
           formData
         )
         .then((res) => {
@@ -170,12 +167,10 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   ];
   const Customersoptions = () => {
     return allCustomers?.map((el) => ({
-      label: el.first_name +" "+ el.last_name,
+      label: el.first_name + " " + el.last_name,
       value: el.userId,
     }));
   };
-
-
 
   return (
     <>
@@ -224,14 +219,16 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
 
           <div className="field my-3  w-[30vw]">
             <label htmlFor="cust">Selected Customer</label>
-           
-           <MultiSelect
-              value={formData.selectCustomer} 
+
+            <MultiSelect
+              value={formData.selectCustomer}
               options={Customersoptions()}
-              onChange={(e) => setFormData((prevData) => ({
-                ...prevData,
-                selectCustomer: e.value, 
-              }))}
+              onChange={(e) =>
+                setFormData((prevData) => ({
+                  ...prevData,
+                  selectCustomer: e.value,
+                }))
+              }
               style={{
                 width: "30vw",
                 borderBottom: "1px dashed #ced4da",
@@ -246,7 +243,6 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
               className="dark:bg-gray-900"
               filter
             />
-         
           </div>
           <p className="mt-4 font-bold ">System Type</p>
           <div className="my-3 flex flex-wrap gap-3">
@@ -471,7 +467,7 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
                 borderTop: "none",
               }}
               options={OncomingObstacleptions}
-              value={formData.detectOncomingObstacles}
+              value={formData.detectOncomingObstacle}
               placeholder={
                 formData.detectOncomingObstacles
                   ? formData.detectOncomingObstacles
