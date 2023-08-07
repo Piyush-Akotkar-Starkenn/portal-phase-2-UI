@@ -307,10 +307,11 @@ body
   border: none;
 }
 .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  color: #918c8c;
   background: none;
-  color: #333;
   font-weight: 500;
 }
+
 .p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus {
   box-shadow: none;
 }

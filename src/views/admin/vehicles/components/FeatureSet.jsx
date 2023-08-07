@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -9,6 +9,11 @@ const FeatureSet = ({ parameters }) => {
   console.log(parameters.propValue);
   const [featuresetDetails, setFeaturesetDetails] = useState({});
   const [formData, setFormData] = useState({});
+  const [isEditable, setIsEditable] = useState(false);
+
+  const handleToggleEdit = () => {
+    setIsEditable(!isEditable);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,7 +53,7 @@ const FeatureSet = ({ parameters }) => {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [parameters]);
 
   const StationaryObjectoptions = [
     { label: "Yes", value: 0 },
@@ -123,6 +128,15 @@ const FeatureSet = ({ parameters }) => {
     <>
       <form onSubmit={handleSubmit}>
         <div className="card">
+          <div className="text-right">
+            <button onClick={handleToggleEdit}>
+              {isEditable ? (
+                <i className="pi pi-unlock rounded-full bg-gray-200 p-3 text-green-600" /> // Lock icon when editable
+              ) : (
+                <i className="pi pi-lock rounded-full bg-gray-200 p-3 text-red-400" /> // Unlock icon when non-editable
+              )}
+            </button>
+          </div>
           <div className="flex" style={{ flexDirection: "column" }}>
             <label htmlFor="username">Feature Set ID12345*</label>
             <InputText
@@ -138,6 +152,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="featureSetId"
+              className="dark:bg-gray-900 dark:text-gray-150"
               onChange={handleChange}
             />
             <small id="username-help">Unique id to identify feature set</small>
@@ -158,41 +173,46 @@ const FeatureSet = ({ parameters }) => {
               }}
               value={featuresetDetails?.featureSetName}
               name="featureSetName"
+              className="dark:bg-gray-900 dark:text-gray-150"
               onChange={handleChange}
             />
             <small id="username-help">Unique id to identify feature set</small>
           </div>
 
-          <p className="mt-4 font-bold ">System Type</p>
+          <p className="mt-4 font-bold dark:text-gray-300">System Type</p>
           <div className="my-3 flex flex-wrap gap-3">
             <div className="align-items-center flex">
               <input
                 type="radio"
                 name="mode"
+                disabled={!isEditable}
                 onChange={handleChange}
                 value="Offline"
                 checked={formData?.mode === "Offline"}
               />
-              <label htmlFor="ingredient1" className="ml-2">
+              <label htmlFor="ingredient1" className="ml-2 dark:text-gray-400">
                 Offline Mode
               </label>
             </div>
             <div className="align-items-center flex">
               <input
                 type="radio"
+                disabled={!isEditable}
                 name="mode"
                 onChange={handleChange}
                 value="Online"
                 checked={formData?.mode === "Online"}
               />
-              <label htmlFor="ingredient2" className="ml-2">
+              <label htmlFor="ingredient2" className="ml-2 dark:text-gray-400">
                 Online Mode
               </label>
             </div>
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Collision Avoidance System</p>
+        <p className="mt-4 font-bold dark:text-gray-300">
+          Collision Avoidance System
+        </p>
         <div className="card justify-content-center mt-5 flex gap-4">
           <div className="align-items-center flex">
             <input
@@ -201,6 +221,7 @@ const FeatureSet = ({ parameters }) => {
               value="Disable"
               onChange={handleChange}
               checked={formData?.CASMode === "Disable"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -213,6 +234,7 @@ const FeatureSet = ({ parameters }) => {
               value="Enable"
               onChange={handleChange}
               checked={formData?.CASMode === "Enable"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -224,6 +246,7 @@ const FeatureSet = ({ parameters }) => {
             <label>Activation Speed</label>
             <InputText
               keyfilter="pint"
+              disabled={!isEditable}
               id="username"
               style={{
                 width: "30vw",
@@ -265,6 +288,7 @@ const FeatureSet = ({ parameters }) => {
               value={formData?.alarmThreshold || ""}
               name="alarmThreshold"
               onChange={handleChange}
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -290,6 +314,7 @@ const FeatureSet = ({ parameters }) => {
               }
               name="brakeThreshold"
               onChange={handleChange}
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -311,6 +336,7 @@ const FeatureSet = ({ parameters }) => {
               }
               name="brakeSpeed"
               onChange={handleChange}
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -340,6 +366,7 @@ const FeatureSet = ({ parameters }) => {
               name="detectStationaryObject"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -367,6 +394,7 @@ const FeatureSet = ({ parameters }) => {
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -396,6 +424,7 @@ const FeatureSet = ({ parameters }) => {
               optionValue="value"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -421,6 +450,7 @@ const FeatureSet = ({ parameters }) => {
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -444,6 +474,7 @@ const FeatureSet = ({ parameters }) => {
               }
               name="ttcThreshold"
               onChange={handleChange}
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -467,6 +498,7 @@ const FeatureSet = ({ parameters }) => {
                   : "Enter a value"
               }
               value={formData?.brakeOnDuration || ""}
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -492,12 +524,13 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.brakeOffDuration
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
 
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Sleep Alert</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Sleep Alert</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -506,6 +539,7 @@ const FeatureSet = ({ parameters }) => {
               onChange={handleChange}
               value="Offline"
               checked={formData?.sleepAlertMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -518,6 +552,7 @@ const FeatureSet = ({ parameters }) => {
               onChange={handleChange}
               value="Online"
               checked={formData?.sleepAlertMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -544,6 +579,7 @@ const FeatureSet = ({ parameters }) => {
               }
               name="preWarning"
               onChange={handleChange}
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -567,6 +603,7 @@ const FeatureSet = ({ parameters }) => {
                   : "Enter a value"
               }
               value={formData?.sleepAlertInterval || ""}
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -592,6 +629,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.activationSpeed
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -613,6 +651,7 @@ const FeatureSet = ({ parameters }) => {
               placeholder={
                 formData.startTime ? formData.startTime : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -636,6 +675,7 @@ const FeatureSet = ({ parameters }) => {
               placeholder={
                 formData.stopTime ? formData.stopTime : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -659,6 +699,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.brakeActivateTime
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -686,11 +727,12 @@ const FeatureSet = ({ parameters }) => {
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Driver Evaluation</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Driver Evaluation</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -699,6 +741,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.driverEvalMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -711,6 +754,7 @@ const FeatureSet = ({ parameters }) => {
               value="Online"
               onChange={handleChange}
               checked={formData?.driverEvalMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -739,6 +783,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.maxLaneChangeThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -762,6 +807,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.minLaneChangeThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -787,6 +833,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.maxHarshAccelerationThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -810,6 +857,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.minHarshAccelerationThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -835,6 +883,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.suddenBrakingThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -858,6 +907,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.maxSpeedBumpThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -883,11 +933,12 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.minSpeedBumpThreshold
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Speed Governor</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Speed Governor</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -896,6 +947,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.GovernerMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -908,6 +960,7 @@ const FeatureSet = ({ parameters }) => {
               name="GovernerMode"
               value="Online"
               checked={formData?.GovernerMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -934,11 +987,12 @@ const FeatureSet = ({ parameters }) => {
                 formData.speedLimit ? formData.speedLimit : "Enter a value"
               }
               value={formData?.speedLimit || ""}
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Cruise</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Cruise</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -947,6 +1001,7 @@ const FeatureSet = ({ parameters }) => {
               name="cruiseMode"
               value="Offline"
               checked={formData?.cruiseMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -959,6 +1014,7 @@ const FeatureSet = ({ parameters }) => {
               value="Online"
               onChange={handleChange}
               checked={formData?.cruiseMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -986,6 +1042,7 @@ const FeatureSet = ({ parameters }) => {
                 ? formData.activationSpeed
                 : "Enter a value"
             }
+            disabled={!isEditable}
           />
         </div>
         <div className="flex justify-between">
@@ -1012,11 +1069,12 @@ const FeatureSet = ({ parameters }) => {
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">OBD</p>
+        <p className="mt-4 font-bold dark:text-gray-300">OBD</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -1025,6 +1083,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.obdMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1036,6 +1095,7 @@ const FeatureSet = ({ parameters }) => {
               name="obdMode"
               value="Online"
               onChange={handleChange}
+              disabled={!isEditable}
               checked={formData?.obdMode === "Online"}
             />
             <label htmlFor="ingredient2" className="ml-2">
@@ -1070,11 +1130,12 @@ const FeatureSet = ({ parameters }) => {
               optionLabel="label"
               optionValue="value"
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">TPMS</p>
+        <p className="mt-4 font-bold dark:text-gray-300">TPMS</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -1083,6 +1144,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.tpmsMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1095,6 +1157,7 @@ const FeatureSet = ({ parameters }) => {
               value="Online"
               onChange={handleChange}
               checked={formData?.tpmsMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1102,7 +1165,7 @@ const FeatureSet = ({ parameters }) => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Vehicle Settings</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Vehicle Settings</p>
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
@@ -1129,6 +1192,7 @@ const FeatureSet = ({ parameters }) => {
               name="acceleratorType"
               onChange={handleChange}
               options={AcceleratorTypeoptions}
+              disabled={!isEditable}
               className="md:w-14rem mt-2 w-full"
             />
           </div>
@@ -1155,12 +1219,13 @@ const FeatureSet = ({ parameters }) => {
               onChange={handleChange}
               options={BrakeTypeoptions}
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Sensor</p>
-        <p className="mt-4 font-bold ">Laser Sensor</p>
+        <p className="mt-4 text-lg font-bold dark:text-gray-300">Sensor</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Laser Sensor</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -1169,6 +1234,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.lazerMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1181,13 +1247,14 @@ const FeatureSet = ({ parameters }) => {
               value="Online"
               onChange={handleChange}
               checked={formData?.lazerMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
             </label>
           </div>
         </div>
-        <p className="mt-4 font-bold ">RF Sensor</p>
+        <p className="mt-4 font-bold dark:text-gray-300">RF Sensor</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -1196,6 +1263,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.rfSensorMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1208,6 +1276,7 @@ const FeatureSet = ({ parameters }) => {
               value="Online"
               onChange={handleChange}
               checked={formData?.rfSensorMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1234,6 +1303,7 @@ const FeatureSet = ({ parameters }) => {
               placeholder={
                 formData.rfAngle ? formData.rfAngle : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -1257,6 +1327,7 @@ const FeatureSet = ({ parameters }) => {
               placeholder={
                 formData.reserved1 ? formData.reserved1 : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1278,6 +1349,7 @@ const FeatureSet = ({ parameters }) => {
               placeholder={
                 formData.reserved2 ? formData.reserved2 : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -1300,10 +1372,11 @@ const FeatureSet = ({ parameters }) => {
             placeholder={
               formData.reserved3 ? formData.reserved3 : "Enter a value"
             }
+            disabled={!isEditable}
           />
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Speed Settings</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Speed Settings</p>
 
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
@@ -1329,6 +1402,7 @@ const FeatureSet = ({ parameters }) => {
               optionValue="value"
               onChange={handleChange}
               className="md:w-14rem mt-2 w-full"
+              disabled={!isEditable}
             />
           </div>
         </div>
@@ -1350,6 +1424,7 @@ const FeatureSet = ({ parameters }) => {
               onChange={handleChange}
               value={formData?.slope || ""}
               placeholder={formData.slope ? formData.slope : "Enter a value"}
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1369,11 +1444,12 @@ const FeatureSet = ({ parameters }) => {
               onChange={handleChange}
               value={formData?.offset || ""}
               placeholder={formData.offset ? formData.offset : "Enter a value"}
+              disabled={!isEditable}
             />
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Shutdown Delay</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Shutdown Delay</p>
         <div className="field my-3 w-[30vw]">
           <label>Delay</label>
           <InputText
@@ -1391,10 +1467,11 @@ const FeatureSet = ({ parameters }) => {
             onChange={handleChange}
             value={formData?.delay || ""}
             placeholder={formData.delay ? formData.delay : "Enter a value"}
+            disabled={!isEditable}
           />
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">RF Name</p>
+        <p className="mt-4 font-bold dark:text-gray-300">RF Name</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
@@ -1403,6 +1480,7 @@ const FeatureSet = ({ parameters }) => {
               value="Offline"
               onChange={handleChange}
               checked={formData?.rfNameMode === "Offline"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient1" className="ml-2">
               Disable
@@ -1415,6 +1493,7 @@ const FeatureSet = ({ parameters }) => {
               value="Online"
               onChange={handleChange}
               checked={formData?.rfNameMode === "Online"}
+              disabled={!isEditable}
             />
             <label htmlFor="ingredient2" className="ml-2">
               Enable
@@ -1422,7 +1501,7 @@ const FeatureSet = ({ parameters }) => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Time Based Errors</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Time Based Errors</p>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label>No Alarm</label>
@@ -1439,6 +1518,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="noAlarm"
               onChange={handleChange}
+              disabled={!isEditable}
               value={formData?.noAlarm || ""}
               placeholder={
                 formData.noAlarm ? formData.noAlarm : "Enter a value"
@@ -1458,6 +1538,7 @@ const FeatureSet = ({ parameters }) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              disabled={!isEditable}
               name="speed"
               onChange={handleChange}
               value={formData?.speed || ""}
@@ -1479,6 +1560,7 @@ const FeatureSet = ({ parameters }) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              disabled={!isEditable}
               value={formData?.accelerationBypass || ""}
               placeholder={
                 formData.accelerationBypass
@@ -1491,7 +1573,7 @@ const FeatureSet = ({ parameters }) => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Speed Based Errors</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Speed Based Errors</p>
         <div className="flex justify-between">
           <div className="field my-3 w-[30vw]">
             <label>RF Sensor Absent</label>
@@ -1514,6 +1596,7 @@ const FeatureSet = ({ parameters }) => {
                   ? formData.rfSensorAbsent
                   : "Enter a value"
               }
+              disabled={!isEditable}
             />
           </div>
           <div className="field my-3 w-[30vw]">
@@ -1529,6 +1612,7 @@ const FeatureSet = ({ parameters }) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              disabled={!isEditable}
               name="gyroscopeAbsent"
               onChange={handleChange}
               value={formData?.gyroscopeAbsent || ""}
@@ -1555,6 +1639,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="hmiAbsent"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.hmiAbsent || ""}
               placeholder={
@@ -1577,6 +1662,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="timeNotSet"
               onChange={handleChange}
+              disabled={!isEditable}
               value={formData?.timeNotSet || ""}
               placeholder={
                 formData.timeNotSet ? formData.timeNotSet : "Enter a value"
@@ -1598,6 +1684,7 @@ const FeatureSet = ({ parameters }) => {
               borderTop: "none",
             }}
             name="accelerationError"
+            disabled={!isEditable}
             onChange={handleChange}
             value={formData?.accelerationError || ""}
             placeholder={
@@ -1623,6 +1710,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="brakeError"
               onChange={handleChange}
+              disabled={!isEditable}
               value={formData?.brakeError || ""}
               placeholder={
                 formData.brakeError ? formData.brakeError : "Enter a value"
@@ -1643,6 +1731,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="tpmsError"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.tpmsError || ""}
               placeholder={
@@ -1666,6 +1755,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="simCardAbsent"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.simCardAbsent || ""}
               placeholder={
@@ -1690,6 +1780,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="lowBattery"
               onChange={handleChange}
+              disabled={!isEditable}
               value={formData?.lowBattery || ""}
               placeholder={
                 formData.lowBattery ? formData.lowBattery : "Enter a value"
@@ -1713,6 +1804,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="tripNotStarted"
               onChange={handleChange}
+              disabled={!isEditable}
               placeholder={
                 formData.tripNotStarted
                   ? formData.tripNotStarted
@@ -1735,6 +1827,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="bluetoothConnAbsent"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.bluetoothConnAbsent || ""}
               placeholder={
@@ -1760,6 +1853,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="obdAbsent"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.obdAbsent || ""}
               placeholder={
@@ -1782,6 +1876,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="noAlarm"
               onChange={handleChange}
+              disabled={!isEditable}
               value={formData?.noAlarm || ""}
               placeholder={
                 formData.noAlarm ? formData.noAlarm : "Enter a value"
@@ -1803,6 +1898,7 @@ const FeatureSet = ({ parameters }) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              disabled={!isEditable}
               name="laserSensorAbsent"
               onChange={handleChange}
               value={formData?.laserSensorAbsent || ""}
@@ -1827,6 +1923,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="rfidAbsent"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.rfidAbsent || ""}
               placeholder={
@@ -1851,6 +1948,7 @@ const FeatureSet = ({ parameters }) => {
               }}
               name="iotAbsent"
               onChange={handleChange}
+              disabled={!isEditable}
               value={formData?.iotAbsent || ""}
               placeholder={
                 formData.iotAbsent ? formData.iotAbsent : "Enter a value"
@@ -1859,13 +1957,14 @@ const FeatureSet = ({ parameters }) => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Firmware OTA Update</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Firmware OTA Update</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
               type="radio"
               name="firmwareOtaUpdate"
               value="Offline"
+              disabled={!isEditable}
               onChange={handleChange}
               checked={formData?.firmwareOtaUpdate === "Offline"}
             />
@@ -1879,6 +1978,7 @@ const FeatureSet = ({ parameters }) => {
               name="firmwareOtaUpdate"
               value="Online"
               onChange={handleChange}
+              disabled={!isEditable}
               checked={formData?.firmwareOtaUpdate === "Online"}
             />
             <label htmlFor="firmwareOtaUpdate2" className="ml-2">
@@ -1900,6 +2000,7 @@ const FeatureSet = ({ parameters }) => {
                 borderLeft: "none",
                 borderTop: "none",
               }}
+              disabled={!isEditable}
               name="firewarereserver1"
               onChange={handleChange}
               value={formData?.firewarereserver1 || ""}
@@ -1912,13 +2013,14 @@ const FeatureSet = ({ parameters }) => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Alcohol Detection</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Alcohol Detection</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
               type="radio"
               name="alcoholDetectionMode"
               value="Offline"
+              disabled={!isEditable}
               onChange={handleChange}
               checked={formData?.alcoholDetectionMode === "Offline"}
             />
@@ -1931,6 +2033,7 @@ const FeatureSet = ({ parameters }) => {
               type="radio"
               name="alcoholDetectionMode"
               value="Online"
+              disabled={!isEditable}
               onChange={handleChange}
               checked={formData?.alcoholDetectionMode === "Online"}
             />
@@ -1954,6 +2057,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="alcoholreserved1"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.alcoholreserved1 || ""}
               placeholder={
@@ -1965,13 +2069,14 @@ const FeatureSet = ({ parameters }) => {
           </div>
         </div>
         <hr style={{ borderColor: "#333" }} />
-        <p className="mt-4 font-bold ">Driver Drowsiness</p>
+        <p className="mt-4 font-bold dark:text-gray-300">Driver Drowsiness</p>
         <div className="my-3 flex flex-wrap gap-3">
           <div className="align-items-center flex">
             <input
               type="radio"
               name="driverDrowsinessMode"
               value="Offline"
+              disabled={!isEditable}
               onChange={handleChange}
               checked={formData?.driverDrowsinessMode === "Offline"}
             />
@@ -1984,6 +2089,7 @@ const FeatureSet = ({ parameters }) => {
               type="radio"
               name="driverDrowsinessMode"
               value="Online"
+              disabled={!isEditable}
               onChange={handleChange}
               checked={formData?.driverDrowsinessMode === "Online"}
             />
@@ -2007,6 +2113,7 @@ const FeatureSet = ({ parameters }) => {
                 borderTop: "none",
               }}
               name="driverreserved1"
+              disabled={!isEditable}
               onChange={handleChange}
               value={formData?.driverreserved1 || ""}
               placeholder={
