@@ -268,7 +268,7 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
       <Dialog
         visible={visible}
         onHide={onHide}
-        style={{ width: "40rem" }}
+        style={{ width: "45rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Edit the Device"
         modal

@@ -42,7 +42,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const menuRight = useRef(null);
+  const menuLeft = useRef(null);
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState(null);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -192,9 +192,9 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
             <Button
               type="button"
               className="text-bold setting ml-2 rounded-full text-gray-950 dark:text-white"
-              onClick={(event) => menuRight.current.toggle(event)}
+              onClick={(event) => menuLeft.current.toggle(event)}
               style={{ padding: "0.4rem" }}
-              aria-controls="popup_menu_right"
+              aria-controls="popup_menu_left"
               aria-haspopup
             >
               <CiMenuKebab />
@@ -215,9 +215,9 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 },
               ]}
               popup
-              ref={menuRight}
-              id="popup_menu_right"
-              popupAlignment="right"
+              ref={menuLeft}
+              id="popup_menu_left"
+              popupAlignment="left"
             />
           </div>
         </div>
@@ -226,7 +226,9 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
   };
 
   const EditCustomerDialog = ({ visible, onHide, customer }) => {
-    const [editedCustomerData, setEditedCustomerData] = useState(customer);
+    const [editedCustomerData, setEditedCustomerData] = useState(
+      customer || {}
+    );
     const isValidPhoneNumber = (phoneNumber) => {
       // Regular expression to check for exactly 10 digits
       const phonePattern = /^\d{10}$/;
@@ -334,7 +336,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
       >
         <div className="p-fluid">
           <div className="flex justify-between">
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center mr-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="first_name"
@@ -346,7 +348,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 <label htmlFor="first_name">First Name</label>
               </span>
             </div>
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center ml-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="last_name"

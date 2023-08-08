@@ -422,6 +422,10 @@ body
   background: transparent;
 }
 
+.dark-mode .radio-input {
+  background: #422afb;
+}
+
 @media (max-width: 767px) {
   /* CSS styles for screens up to 767px wide (mobile devices) */
   .grid {

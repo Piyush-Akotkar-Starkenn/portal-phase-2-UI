@@ -150,7 +150,7 @@ const DevicesAdmin = () => {
 
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
-    { label: "IoT", value: "IoT" },
+    { label: "IOT", value: "IOT" },
     { label: "DMS", value: "DMS" },
   ];
 
@@ -248,7 +248,7 @@ const DevicesAdmin = () => {
         <Dialog
           visible={isDialogVisible}
           onHide={closeDialog}
-          style={{ width: "40rem" }}
+          style={{ width: "45rem" }}
           breakpoints={{ "960px": "75vw", "641px": "90vw" }}
           header="Add the Device"
           modal

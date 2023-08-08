@@ -4,6 +4,8 @@ import SignIn from "./auth/SignIn";
 import Profile from "./auth/Profile";
 import CustomerLayout from "layouts/customer";
 import AdminLayout from "layouts/admin";
+import Report from "./customer/reports/components/Report";
+import CustomerProtected from "authorization/CustomerProtected";
 
 const AllRoutes = () => {
   return (
@@ -13,6 +15,14 @@ const AllRoutes = () => {
       <Route path="profile" element={<Profile />} />
       <Route path="admin/*" element={<AdminLayout />} />
       <Route path="customer/*" element={<CustomerLayout />} />
+      <Route
+        path="customer/report/"
+        element={
+          <CustomerProtected>
+            <Report />
+          </CustomerProtected>
+        }
+      />
     </Routes>
   );
 };

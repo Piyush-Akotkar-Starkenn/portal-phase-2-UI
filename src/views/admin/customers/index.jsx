@@ -381,7 +381,7 @@ const Customers = () => {
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}
-        style={{ width: "40rem" }}
+        style={{ width: "45rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Fill the details"
         modal
@@ -389,7 +389,7 @@ const Customers = () => {
       >
         <form onSubmit={handleSubmit} className="mx-auto">
           <div className="flex justify-evenly">
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center mr-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="f_name"
@@ -404,7 +404,7 @@ const Customers = () => {
                 <label htmlFor="f_name">First Name</label>
               </span>
             </div>
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center ml-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="l_name"

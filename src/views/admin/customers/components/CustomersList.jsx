@@ -41,7 +41,9 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
       const phonePattern = /^\d{10}$/;
       return phonePattern.test(phoneNumber);
     };
-    const [editedCustomerData, setEditedCustomerData] = useState([]);
+    const [editedCustomerData, setEditedCustomerData] = useState(
+      customer || {}
+    );
 
     const onSave = async () => {
       if (!isValidPhoneNumber(editedCustomerData.phone)) {
@@ -144,7 +146,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
       >
         <div className="p-fluid">
           <div className="flex justify-between">
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center mr-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="first_name"
@@ -156,7 +158,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 <label htmlFor="first_name">First Name</label>
               </span>
             </div>
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center ml-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="last_name"
@@ -236,6 +238,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 name="city"
                 value={editedCustomerData?.city || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.city ? "p-invalid" : ""}
               />
               <label htmlFor="city">City</label>
             </span>
