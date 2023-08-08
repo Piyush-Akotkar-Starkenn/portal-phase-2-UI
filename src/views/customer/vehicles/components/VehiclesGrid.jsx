@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { classNames } from "primereact/utils";
-import { DataView, DataViewLayoutOptions } from "primereact/dataview";
+import { DataView } from "primereact/dataview";
 import { Vehicles } from "../variables/Vehicles";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
@@ -32,7 +32,7 @@ export default function VehiclesGrid() {
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
   const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
   const [product, setProduct] = useState(emptyProduct);
-  const [selectedProducts, setSelectedProducts] = useState(null);
+  // const [selectedProducts, setSelectedProducts] = useState(null);
   const [checked, setChecked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
@@ -174,7 +174,6 @@ export default function VehiclesGrid() {
   const deleteSelectedProducts = () => {
     setProducts([]);
     setDeleteProductsDialog(false);
-    setSelectedProducts(null);
     toast.current.show({
       severity: "success",
       summary: "Successful",

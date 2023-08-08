@@ -36,9 +36,43 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
 
   // Edit Customer Dialog code
   const EditCustomerDialog = ({ visible, onHide, customer }) => {
-    const [editedCustomerData, setEditedCustomerData] = useState(customer);
+    const isValidPhoneNumber = (phoneNumber) => {
+      // Regular expression to check for exactly 10 digits
+      const phonePattern = /^\d{10}$/;
+      return phonePattern.test(phoneNumber);
+    };
+    const [editedCustomerData, setEditedCustomerData] = useState([]);
 
     const onSave = async () => {
+      if (!isValidPhoneNumber(editedCustomerData.phone)) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Invalid Phone Number",
+          detail: "Please enter a 10-digit valid phone number.",
+          life: 3000,
+        });
+        return;
+      }
+      if (
+        editedCustomerData.first_name === "" ||
+        editedCustomerData.last_name === "" ||
+        editedCustomerData.email === "" ||
+        editedCustomerData.company_name === "" ||
+        editedCustomerData.address === "" ||
+        editedCustomerData.city === "" ||
+        editedCustomerData.state === "" ||
+        editedCustomerData.pincode === "" ||
+        editedCustomerData.phone === ""
+      ) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Missing field",
+          detail: "Field cannot be empty",
+          life: 3000,
+        });
+        return;
+      }
+
       try {
         await onUpdate(customer.userId, editedCustomerData);
 
@@ -53,7 +87,6 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
         });
 
         setCustomerData(updatedData);
-
         onHide();
         toastRef.current.show({
           severity: "success",
@@ -75,37 +108,22 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
     const handleInputChange = (e) => {
       const { name, value } = e.target;
 
-      if (name === "first_name") {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          first_name: value,
-          full_name: `${value} ${prevState.last_name}`,
-        }));
-      } else if (name === "last_name") {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          last_name: value,
-          full_name: `${prevState.first_name} ${value}`,
-        }));
-      } else if (
-        name === "address" ||
-        name === "city" ||
-        name === "state" ||
-        name === "pincode"
-      ) {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          [name]: value,
-          full_address: `${prevState.address || ""}, ${prevState.city || ""}, ${
-            prevState.state || ""
-          }, ${prevState.pincode || ""}`,
-        }));
-      } else {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          [name]: value,
-        }));
-      }
+      setEditedCustomerData((prevState) => {
+        const updatedData = { ...prevState, [name]: value };
+
+        if (name === "first_name") {
+          updatedData.full_name = `${value} ${prevState.last_name || ""}`;
+        } else if (name === "last_name") {
+          updatedData.full_name = `${prevState.first_name || ""} ${value}`;
+        }
+
+        const { address, city, state, pincode } = updatedData;
+        updatedData.full_address = `${address || ""}, ${city || ""}, ${
+          state || ""
+        }, ${pincode || ""}`;
+
+        return updatedData;
+      });
     };
 
     return (
@@ -133,6 +151,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                   name="first_name"
                   value={editedCustomerData?.first_name || ""}
                   onChange={handleInputChange}
+                  className={!editedCustomerData.first_name ? "p-invalid" : ""}
                 />
                 <label htmlFor="first_name">First Name</label>
               </span>
@@ -144,6 +163,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                   name="last_name"
                   value={editedCustomerData?.last_name || ""}
                   onChange={handleInputChange}
+                  className={!editedCustomerData.last_name ? "p-invalid" : ""}
                 />
                 <label htmlFor="last_name">Last Name</label>
               </span>
@@ -157,6 +177,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 name="email"
                 value={editedCustomerData?.email || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.email ? "p-invalid" : ""}
               />
               <label htmlFor="email">Email</label>
             </span>
@@ -169,8 +190,26 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 name="company_name"
                 value={editedCustomerData?.company_name || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.company_name ? "p-invalid" : ""}
               />
               <label htmlFor="company_name">Company Name</label>
+            </span>
+          </div>
+          <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
+            <span className="p-float-label">
+              <InputText
+                id="phone"
+                type="tel"
+                name="phone"
+                value={editedCustomerData?.phone || ""}
+                onChange={handleInputChange}
+                className={
+                  isValidPhoneNumber(editedCustomerData?.phone || "")
+                    ? ""
+                    : "p-invalid"
+                }
+              />
+              <label htmlFor="phone">Contact Number</label>
             </span>
           </div>
           <div className="mx-auto mt-6 w-[34.5vw]">
@@ -184,6 +223,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 name="address"
                 value={editedCustomerData?.address || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.address ? "p-invalid" : ""}
               />
               <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
             </span>
@@ -208,6 +248,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 name="state"
                 value={editedCustomerData?.state || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.state ? "p-invalid" : ""}
               />
               <label htmlFor="state">State</label>
             </span>
@@ -220,20 +261,9 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
                 name="pincode"
                 value={editedCustomerData?.pincode || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.pincode ? "p-invalid" : ""}
               />
               <label htmlFor="pincode">Pincode</label>
-            </span>
-          </div>
-          <div className="mx-auto mb-3 mt-8 w-[34.5vw]">
-            <span className="p-float-label">
-              <InputText
-                id="phone"
-                type="tel"
-                name="phone"
-                value={editedCustomerData?.phone || ""}
-                onChange={handleInputChange}
-              />
-              <label htmlFor="phone">Contact Number</label>
             </span>
           </div>
         </div>
@@ -414,7 +444,6 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
       </React.Fragment>
     );
   };
-
   return (
     <div>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />

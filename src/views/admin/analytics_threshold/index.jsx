@@ -36,7 +36,7 @@ const AnalyticsThreshold = () => {
   const fetchAnalyticsThresholdData = () => {
     axios
       .get(
-        `${process.env.REACT_APP_API_URL}/Admin/AnalyticsThreshold/getAnalyticsThreshold`
+        `${process.env.REACT_APP_API_URL}/admin/analytics-threshold/get-analytics-threshold`
       )
       .then((res) => {
         console.log(res.data.data.AT);
@@ -54,7 +54,7 @@ const AnalyticsThreshold = () => {
   const handleDeleteAT = (customer_id) => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/Admin/AnalyticsThreshold/deleteCustomers-AT/${customer_id}`
+        `${process.env.REACT_APP_API_URL}/admin/analytics-threshold/delete-customers-at/${customer_id}`
       )
       .then((res) => {
         fetchAnalyticsThresholdData();
@@ -79,7 +79,7 @@ const AnalyticsThreshold = () => {
   const handleUpdateAT = (customer_id, editedData) => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/Admin/AnalyticsThreshold/updateCustomers-AT/${customer_id}`,
+        `${process.env.REACT_APP_API_URL}/admin/analytics-threshold/update-customers-at/${customer_id}`,
         editedData
       )
       .then((res) => {
@@ -126,7 +126,7 @@ const AnalyticsThreshold = () => {
   useEffect(() => {
     axios
       .get(
-        `${process.env.REACT_APP_API_URL}/Admin/AnalyticsThreshold/GetCustomers-AT`
+        `${process.env.REACT_APP_API_URL}/admin/analytics-threshold/get-customers-at`
       )
       .then((response) => {
         if (response.data && Array.isArray(response.data.data)) {
@@ -154,6 +154,7 @@ const AnalyticsThreshold = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     const formData = {
       title: event.target.elements["username"]?.value,
       customer_id: selectedCustomer,
@@ -187,7 +188,28 @@ const AnalyticsThreshold = () => {
       total_distance: formData.total_distance === "",
       duration: formData.duration === "",
     });
+    const rangeValidations = {
+      brake: [1, 1000],
+      tailgating: [1, 1000],
+      rash_driving: [1, 1000],
+      sleep_alert: [1, 1000],
+      over_speed: [0, 1000],
+      green_zone: [1, 1000],
+      minimum_distance: [1, 1000],
+      minimum_driver_rating: [0, 5],
+      ttc_difference_percentage: [0, 100],
+      total_distance: [0, 10000],
+      duration: [1, 1000],
+    };
+    const invalidFields = {};
+    Object.entries(rangeValidations).forEach(([field, [min, max]]) => {
+      const value = parseInt(formData[field], 10);
+      if (isNaN(value) || value < min || value > max) {
+        invalidFields[field] = true;
+      }
+    });
 
+    setFormErrors(invalidFields);
     const requiredFields = [
       "title",
       "customer_id",
@@ -220,7 +242,7 @@ const AnalyticsThreshold = () => {
     // Send the data to the API endpoint using axios
     axios
       .post(
-        `${process.env.REACT_APP_API_URL}/Admin/AnalyticsThreshold/AddAnalytics`,
+        `${process.env.REACT_APP_API_URL}/admin/analytics-threshold/add-analytics`,
         formData
       )
       .then((response) => {
@@ -323,7 +345,7 @@ const AnalyticsThreshold = () => {
                     name="brake-input"
                     keyfilter="pint"
                     title="(1-1000)"
-                    className={formErrors.brake ? "p-invalid" : ""}
+                    className={formErrors.brake ? "p-invalid p-filled" : ""}
                   />
                   <label
                     htmlFor="brake-input"
@@ -342,7 +364,9 @@ const AnalyticsThreshold = () => {
                     name="tailgating-input"
                     keyfilter="pint"
                     title="(1-1000)"
-                    className={formErrors.tailgating ? "p-invalid" : ""}
+                    className={
+                      formErrors.tailgating ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="tailgating-input"
@@ -361,7 +385,9 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="rash-driving-input"
                     title="(1-1000)"
-                    className={formErrors.rash_driving ? "p-invalid" : ""}
+                    className={
+                      formErrors.rash_driving ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="rash-driving-input"
@@ -380,7 +406,9 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="sleep-alert-input"
                     title="(1-1000)"
-                    className={formErrors.sleep_alert ? "p-invalid" : ""}
+                    className={
+                      formErrors.sleep_alert ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="sleep-alert-input"
@@ -399,7 +427,9 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="over-speed-input"
                     title="(1-1000)"
-                    className={formErrors.over_speed ? "p-invalid" : ""}
+                    className={
+                      formErrors.over_speed ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="over-speed-input"
@@ -418,7 +448,9 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="green-zone-input"
                     title="(1-1000)"
-                    className={formErrors.green_zone ? "p-invalid" : ""}
+                    className={
+                      formErrors.green_zone ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="green-zone-input"
@@ -444,7 +476,9 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="minimum-distance-input"
                     title="(1-1000)"
-                    className={formErrors.minimum_distance ? "p-invalid" : ""}
+                    className={
+                      formErrors.minimum_distance ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="minimum-distance-input"
@@ -460,11 +494,13 @@ const AnalyticsThreshold = () => {
               <div className="flex-auto">
                 <span className="p-float-label">
                   <InputText
-                    keyfilter="pint"
+                    keyfilter="num"
                     name="minimum-driver-rating-input"
                     title="(0-5)"
                     className={
-                      formErrors.minimum_driver_rating ? "p-invalid" : ""
+                      formErrors.minimum_driver_rating
+                        ? "p-invalid p-filled"
+                        : ""
                     }
                   />
                   <label
@@ -492,7 +528,9 @@ const AnalyticsThreshold = () => {
                     name="ttc-difference-percentage-input"
                     title="(0-100)"
                     className={
-                      formErrors.ttc_difference_percentage ? "p-invalid" : ""
+                      formErrors.ttc_difference_percentage
+                        ? "p-invalid p-filled"
+                        : ""
                     }
                   />
                   <label
@@ -519,7 +557,9 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="total-distance-input"
                     title="(0-10000)"
-                    className={formErrors.total_distance ? "p-invalid" : ""}
+                    className={
+                      formErrors.total_distance ? "p-invalid p-filled" : ""
+                    }
                   />
                   <label
                     htmlFor="total-distance-input"
@@ -545,7 +585,7 @@ const AnalyticsThreshold = () => {
                     keyfilter="pint"
                     name="halt-duration-input"
                     title="(1-1000)"
-                    className={formErrors.duration ? "p-invalid" : ""}
+                    className={formErrors.duration ? "p-invalid p-filled" : ""}
                   />
                   <label
                     htmlFor="halt-duration-input"

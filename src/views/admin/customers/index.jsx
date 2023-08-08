@@ -52,7 +52,7 @@ const Customers = () => {
   //Fetching all data
   const fetchCustomersData = () => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/Admin/GetAll`)
+      .get(`${process.env.REACT_APP_API_URL}/admin/get-all`)
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
@@ -70,7 +70,7 @@ const Customers = () => {
   const handleDeleteCustomer = async (customerId) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/Admin/delete/${customerId}`,
+        `${process.env.REACT_APP_API_URL}/admin/delete/${customerId}`,
         {
           status: false,
         }
@@ -88,7 +88,7 @@ const Customers = () => {
   const handleUpdateCustomer = async (customerId, updatedData) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/Admin/update/${customerId}`,
+        `${process.env.REACT_APP_API_URL}/admin/update/${customerId}`,
         updatedData
       );
 
@@ -204,6 +204,7 @@ const Customers = () => {
       });
       return;
     }
+
     if (data.password !== data.confirmPassword) {
       toastRef.current.show({
         severity: "warn",
@@ -216,7 +217,7 @@ const Customers = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/Admin/Signup`,
+        `${process.env.REACT_APP_API_URL}/admin/signup`,
         data,
         {
           headers: {
@@ -239,11 +240,11 @@ const Customers = () => {
         });
         fetchCustomersData();
       } else {
-        console.log("Failed to post data:", response.statusText);
+        console.log(response.data.message);
         toastRef.current.show({
           severity: "error",
           summary: "Error",
-          detail: "An error occurred. Please try again later.",
+          detail: `${response.data.message}`,
           life: 3000,
         });
       }
@@ -281,7 +282,10 @@ const Customers = () => {
             detail: "Passwords do not match.",
             life: 3000,
           });
-        } else if (status === 500 && data === "This Email Already Taken ") {
+        } else if (
+          status === 409 &&
+          data.message === "This Email Already Taken "
+        ) {
           // Show phone number already in use error toast message
           toastRef.current.show({
             severity: "error",
@@ -290,8 +294,8 @@ const Customers = () => {
             life: 3000,
           });
         } else if (
-          status === 500 &&
-          data === "This Phone Number Already Taken"
+          status === 409 &&
+          data.message === "This Phone Number Already Taken"
         ) {
           // Show phone number already in use error toast message
           toastRef.current.show({
@@ -301,26 +305,16 @@ const Customers = () => {
             life: 3000,
           });
         } else {
-          console.log("Error:", error);
+          console.log("Error:", error.response.data.message);
 
           // Show generic error toast message for other errors
           toastRef.current.show({
             severity: "error",
             summary: "Error",
-            detail: "An error occurred. Please try again later.",
+            detail: `${error.response.data.message}`,
             life: 3000,
           });
         }
-      } else {
-        console.log("Error:", error);
-
-        // Show network error toast message
-        toastRef.current.show({
-          severity: "error",
-          summary: "Network Error",
-          detail: "An error occurred. Please check your network connection.",
-          life: 3000,
-        });
       }
     }
   };
@@ -400,7 +394,12 @@ const Customers = () => {
                 <InputText
                   id="f_name"
                   name="f_name"
-                  className={formErrors.f_name ? "p-invalid" : ""}
+                  className={
+                    formErrors.f_name
+                      ? "p-invalid"
+                      : (data.f_name = "" ? "p-filled" : "")
+                  }
+                  floatingLabel
                 />
                 <label htmlFor="f_name">First Name</label>
               </span>
@@ -410,7 +409,12 @@ const Customers = () => {
                 <InputText
                   id="l_name"
                   name="l_name"
-                  className={formErrors.l_name ? "p-invalid" : ""}
+                  className={
+                    formErrors.l_name
+                      ? "p-invalid"
+                      : (data.l_name = "" ? "p-filled" : "")
+                  }
+                  floatingLabel
                 />
                 <label htmlFor="l_name">Last Name</label>
               </span>
@@ -422,7 +426,12 @@ const Customers = () => {
                 id="email"
                 type="email"
                 name="email"
-                className={formErrors.email ? "p-invalid" : ""}
+                className={
+                  formErrors.email
+                    ? "p-invalid"
+                    : (data.email = "" ? "p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="email">Email</label>
             </span>
@@ -433,7 +442,14 @@ const Customers = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 name="password"
-                className={formErrors.password ? "p-invalid" : ""}
+                className={
+                  formErrors.password
+                    ? "p-invalid"
+                    : data.password !== ""
+                    ? ""
+                    : "p-filled"
+                }
+                floatingLabel
               />
               <label htmlFor="password">Password</label>
               <div className="absolute right-2.5 top-4">
@@ -457,7 +473,12 @@ const Customers = () => {
                 id="confirmPassword"
                 type="password"
                 name="confirmPassword"
-                className={formErrors.confirmPassword ? "p-invalid" : ""}
+                className={
+                  formErrors.confirmPassword
+                    ? "p-filled p-invalid"
+                    : (data.confirmPassword = "" ? "p-invalid p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="confirmPassword">Confirm Password</label>
             </span>
@@ -487,7 +508,12 @@ const Customers = () => {
                 id="company_name"
                 type="text"
                 name="company_name"
-                className={formErrors.company_name ? "p-invalid" : ""}
+                className={
+                  formErrors.company_name
+                    ? "p-invalid"
+                    : (data.company_name = "" ? "p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="company_name">Company Name</label>
             </span>
@@ -498,7 +524,12 @@ const Customers = () => {
                 id="phone"
                 type="tel"
                 name="phone"
-                className={formErrors.phone ? "p-invalid" : ""}
+                className={
+                  formErrors.phone
+                    ? "p-invalid"
+                    : (data.phone = "" ? "p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="phone">Contact Number</label>
             </span>
@@ -512,7 +543,12 @@ const Customers = () => {
                 id="address"
                 type="text"
                 name="address"
-                className={formErrors.address ? "p-invalid" : ""}
+                className={
+                  formErrors.address
+                    ? "p-invalid"
+                    : (data.address = "" ? "p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
             </span>
@@ -523,7 +559,12 @@ const Customers = () => {
                 id="city"
                 type="text"
                 name="city"
-                className={formErrors.city ? "p-invalid" : ""}
+                className={
+                  formErrors.city
+                    ? "p-invalid"
+                    : (data.city = "" ? "p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="city">City</label>
             </span>
@@ -534,7 +575,12 @@ const Customers = () => {
                 id="state"
                 type="text"
                 name="state"
-                className={formErrors.state ? "p-invalid" : ""}
+                className={
+                  formErrors.state
+                    ? "p-invalid"
+                    : (data.state = "" ? "p-filled" : "")
+                }
+                floatingLabel
               />
               <label htmlFor="state">State</label>
             </span>
@@ -546,7 +592,12 @@ const Customers = () => {
                 type="text"
                 name="pincode"
                 keyfilter="pint"
-                className={formErrors.pincode ? "p-invalid" : ""}
+                className={
+                  formErrors.pincode
+                    ? "p-invalid"
+                    : (data.pincode = "" ? "p-filled" : "")
+                }
+                floatingLabel
                 onChange={(e) => {
                   const value = e.target.value;
                   const formattedValue = value.replace(/\D/g, "").slice(0, 6); // Remove non-digits and limit to 6 characters
