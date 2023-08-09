@@ -17,11 +17,11 @@ export default function VehiclesList({ data }) {
   const toast = useRef(null);
   const [visible, setVisible] = useState(false);
   const [myData, setMyData] = useState();
-
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
+  //global search
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -54,12 +54,12 @@ export default function VehiclesList({ data }) {
       ></Tag>
     );
   };
-
+  //opens vehicle details dialog
   const openDialog = (rowData) => {
     setMyData(rowData);
     setVisible(true);
   };
-
+  //closes vehicle details dialog
   const closeDialog = () => {
     setVisible(false);
   };
