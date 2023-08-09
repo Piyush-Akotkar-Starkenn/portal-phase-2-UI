@@ -16,10 +16,8 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState(null);
   const [customerData, setCustomerData] = useState(data);
-
   const toastRef = useRef(null);
   const toastErr = useRef(null);
-
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
@@ -309,7 +307,7 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
         });
       }
     };
-
+    // Delete dialog
     return (
       <Dialog
         visible={visible}
@@ -447,6 +445,8 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
       </React.Fragment>
     );
   };
+
+  // Customers List
   return (
     <div>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />

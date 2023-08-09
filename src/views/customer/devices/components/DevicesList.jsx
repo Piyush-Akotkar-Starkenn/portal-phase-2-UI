@@ -25,8 +25,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const toastRef = useRef(null);
-
-  //global search logic
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -43,14 +41,10 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     _filters["global"].value = null; // Clear the global filter value
     setFilters(_filters);
   };
-
-  //opens delete dialog
   const openDeleteDialog = (rowData) => {
     setSelectedDevice(rowData);
     setDeleteDialogVisible(true);
   };
-
-  //searchbox
   const renderHeader = () => {
     return (
       <div className="my-4 flex justify-end">
@@ -76,14 +70,13 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     );
   };
 
-  //device type options
   const deviceTypeOptions = [
     ...new Set(data.map((item) => item.device_type)),
   ].map((deviceType) => ({
     label: deviceType,
     value: deviceType,
   }));
-  //device type filter
+  console.log(deviceTypeOptions);
   const representativeFilterTemplate = (options) => {
     return (
       <React.Fragment>
@@ -144,7 +137,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
         onHide();
       }
     };
-    // delete dialog
+
     return (
       <Dialog
         visible={visible}
@@ -172,7 +165,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     );
   };
 
-  //opens edit dialog
+  //edit device
 
   const openDialog = (rowData) => {
     setIsDialogVisible(true);
@@ -181,12 +174,10 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     setRowId(rowData);
   };
 
-  //closes edit dialog
   const closeDialog = () => {
     setIsDialogVisible(false);
   };
 
-  //dropdown options
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
     { label: "IOT", value: "IOT" },
@@ -197,25 +188,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     { label: "Active", value: "true" },
     { label: "Deactive", value: "false" },
   ];
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
-      .then((res) => {
-        setListCustomers(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [deviceData]);
-
-  const Customersoptions = () => {
-    return listCustomers?.map((el) => ({
-      label: el.first_name + " " + el.last_name,
-      value: el.userId,
-    }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     onEditDevice(rowId?.device_id, editData);
@@ -230,6 +202,17 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     }));
   };
 
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
+      .then((res) => {
+        setListCustomers(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [deviceData]);
+
   const getDeviceData = (rowData) => {
     axios
       .get(
@@ -243,7 +226,13 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
       });
   };
 
-  //edit dialog
+  const Customersoptions = () => {
+    return listCustomers?.map((el) => ({
+      label: el.first_name + " " + el.last_name,
+      value: el.userId,
+    }));
+  };
+
   return (
     <div className="card">
       <Dialog
@@ -340,7 +329,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
         </form>
       </Dialog>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
-      {/* List View  */}
       <DataTable
         value={data}
         removableSort

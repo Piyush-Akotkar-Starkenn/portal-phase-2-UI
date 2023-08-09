@@ -49,11 +49,11 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
   const titleInputRef = useRef(null);
   const brakeInputRef = useRef(null);
   const tailgatingInputRef = useRef(null);
-  // Add refs for other input fields as needed
-
   const [selectedAT, setSelectedAT] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const toastRef = useRef(null);
+
+  //Global search logic
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -70,10 +70,8 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
     _filters["global"].value = null; // Clear the global filter value
     setFilters(_filters);
   };
-  const openDeleteDialog = (rowData) => {
-    setSelectedAT(rowData);
-    setDeleteDialogVisible(true);
-  };
+
+  //Searchbox
   const renderHeader = () => {
     return (
       <div className="my-4 flex justify-end">
@@ -98,14 +96,11 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
       </div>
     );
   };
-
-  const deviceTypeOptions = [
-    ...new Set(data.map((item) => item.device_type)),
-  ].map((deviceType) => ({
-    label: deviceType,
-    value: deviceType,
-  }));
-  console.log(deviceTypeOptions);
+  //open delete dialog
+  const openDeleteDialog = (rowData) => {
+    setSelectedAT(rowData);
+    setDeleteDialogVisible(true);
+  };
 
   const actionBodyTemplate = (rowData) => {
     return (
@@ -170,7 +165,7 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
     );
   };
 
-  //edit AT
+  //open edit AT dialog
 
   const openDialog = (rowData) => {
     setIsDialogVisible(true);
@@ -237,7 +232,6 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
       } else if (invalidFields.tailgating) {
         tailgatingInputRef.current.focus();
       }
-      // Add more conditions for other fields as needed
 
       return;
     }
@@ -278,7 +272,6 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
 
       // If a nestedProperty is provided, update the nested property
       if (nestedProperty) {
-        // Create the nested object if it doesn't exist
         if (!clonedData[name]) {
           clonedData[name] = {};
         }
@@ -290,7 +283,7 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
       return clonedData;
     });
   };
-
+  //get customers
   useEffect(() => {
     axios
       .get(
@@ -310,7 +303,7 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
       value: el.userId,
     }));
   };
-
+  //mapping customer names
   const getCustomerNameMap = () => {
     const customerNameMap = {};
     listCustomers?.forEach((el) => {
@@ -320,6 +313,8 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
     return customerNameMap;
   };
   const customerNameMap = getCustomerNameMap();
+
+  //edit dialog
   return (
     <div className="card">
       <Dialog
@@ -637,6 +632,8 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
         </form>
       </Dialog>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
+
+      {/* List of AT */}
       <DataTable
         value={data}
         removableSort

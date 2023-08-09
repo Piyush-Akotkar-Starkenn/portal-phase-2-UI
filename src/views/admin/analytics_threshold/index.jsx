@@ -29,10 +29,12 @@ const AnalyticsThreshold = () => {
     total_distance: false,
     duration: false,
   });
+
+  //Fetching all data
   useEffect(() => {
     fetchAnalyticsThresholdData();
   }, []);
-  //Fetching all data
+
   const fetchAnalyticsThresholdData = () => {
     axios
       .get(
@@ -51,6 +53,7 @@ const AnalyticsThreshold = () => {
       });
   };
 
+  //Delete api call
   const handleDeleteAT = (customer_id) => {
     axios
       .put(
@@ -76,6 +79,7 @@ const AnalyticsThreshold = () => {
       });
   };
 
+  //Edit api call
   const handleUpdateAT = (customer_id, editedData) => {
     axios
       .put(
@@ -121,8 +125,7 @@ const AnalyticsThreshold = () => {
     setFormErrors(false);
     setSelectedCustomer(null);
   };
-  //Add AT form
-
+  //get customer list
   useEffect(() => {
     axios
       .get(
@@ -146,6 +149,7 @@ const AnalyticsThreshold = () => {
     value: customer.userId,
   }));
 
+  //add AT api call
   const resetFormFields = () => {
     setSelectedCustomer(null);
     const form = document.querySelector("form");
@@ -286,11 +290,13 @@ const AnalyticsThreshold = () => {
         className="mt-2 h-10 px-3 py-0 text-left dark:hover:text-white"
         onClick={openDialog}
       />
+      {/* List of AT */}
       <AnalyticsList
         data={data}
         onEdit={handleUpdateAT}
         onDelete={handleDeleteAT}
       />
+      {/* Add AT form */}
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}

@@ -11,6 +11,7 @@ const AssignCustomer = ({ parameters, onSuccess }) => {
   const toastErr = useRef(null);
   const [validationError, setValidationError] = useState(false);
 
+  //fetching customers to assign
   useEffect(() => {
     axios
       .get(
@@ -28,6 +29,7 @@ const AssignCustomer = ({ parameters, onSuccess }) => {
     value: customer.userId,
   }));
 
+  //update and assign FS to customer
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedCustomer) {

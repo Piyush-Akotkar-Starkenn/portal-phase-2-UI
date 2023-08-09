@@ -23,6 +23,7 @@ const FeatureSet = ({ parameters }) => {
     setFormData(featuresetDetails);
   }, [featuresetDetails]);
 
+  //edit and update feature set assigned to selected vehicle
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(formData);
@@ -41,6 +42,7 @@ const FeatureSet = ({ parameters }) => {
       });
   };
 
+  //fetch feature set details of selected vehicle
   useEffect(() => {
     axios
       .get(
@@ -54,6 +56,7 @@ const FeatureSet = ({ parameters }) => {
       });
   }, [parameters]);
 
+  //dropdown options
   const StationaryObjectoptions = [
     { label: "Yes", value: 0 },
     { label: "No", value: 1 },
@@ -123,6 +126,7 @@ const FeatureSet = ({ parameters }) => {
     { label: "GPS", value: "GPS" },
   ];
 
+  //edit dialog
   return (
     <>
       <form onSubmit={handleSubmit}>

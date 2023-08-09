@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { BsArrowRightCircleFill } from "react-icons/bs";
 import FixedPlugin from "components/fixedPlugin/FixedPlugin";
@@ -7,7 +7,6 @@ import { Toast } from "primereact/toast";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import Preloader from "./Preloader";
-import { useMemo } from "react";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,31 +14,6 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [typedString, setTypedString] = useState("");
-  const typedStrings = useMemo(
-    () => ["Welcome To Starkenn Technologies.."],
-    []
-  );
-  const typingSpeed = 50;
-
-  useEffect(() => {
-    let currentIndex = 0;
-    let currentTypedString = "";
-    let timer;
-
-    const typeString = () => {
-      if (currentIndex < typedStrings[0].length) {
-        currentTypedString += typedStrings[0][currentIndex];
-        setTypedString(currentTypedString);
-        currentIndex++;
-        timer = setTimeout(typeString, typingSpeed);
-      }
-    };
-
-    timer = setTimeout(typeString, typingSpeed);
-
-    return () => clearTimeout(timer);
-  }, [typedStrings, typingSpeed]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,6 +36,7 @@ export default function SignIn() {
       axios
         .post("http://localhost:3001/api/Admin/Login", data)
         .then((res) => {
+          console.log(res.data);
           const token = res.data.accessToken;
           const user_type = res.data.data.user_type;
           const userId = res.data.data.userId;
@@ -126,7 +101,7 @@ export default function SignIn() {
                       fontWeight: "500",
                     }}
                   >
-                    {typedString}
+                    Welcome To Starkenn Technologies
                   </span>
                 </h1>
               </div>

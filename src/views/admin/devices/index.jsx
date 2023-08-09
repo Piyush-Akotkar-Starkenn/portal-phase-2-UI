@@ -37,11 +37,11 @@ const DevicesAdmin = () => {
   const [listCustomers, setListCustomers] = useState([]);
   const toastRef = useRef(null);
 
+  //Fetching all data
   useEffect(() => {
     fetchDevicesData();
   }, []);
 
-  //Fetching all data
   const fetchDevicesData = () => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/admin/devices/get-all-devices`)
@@ -58,6 +58,7 @@ const DevicesAdmin = () => {
       });
   };
 
+  //edit api call
   const handleEditDevice = (deviceId, editedDevice) => {
     axios
       .put(
@@ -94,6 +95,7 @@ const DevicesAdmin = () => {
       });
   };
 
+  //delete api call
   const handleDeleteDevice = (deviceId) => {
     axios
       .put(
@@ -128,6 +130,7 @@ const DevicesAdmin = () => {
       sim_number: "",
     });
   };
+
   const handleListView = () => {
     setIsListView(true);
   };
@@ -136,18 +139,19 @@ const DevicesAdmin = () => {
     setIsListView(false);
   };
 
+  //add device dialog open
   const openDialog = () => {
     resetFormData();
     setIsDialogVisible(true);
   };
 
+  //add device dialog close
   const closeDialog = () => {
     resetFormData();
     setIsDialogVisible(false);
   };
 
-  ///Device Add Page
-
+  //dropdown options
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
     { label: "IOT", value: "IOT" },
@@ -159,6 +163,26 @@ const DevicesAdmin = () => {
     { label: "Deactive", value: "false" },
   ];
 
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/admin/devices/get-customers`)
+      .then((res) => {
+        setListCustomers(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  const Customersoptions = () => {
+    return listCustomers?.map((el) => ({
+      label: el.first_name + " " + el.last_name,
+      value: el.userId,
+    }));
+  };
+
+  //add customer api call
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid()) {
@@ -221,25 +245,7 @@ const DevicesAdmin = () => {
     handleValidation(name, value);
   };
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/admin/devices/get-customers`)
-      .then((res) => {
-        setListCustomers(res.data);
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
-  const Customersoptions = () => {
-    return listCustomers?.map((el) => ({
-      label: el.first_name + " " + el.last_name,
-      value: el.userId,
-    }));
-  };
-
+  //add device dialog
   return (
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />

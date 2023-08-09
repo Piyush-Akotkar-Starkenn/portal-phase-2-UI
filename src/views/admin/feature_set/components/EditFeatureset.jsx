@@ -17,26 +17,18 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
   const [formData, setFormData] = useState({});
   const toastErr = useRef(null);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
-
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
       selectCustomer: [...customers],
     }));
-    console.log(setCustomers);
-  }, [customers, featuresetDetails, setFormData]);
+  }, [customers, featuresetDetails, setFormData, setCustomers]);
 
   useEffect(() => {
     setFormData(featuresetDetails);
   }, [featuresetDetails]);
 
+  //fetching cutomers
   useEffect(() => {
     axios
       .get(
@@ -50,7 +42,7 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
         console.log(err);
       });
   }, []);
-
+  //fetching featureset
   useEffect(() => {
     axios
       .get(
@@ -64,10 +56,9 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
       });
   }, [parameters?.propValue]);
 
+  //making api call to update FS
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
-    // console.log(Object.keys(data).length);
     try {
       axios
         .put(
@@ -95,8 +86,15 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
     }
   };
 
-  console.log(featuresetDetails);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
 
+  //dropdown options
   const StationaryObjectoptions = [
     { label: "Yes", value: 0 },
     { label: "No", value: 1 },
@@ -172,6 +170,7 @@ const EditFeatureset = ({ parameters, onSuccess }) => {
     }));
   };
 
+  //edit dialog
   return (
     <>
       <Toast ref={toastErr} className="bg-red-400" />

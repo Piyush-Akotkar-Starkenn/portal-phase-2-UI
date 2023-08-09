@@ -11,7 +11,7 @@ import { Toast } from "primereact/toast";
 
 const applyFilters = (filters, allData) => {
   let filteredData = allData;
-  //condition to exclude these fields for global search
+
   if (filters.global.value) {
     filteredData = filteredData.filter((item) =>
       Object.entries(item).some(
@@ -29,7 +29,6 @@ const applyFilters = (filters, allData) => {
 
   return filteredData;
 };
-
 export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -42,11 +41,9 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
+  // const [editData, setEditData] = useState({});
   const [listCustomers, setListCustomers] = useState([]);
   const totalItems = filteredData.length;
-  const toastRef = useRef(null);
-
-  //dropdown options
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
     { label: "IoT", value: "IoT" },
@@ -57,6 +54,13 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
     { label: "Active", value: "true" },
     { label: "Deactive", value: "false" },
   ];
+  const toastRef = useRef(null);
+
+  useEffect(() => {
+    setAllData(data);
+    const filteredData = applyFilters(filters, data);
+    setFilteredData(filteredData);
+  }, [data, filters]);
 
   useEffect(() => {
     axios
@@ -75,13 +79,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
       value: el.userId,
     }));
   };
-
-  //global search
-  useEffect(() => {
-    setAllData(data);
-    const filteredData = applyFilters(filters, data);
-    setFilteredData(filteredData);
-  }, [data, filters]);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -106,13 +103,11 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
     setFilteredData(filteredData);
   };
 
-  //edit api call
   const handleEdit = (device) => {
     setEditedDevice(device);
     setIsEditDialogVisible(true);
   };
 
-  //delete api call
   const handleDelete = (device) => {
     setSelectedDevice(device);
     setIsDeleteDialogVisible(true);
@@ -148,7 +143,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
     }
   };
 
-  //card
   const itemTemplate = (item) => {
     return (
       <div className="p-col-11 mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
@@ -224,6 +218,8 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
       </div>
     );
   };
+
+  // Delete Dialog
 
   // Edit Dialog
 
@@ -364,7 +360,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
     );
   };
 
-  //searchbox
   return (
     <div>
       <div className="my-4 mr-7  flex justify-end">
@@ -388,7 +383,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
         </div>
       </div>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
-      {/* Gridview */}
       <DataView
         value={filteredData}
         layout="grid"
@@ -398,7 +392,7 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
         emptyMessage="No devices found."
       />
       <p className="text-center text-gray-700">Total Items : {totalItems}</p>
-      {/* Delete dialog */}
+      {/* Add the delete dialog component */}
       <Dialog
         visible={isDeleteDialogVisible}
         onHide={() => setIsDeleteDialogVisible(false)}
@@ -422,6 +416,7 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
       >
         <div>Are you sure you want to delete ${selectedDevice?.device_id}?</div>
       </Dialog>
+      {/* Add the edit dialog component */}
       <EditDeviceDialog
         visible={isEditDialogVisible}
         onHide={() => setIsEditDialogVisible(false)}
