@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { DataView } from "primereact/dataview";
 import { Tag } from "primereact/tag";
@@ -10,31 +9,37 @@ import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import VehicleTrips from "./VehicleTrips";
 import FeatureSet from "./FeatureSet";
+const applyFilters = (filters, allData) => {
+  let filteredData = allData;
 
-export default function VehiclesGrid() {
-  const [allData, setAllData] = useState([]);
-  const [data, setData] = useState([]);
+  if (filters.global.value) {
+    filteredData = filteredData.filter((item) =>
+      Object.entries(item).some(
+        ([key, value]) =>
+          key !== "created_at" &&
+          key !== "updated_at" &&
+          key !== "_id" &&
+          key !== "status" &&
+          String(value)
+            .toLowerCase()
+            .includes(filters.global.value.toLowerCase())
+      )
+    );
+  }
+
+  return filteredData;
+};
+export default function VehiclesGrid({ data }) {
   const [visible, setVisible] = useState(false);
-  const totalItems = data.length;
-  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  const toast = useRef(null);
+  const [allData, setAllData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const totalItems = filteredData.length;
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
-  let emptyProduct = {
-    id: null,
-    vehicle_name: "",
-    vehicle_registration: "",
-    dms: "",
-    iot: "",
-    ecu: "",
-    status: "",
-  };
-  const [product, setProduct] = useState(emptyProduct);
-  const [products, setProducts] = useState(null);
   const getSeverity = (data) => {
     switch (data.status) {
       case "1":
@@ -47,77 +52,34 @@ export default function VehiclesGrid() {
   };
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/Customers/Vehicles/getAllVehicle`)
-      .then((res) => {
-        setAllData(res.data.data);
+    setAllData(data);
+    const filteredData = applyFilters(filters, data);
+    setFilteredData(filteredData);
+  }, [data, filters]);
 
-        const formattedData = res.data.data.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-        }));
-        setData(formattedData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-  const confirmDeleteProduct = (product) => {
-    setProduct(product);
-    setDeleteProductDialog(true);
-  };
-
-  const deleteProduct = () => {
-    let _products = products.filter((val) => val.id !== product.id);
-
-    setProducts(_products);
-    setDeleteProductDialog(false);
-    setProduct(emptyProduct);
-    toast.current.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Product Deleted",
-      life: 3000,
-    });
-  };
-  const hideDeleteProductDialog = () => {
-    setDeleteProductDialog(false);
-  };
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
-    let _filters = { ...filters };
-    _filters["global"].value = value;
-    setFilters(_filters);
     setGlobalFilterValue(value);
-    applyFilters(_filters); // Apply filters after global search value changes
+    const updatedFilters = {
+      ...filters,
+      global: { value, matchMode: FilterMatchMode.CONTAINS },
+    };
+    const filteredData = applyFilters(updatedFilters, allData);
+    setFilters(updatedFilters);
+    setFilteredData(filteredData);
   };
 
   const clearSearch = () => {
     setGlobalFilterValue("");
-    const _filters = { ...filters };
-    _filters["global"].value = null;
-    setFilters(_filters);
-    applyFilters(_filters); // Apply filters after clearing search
+    const updatedFilters = {
+      ...filters,
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    };
+    const filteredData = applyFilters(updatedFilters, allData);
+    setFilters(updatedFilters);
+    setFilteredData(filteredData);
   };
-
-  const applyFilters = (filters) => {
-    let filteredData = allData;
-    if (filters.global.value) {
-      filteredData = filteredData.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value)
-            .toLowerCase()
-            .includes(filters.global.value.toLowerCase())
-        )
-      );
-    }
-    if (filters.device_type.value) {
-      filteredData = filteredData.filter((item) =>
-        filters.device_type.value.includes(item.device_type)
-      );
-    }
-    setData(filteredData);
-  };
+  console.log(filteredData);
 
   const itemTemplate = (item) => {
     return (
@@ -209,18 +171,6 @@ export default function VehiclesGrid() {
                 }}
               />
               <Button
-                icon="pi pi-trash"
-                rounded
-                outlined
-                style={{
-                  borderColor: "#F18080",
-                  width: "2.2rem",
-                  height: "2.2rem",
-                }}
-                onClick={() => confirmDeleteProduct()}
-                className="p-button-rounded p-button-text p-button-danger"
-              />
-              <Button
                 icon="pi pi-eye"
                 rounded
                 outlined
@@ -234,23 +184,6 @@ export default function VehiclesGrid() {
       </div>
     );
   };
-  const deleteProductDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteProductDialog}
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        outlined
-        onClick={deleteProduct}
-      />
-    </React.Fragment>
-  );
   return (
     <div>
       <div className="my-4 mr-7  flex justify-end">
@@ -275,7 +208,7 @@ export default function VehiclesGrid() {
       </div>
 
       <DataView
-        value={data}
+        value={filteredData}
         layout="grid"
         itemTemplate={itemTemplate}
         paginator
@@ -284,25 +217,7 @@ export default function VehiclesGrid() {
         emptyMessage="No vehicles found."
       />
       <p className="text-center text-gray-700">Total Items : {totalItems}</p>
-      <Dialog
-        visible={deleteProductDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={deleteProductDialogFooter}
-        onHide={hideDeleteProductDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          <span>
-            <b>Are you sure you want to delete?</b>?
-          </span>
-        </div>
-      </Dialog>
+
       <Dialog
         header="Vehicle Details"
         visible={visible}

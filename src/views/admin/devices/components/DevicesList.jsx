@@ -180,7 +180,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
 
   const devicesOptions = [
     { label: "ECU", value: "ECU" },
-    { label: "IoT", value: "IoT" },
+    { label: "IOT", value: "IOT" },
     { label: "DMS", value: "DMS" },
   ];
 
@@ -238,7 +238,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}
-        style={{ width: "40rem" }}
+        style={{ width: "45rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Edit the Device"
         modal

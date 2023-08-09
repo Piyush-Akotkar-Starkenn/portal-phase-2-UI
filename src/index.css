@@ -318,6 +318,11 @@ body
 .p-tabview .p-tabview-nav li .p-tabview-nav-link {
   border-radius: 0px;
 }
+.highlight {
+  background-color: yellow; /* Change this to the desired highlight color */
+  /* Add any other styles to highlight the matched text */
+}
+
 .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
   background: none;
 }
@@ -415,6 +420,10 @@ body
   .p-multiselect-items
   .p-multiselect-item.p-highlight {
   background: transparent;
+}
+
+.dark-mode .radio-input {
+  background: #422afb;
 }
 
 @media (max-width: 767px) {

@@ -6,7 +6,6 @@ import { useState } from "react";
 import axios from "axios";
 
 const FeatureSet = ({ parameters }) => {
-  console.log(parameters.propValue);
   const [featuresetDetails, setFeaturesetDetails] = useState({});
   const [formData, setFormData] = useState({});
   const [isEditable, setIsEditable] = useState(false);

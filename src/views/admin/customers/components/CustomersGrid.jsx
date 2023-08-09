@@ -42,7 +42,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const menuRight = useRef(null);
+  const menuLeft = useRef(null);
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState(null);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -192,9 +192,9 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
             <Button
               type="button"
               className="text-bold setting ml-2 rounded-full text-gray-950 dark:text-white"
-              onClick={(event) => menuRight.current.toggle(event)}
+              onClick={(event) => menuLeft.current.toggle(event)}
               style={{ padding: "0.4rem" }}
-              aria-controls="popup_menu_right"
+              aria-controls="popup_menu_left"
               aria-haspopup
             >
               <CiMenuKebab />
@@ -215,9 +215,9 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 },
               ]}
               popup
-              ref={menuRight}
-              id="popup_menu_right"
-              popupAlignment="right"
+              ref={menuLeft}
+              id="popup_menu_left"
+              popupAlignment="left"
             />
           </div>
         </div>
@@ -226,9 +226,66 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
   };
 
   const EditCustomerDialog = ({ visible, onHide, customer }) => {
-    const [editedCustomerData, setEditedCustomerData] = useState(customer);
+    const [editedCustomerData, setEditedCustomerData] = useState(
+      customer || {}
+    );
+    const isValidPhoneNumber = (phoneNumber) => {
+      // Regular expression to check for exactly 10 digits
+      const phonePattern = /^\d{10}$/;
+      return phonePattern.test(phoneNumber);
+    };
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+
+      setEditedCustomerData((prevState) => {
+        const updatedData = { ...prevState, [name]: value };
+
+        if (name === "first_name") {
+          updatedData.full_name = `${value} ${prevState.last_name || ""}`;
+        } else if (name === "last_name") {
+          updatedData.full_name = `${prevState.first_name || ""} ${value}`;
+        }
+
+        const { address, city, state, pincode } = updatedData;
+        updatedData.full_address = `${address || ""}, ${city || ""}, ${
+          state || ""
+        }, ${pincode || ""}`;
+
+        return updatedData;
+      });
+    };
 
     const onSave = async () => {
+      if (!isValidPhoneNumber(editedCustomerData.phone)) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Invalid Phone Number",
+          detail: "Please enter a 10-digit valid phone number.",
+          life: 3000,
+        });
+        return;
+      }
+      if (
+        editedCustomerData.first_name === "" ||
+        editedCustomerData.last_name === "" ||
+        editedCustomerData.email === "" ||
+        editedCustomerData.company_name === "" ||
+        editedCustomerData.address === "" ||
+        editedCustomerData.city === "" ||
+        editedCustomerData.state === "" ||
+        editedCustomerData.pincode === "" ||
+        editedCustomerData.phone === ""
+      ) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Missing field",
+          detail: "Field cannot be empty",
+          life: 3000,
+        });
+        return;
+      }
+
       try {
         await onUpdate(customer.userId, editedCustomerData);
 
@@ -246,7 +303,9 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
         toastRef.current.show({
           severity: "success",
           summary: "Customer Updated",
-          detail: "Customer information has been updated successfully.",
+          detail: `${
+            editedCustomerData.first_name + " " + editedCustomerData.last_name
+          }'s data has been updated successfully.`,
         });
       } catch (error) {
         console.error("Save error:", error);
@@ -256,42 +315,6 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
           detail: "Error while saving",
           life: 3000,
         });
-      }
-    };
-
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-
-      if (name === "first_name") {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          first_name: value,
-          full_name: `${value} ${prevState.last_name}`,
-        }));
-      } else if (name === "last_name") {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          last_name: value,
-          full_name: `${prevState.first_name} ${value}`,
-        }));
-      } else if (
-        name === "address" ||
-        name === "city" ||
-        name === "state" ||
-        name === "pincode"
-      ) {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          [name]: value,
-          full_address: `${prevState.address || ""}, ${prevState.city || ""}, ${
-            prevState.state || ""
-          }, ${prevState.pincode || ""}`,
-        }));
-      } else {
-        setEditedCustomerData((prevState) => ({
-          ...prevState,
-          [name]: value,
-        }));
       }
     };
 
@@ -313,24 +336,26 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
       >
         <div className="p-fluid">
           <div className="flex justify-between">
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center mr-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="first_name"
                   name="first_name"
                   value={editedCustomerData?.first_name || ""}
                   onChange={handleInputChange}
+                  className={!editedCustomerData.first_name ? "p-invalid" : ""}
                 />
                 <label htmlFor="first_name">First Name</label>
               </span>
             </div>
-            <div className="card justify-content-center mt-5 flex">
+            <div className="card justify-content-center ml-1 mt-5 flex-auto">
               <span className="p-float-label">
                 <InputText
                   id="last_name"
                   name="last_name"
                   value={editedCustomerData?.last_name || ""}
                   onChange={handleInputChange}
+                  className={!editedCustomerData.last_name ? "p-invalid" : ""}
                 />
                 <label htmlFor="last_name">Last Name</label>
               </span>
@@ -344,6 +369,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="email"
                 value={editedCustomerData?.email || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.email ? "p-invalid" : ""}
               />
               <label htmlFor="email">Email</label>
             </span>
@@ -356,6 +382,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="company_name"
                 value={editedCustomerData?.company_name || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.company_name ? "p-invalid" : ""}
               />
               <label htmlFor="company_name">Company Name</label>
             </span>
@@ -368,6 +395,11 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="phone"
                 value={editedCustomerData?.phone || ""}
                 onChange={handleInputChange}
+                className={
+                  isValidPhoneNumber(editedCustomerData?.phone || "")
+                    ? ""
+                    : "p-invalid"
+                }
               />
               <label htmlFor="phone">Contact Number</label>
             </span>
@@ -383,6 +415,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="address"
                 value={editedCustomerData?.address || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.address ? "p-invalid" : ""}
               />
               <label htmlFor="address">Flat No./ Plot No., Area/Society</label>
             </span>
@@ -395,6 +428,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="city"
                 value={editedCustomerData?.city || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.city ? "p-invalid" : ""}
               />
               <label htmlFor="city">City</label>
             </span>
@@ -407,6 +441,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="state"
                 value={editedCustomerData?.state || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.state ? "p-invalid" : ""}
               />
               <label htmlFor="state">State</label>
             </span>
@@ -419,6 +454,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 name="pincode"
                 value={editedCustomerData?.pincode || ""}
                 onChange={handleInputChange}
+                className={!editedCustomerData.pincode ? "p-invalid" : ""}
               />
               <label htmlFor="pincode">Pincode</label>
             </span>

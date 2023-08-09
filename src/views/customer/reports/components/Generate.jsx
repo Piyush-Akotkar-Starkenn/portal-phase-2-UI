@@ -3,6 +3,7 @@ import { Calendar } from "primereact/calendar";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
 import { RadioButton } from "primereact/radiobutton";
+import { Link } from "react-router-dom";
 
 const Generate = () => {
   const [selectedStartDate, setSelectedStartDate] = useState(null);
@@ -236,12 +237,14 @@ const Generate = () => {
           </div>
         </div>
         <div className="text-center">
-          <button
-            type="submit"
-            className="rounded-lg bg-blue-700 px-4 py-1.5 text-lg font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            Generate
-          </button>
+          <Link to="/customer/report">
+            <button
+              type="submit"
+              className="rounded-lg bg-blue-700 px-4 py-1.5 text-lg font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Generate
+            </button>
+          </Link>
         </div>
       </form>
     </div>

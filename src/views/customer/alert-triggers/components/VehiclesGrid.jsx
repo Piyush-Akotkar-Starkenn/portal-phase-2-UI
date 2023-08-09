@@ -32,7 +32,6 @@ export default function VehiclesGrid() {
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
   const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
   const [product, setProduct] = useState(emptyProduct);
-  const [selectedProducts, setSelectedProducts] = useState(null);
   const [checked, setChecked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
@@ -174,7 +173,6 @@ export default function VehiclesGrid() {
   const deleteSelectedProducts = () => {
     setProducts([]);
     setDeleteProductsDialog(false);
-    setSelectedProducts(null);
     toast.current.show({
       severity: "success",
       summary: "Successful",

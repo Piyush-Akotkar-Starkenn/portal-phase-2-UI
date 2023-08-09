@@ -70,9 +70,12 @@ const UnAssignCustomer = ({ parameters, onSuccess }) => {
               value={selectedCustomer}
               options={customerOptions}
               onChange={(e) => setSelectedCustomer(e.value)}
-              className="rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50"
+              className={`rounded-lg border border-gray-300 bg-gray-50 py-0 shadow-sm dark:bg-gray-900 dark:placeholder-gray-50 ${
+                validationError ? "p-invalid" : ""
+              }`}
               optionLabel="label"
             />
+
             <label htmlFor="dd-city">Select a customer</label>
           </span>
           {validationError && (

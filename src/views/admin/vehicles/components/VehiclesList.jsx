@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
@@ -8,11 +8,10 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { FilterMatchMode } from "primereact/api";
 import { TabView, TabPanel } from "primereact/tabview";
-import axios from "axios";
 import FeatureSet from "./FeatureSet";
 import VehicleTrips from "./VehicleTrips";
 
-export default function VehiclesList() {
+export default function VehiclesList({ data }) {
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const toast = useRef(null);
@@ -22,26 +21,6 @@ export default function VehiclesList() {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    // Fetch vehicles data
-    axios
-      .get(
-        `${process.env.REACT_APP_API_URL}/customers/vehicles/get-all-vehicle`
-      )
-      .then((res) => {
-        console.log(res.data);
-        const formattedData = res.data.data.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-        }));
-        setData(formattedData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;

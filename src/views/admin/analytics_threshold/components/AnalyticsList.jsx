@@ -294,7 +294,7 @@ export default function AnalyticsList({ data, onEdit, onDelete }) {
   useEffect(() => {
     axios
       .get(
-        `${process.env.REACT_APP_API_URL}/Admin/AnalyticsThreshold/GetCustomers-AT`
+        `${process.env.REACT_APP_API_URL}/admin/analytics-threshold/get-customers-at`
       )
       .then((res) => {
         setListCustomers(res.data.data);
