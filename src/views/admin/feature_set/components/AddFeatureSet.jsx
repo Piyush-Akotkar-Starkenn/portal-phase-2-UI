@@ -24,19 +24,14 @@ const AddFeatureSet = ({ onSuccess }) => {
   const toastErr = useRef(null);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
   const [listCustomers, setListCustomers] = useState([]);
-
   const { updateFunc } = useContext(AppContext);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setData({ ...data, [name]: value });
-  };
   useEffect(() => {
     setData((prevData) => ({ ...prevData, selectCustomer: [...customers] }));
   }, [customers]);
 
+  //fetching customers
   useEffect(() => {
     axios
       .get(
@@ -51,12 +46,18 @@ const AddFeatureSet = ({ onSuccess }) => {
       });
   }, []);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData({ ...data, [name]: value });
+  };
+
   const handleSelectCustomer = (e) => {
     const { value } = e.target;
     setSelectedCustomer(value);
     setCustomers([...customers, value]);
   };
 
+  //add feature set api call
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,7 +67,6 @@ const AddFeatureSet = ({ onSuccess }) => {
         `${process.env.REACT_APP_API_URL}/featureset/featureset-add`,
         data
       );
-      // Assuming you have access to the toastRef
       toastRef.current.show({
         severity: "success",
         summary: "Success",
@@ -80,7 +80,6 @@ const AddFeatureSet = ({ onSuccess }) => {
         onSuccess();
       }
     } catch (err) {
-      // Assuming you have access to the toastRef
       toastErr.current.show({
         severity: "error",
         summary: "Error",
@@ -94,6 +93,7 @@ const AddFeatureSet = ({ onSuccess }) => {
     }
   };
 
+  //dropdown options
   const StationaryObjectoptions = [
     { label: "Yes", value: 0 },
     { label: "No", value: 1 },
@@ -170,6 +170,7 @@ const AddFeatureSet = ({ onSuccess }) => {
     }));
   };
 
+  //add FS dialog
   return (
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />

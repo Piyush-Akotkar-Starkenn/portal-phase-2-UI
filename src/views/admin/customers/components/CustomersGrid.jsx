@@ -10,7 +10,7 @@ import { Dialog } from "primereact/dialog";
 
 const applyFilters = (filters, allData) => {
   let filteredData = allData;
-
+  //condition to exclude these fields for global search
   if (filters.global.value) {
     filteredData = filteredData.filter((item) =>
       Object.entries(item).some(
@@ -51,6 +51,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
   const toastRef = useRef(null);
   const toastErr = useRef(null);
 
+  //Global Search
   useEffect(() => {
     setAllData(data);
     const filteredData = applyFilters(filters, data);
@@ -80,11 +81,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
     setFilteredData(filteredData);
   };
 
-  const handleEdit = (customer) => {
-    setEditedCustomer(customer);
-    setIsEditDialogVisible(true);
-  };
-
+  //delete api call
   const handleDelete = (customer) => {
     setSelectedCustomer(customer);
     setIsDeleteDialogVisible(true);
@@ -120,6 +117,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
     }
   };
 
+  //card
   const itemTemplate = (item) => {
     return (
       <div className="p-col-11 w-95 mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
@@ -225,6 +223,12 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
     );
   };
 
+  //edit api call
+  const handleEdit = (customer) => {
+    setEditedCustomer(customer);
+    setIsEditDialogVisible(true);
+  };
+
   const EditCustomerDialog = ({ visible, onHide, customer }) => {
     const [editedCustomerData, setEditedCustomerData] = useState(
       customer || {}
@@ -318,6 +322,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
       }
     };
 
+    //edit customer dialog
     return (
       <Dialog
         visible={visible}
@@ -463,7 +468,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
       </Dialog>
     );
   };
-
+  //searchbox
   return (
     <div>
       <div className="my-4 mr-7  flex justify-end">
@@ -488,6 +493,8 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
       </div>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <Toast ref={toastErr} className="bg-red-400" />
+
+      {/* Grid view of customers */}
       <DataView
         value={filteredData}
         itemTemplate={itemTemplate}
@@ -497,6 +504,8 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
         emptyMessage="No customers found."
       />
       <p className="text-center text-gray-700">Total Items : {totalItems}</p>
+
+      {/* delete dialog */}
       <Dialog
         visible={isDeleteDialogVisible}
         onHide={() => setIsDeleteDialogVisible(false)}

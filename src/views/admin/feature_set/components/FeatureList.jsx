@@ -52,16 +52,19 @@ const FeatureList = () => {
       .catch((err) => console.log(err));
   };
 
+  //opens delete dialog
   const openDeleteDialog = (rowData) => {
     setSelectedFeature(rowData);
     setIsDeleteDialogVisible(true);
   };
 
+  //closes delete dialog
   const closeDeleteDialog = () => {
     setSelectedFeature(null);
     setIsDeleteDialogVisible(false);
   };
 
+  //delete api call
   const handleDeleteConfirmation = async () => {
     if (selectedFeature) {
       try {
@@ -114,6 +117,8 @@ const FeatureList = () => {
       }
     }
   };
+
+  //add FS success toast
   const handleAddSuccess = () => {
     setIsDialogVisible(false);
     toastRef.current.show({
@@ -123,6 +128,7 @@ const FeatureList = () => {
       life: 3000,
     });
   };
+  //assign FS success toast
   const handleAssignSuccess = () => {
     setIsDialogVisible2(false);
     toastRef.current.show({
@@ -132,6 +138,7 @@ const FeatureList = () => {
       life: 3000,
     });
   };
+  //unassign FS success toast
   const handleUnAssignSuccess = () => {
     setIsDialogVisible3(false);
     toastRef.current.show({
@@ -141,6 +148,7 @@ const FeatureList = () => {
       life: 3000,
     });
   };
+  //edit FS success toast
   const handleEditSuccess = () => {
     setIsDialogVisible1(false);
     toastRef.current.show({
@@ -150,42 +158,47 @@ const FeatureList = () => {
       life: 3000,
     });
   };
+  //open add dialog
   const openDialog = () => {
     setIsDialogVisible(true);
   };
+  //closes add dialog
   const closeDialog = () => {
     setIsDialogVisible(false);
     resetState();
   };
-
+  //opens edit dialog
   const openDialog1 = (rowData) => {
     setMyData(rowData); // Set the rowData to myData state
     setIsDialogVisible1(true);
   };
-
+  //closes edit dialog
   const closeDialog1 = () => {
     setIsDialogVisible1(false);
     resetState();
   };
-
+  //open assign dialog
   const openDialog2 = (rowData) => {
     setMyData(rowData);
     setIsDialogVisible2(true);
   };
+  //closes assign dialog
   const closeDialog2 = () => {
     setIsDialogVisible2(false);
     resetState();
   };
-
+  //opens unassign dialog
   const openDialog3 = (rowData) => {
     setMyData(rowData);
     setIsDialogVisible3(true);
   };
+  //closes unassign dialog
   const closeDialog3 = () => {
     setIsDialogVisible3(false);
     resetState();
   };
 
+  //global search dialog
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -201,6 +214,7 @@ const FeatureList = () => {
     setFilters(_filters);
   };
 
+  //searchbox
   const header = (
     <div className="align-items-center flex flex-wrap justify-end gap-2 py-3 dark:bg-gray-950">
       <span className="p-input-icon-left">
@@ -270,6 +284,7 @@ const FeatureList = () => {
           onClick={openDialog}
         />
       </div>
+      {/* assign dialog  */}
       <Dialog
         visible={isDialogVisible2}
         onHide={closeDialog2}
@@ -284,6 +299,7 @@ const FeatureList = () => {
           onSuccess={handleAssignSuccess}
         />
       </Dialog>
+      {/* unassign dialog */}
       <Dialog
         visible={isDialogVisible3}
         onHide={closeDialog3}
@@ -298,6 +314,7 @@ const FeatureList = () => {
           onSuccess={handleUnAssignSuccess}
         />
       </Dialog>
+      {/* edit dialog */}
       <Dialog
         visible={isDialogVisible1}
         onHide={closeDialog1}
@@ -312,6 +329,7 @@ const FeatureList = () => {
           onSuccess={handleEditSuccess}
         />
       </Dialog>
+      {/* add dialog */}
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}
@@ -326,6 +344,7 @@ const FeatureList = () => {
 
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <Toast ref={toastErr} className="bg-red-400" />
+      {/* delete dialog */}
       <Dialog
         visible={isDeleteDialogVisible}
         onHide={closeDeleteDialog}
@@ -351,6 +370,7 @@ const FeatureList = () => {
           Are you sure you want to delete {selectedFeature?.featureSetName}?
         </div>
       </Dialog>
+      {/* List View */}
       <DataTable
         removableSort
         value={data}
@@ -389,14 +409,6 @@ const FeatureList = () => {
           className="dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "8rem" }}
         />
-
-        {/* <Column
-          header="Action"
-          headerStyle={{ width: "11rem", textAlign: "left" }}
-          bodyStyle={{ textAlign: "left", overflow: "visible" }}
-          body={actionBodyTemplate}
-          className="border-none dark:bg-gray-900 "
-        /> */}
       </DataTable>
     </>
   );

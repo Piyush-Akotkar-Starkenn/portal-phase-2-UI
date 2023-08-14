@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [vehiclesCount, setVehiclesCount] = useState();
   const [devicesCount, setDevicesCount] = useState();
   const [customersCount, setCustomersCount] = useState();
+  //Fetching total vehicle's count
   useEffect(() => {
     axios
       .get(
@@ -24,6 +25,8 @@ const Dashboard = () => {
         console.log(err);
       });
   }, []);
+
+  //Fetching total device's count
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-all-devices`)
@@ -36,6 +39,8 @@ const Dashboard = () => {
         console.log(err);
       });
   }, []);
+
+  //Fetching total customer's count
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/admin/get-all`)
@@ -48,6 +53,7 @@ const Dashboard = () => {
         console.log(err);
       });
   }, []);
+
   return (
     <div>
       <h4 className="text-dark text-xl font-bold dark:text-white">Dashboard</h4>

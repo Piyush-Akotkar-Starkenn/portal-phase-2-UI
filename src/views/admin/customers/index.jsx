@@ -32,6 +32,7 @@ const Customers = () => {
     state: false,
     pincode: false,
   });
+
   const handleChange = (event) => {
     setUserType(event.value);
     setFormErrors((prevErrors) => ({
@@ -46,10 +47,11 @@ const Customers = () => {
     { label: "Admin", value: 1 },
   ];
 
+  //Fetching all data
   useEffect(() => {
     fetchCustomersData();
   }, []);
-  //Fetching all data
+
   const fetchCustomersData = () => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/admin/get-all`)
@@ -67,6 +69,7 @@ const Customers = () => {
       });
   };
 
+  //delete api call
   const handleDeleteCustomer = async (customerId) => {
     try {
       await axios.put(
@@ -85,13 +88,13 @@ const Customers = () => {
     }
   };
 
+  //edit api call
   const handleUpdateCustomer = async (customerId, updatedData) => {
     try {
       await axios.put(
         `${process.env.REACT_APP_API_URL}/admin/update/${customerId}`,
         updatedData
       );
-
       // Update the customer data in the state
       setData((prevData) =>
         prevData.map((customer) =>
@@ -112,17 +115,19 @@ const Customers = () => {
   const handleGridView = () => {
     setIsListView(false);
   };
-
+  //open add customer dialog
   const openDialog = () => {
     setIsDialogVisible(true);
   };
 
+  //close add customer dialog
   const closeDialog = () => {
     setIsDialogVisible(false);
     setFormErrors(false);
     setUserType(null);
   };
-  //Add Customer form
+
+  //Add Customer api call
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -254,8 +259,6 @@ const Customers = () => {
 
         if (status === 401) {
           console.log("Unauthorized: Please authenticate.");
-
-          // Handle unauthorized error here, e.g., redirect to the login page
           toastRef.current.show({
             severity: "warn",
             summary: "Unauthorized",
@@ -263,9 +266,7 @@ const Customers = () => {
             life: 3000,
           });
         } else if (status === 400) {
-          // Handle validation errors
           const { message } = data;
-
           toastRef.current.show({
             severity: "error",
             summary: "Validation Error",
@@ -274,8 +275,6 @@ const Customers = () => {
           });
         } else if (status === 402) {
           console.log("Passwords MisMatched.");
-
-          // Show password mismatch error toast message
           toastRef.current.show({
             severity: "error",
             summary: "Password Mismatch",
@@ -286,7 +285,6 @@ const Customers = () => {
           status === 409 &&
           data.message === "This Email Already Taken "
         ) {
-          // Show phone number already in use error toast message
           toastRef.current.show({
             severity: "error",
             summary: "Use another email ID",
@@ -297,7 +295,6 @@ const Customers = () => {
           status === 409 &&
           data.message === "This Phone Number Already Taken"
         ) {
-          // Show phone number already in use error toast message
           toastRef.current.show({
             severity: "error",
             summary: "Use different Phone Number",
@@ -306,8 +303,6 @@ const Customers = () => {
           });
         } else {
           console.log("Error:", error.response.data.message);
-
-          // Show generic error toast message for other errors
           toastRef.current.show({
             severity: "error",
             summary: "Error",
@@ -378,6 +373,8 @@ const Customers = () => {
           />
         </div>
       )}
+
+      {/* Add customer form */}
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}

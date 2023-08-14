@@ -11,7 +11,7 @@ import VehicleTrips from "./VehicleTrips";
 import FeatureSet from "./FeatureSet";
 const applyFilters = (filters, allData) => {
   let filteredData = allData;
-
+  //condition to exclude these fields for global search
   if (filters.global.value) {
     filteredData = filteredData.filter((item) =>
       Object.entries(item).some(
@@ -34,6 +34,7 @@ export default function VehiclesGrid({ data }) {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const totalItems = filteredData.length;
+  const [myData, setMyData] = useState();
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
@@ -56,7 +57,7 @@ export default function VehiclesGrid({ data }) {
     const filteredData = applyFilters(filters, data);
     setFilteredData(filteredData);
   }, [data, filters]);
-
+  //global search
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     setGlobalFilterValue(value);
@@ -68,7 +69,10 @@ export default function VehiclesGrid({ data }) {
     setFilters(updatedFilters);
     setFilteredData(filteredData);
   };
-
+  const openDialog = (item) => {
+    setMyData(item);
+    setVisible(true);
+  };
   const clearSearch = () => {
     setGlobalFilterValue("");
     const updatedFilters = {
@@ -79,8 +83,8 @@ export default function VehiclesGrid({ data }) {
     setFilters(updatedFilters);
     setFilteredData(filteredData);
   };
-  console.log(filteredData);
 
+  //card
   const itemTemplate = (item) => {
     return (
       <div className="p-col-12 vehicle-card mb-6 rounded bg-gray-50 dark:bg-gray-900 dark:text-gray-150">
@@ -162,21 +166,12 @@ export default function VehiclesGrid({ data }) {
           <div className="card-actions">
             <div>
               <Button
-                icon="pi pi-pencil"
-                className="p-button-rounded p-button-text mr-2"
-                style={{
-                  borderColor: "#6E70F2",
-                  width: "2.2rem",
-                  height: "2.2rem",
-                }}
-              />
-              <Button
                 icon="pi pi-eye"
                 rounded
                 outlined
                 className="text-red-500 dark:text-blue-500"
                 style={{ width: "2rem", height: "2rem" }}
-                onClick={() => setVisible(true)}
+                onClick={() => openDialog(item)}
               />
             </div>
           </div>
@@ -184,6 +179,8 @@ export default function VehiclesGrid({ data }) {
       </div>
     );
   };
+
+  //searchbox
   return (
     <div>
       <div className="my-4 mr-7  flex justify-end">
@@ -206,7 +203,7 @@ export default function VehiclesGrid({ data }) {
           </span>
         </div>
       </div>
-
+      {/* Grid View */}
       <DataView
         value={filteredData}
         layout="grid"
@@ -225,11 +222,13 @@ export default function VehiclesGrid({ data }) {
         onHide={() => setVisible(false)}
       >
         <TabView>
+          {/* Vehicle Trips dialog */}
           <TabPanel header="Vehicle's Trips" leftIcon="pi pi-truck mr-2">
             <VehicleTrips />
           </TabPanel>
+          {/* Feature Set dialog */}
           <TabPanel header="Feature Set" leftIcon="pi pi-cog mr-2">
-            <FeatureSet />
+            <FeatureSet parameters={{ propValue: myData?._id }} />
           </TabPanel>
         </TabView>
       </Dialog>

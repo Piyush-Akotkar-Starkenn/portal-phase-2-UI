@@ -6,6 +6,7 @@ import WeeklyRevenue from "views/admin/default/components/WeeklyRevenue";
 import { Button } from "primereact/button";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { Link } from "react-router-dom";
 
 const Report = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -35,7 +36,7 @@ const Report = () => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF();
       pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
-      pdf.save("report.pdf");
+      pdf.save(`report@${formattedDate}.pdf`);
     });
   };
 
@@ -142,12 +143,14 @@ const Report = () => {
           className="mx-2 my-3 h-10 px-2 py-0 text-left dark:hover:text-white"
           onClick={downloadPDF}
         />
-        <Button
-          label="Go Back"
-          icon="pi pi-arrow-circle-left"
-          severity="Primary"
-          className="mx-2 my-3 h-10 px-3 py-0 text-left dark:hover:text-white"
-        />
+        <Link to="/customer/reports">
+          <Button
+            label="Go Back"
+            icon="pi pi-arrow-circle-left"
+            severity="Primary"
+            className="mx-2 my-3 h-10 px-3 py-0 text-left dark:hover:text-white"
+          />
+        </Link>
       </div>
     </>
   );
