@@ -389,8 +389,8 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
           style={{ minWidth: "10rem" }}
         ></Column>
         <Column
-          field="customer_id"
-          header="Customer ID"
+          field="status"
+          header="Status"
           sortable
           className="dark:bg-gray-900 dark:text-gray-200"
           style={{ minWidth: "12rem" }}
