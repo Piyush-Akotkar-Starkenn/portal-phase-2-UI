@@ -53,11 +53,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
     { label: "DMS", value: "DMS" },
   ];
 
-  const stateOptions = [
-    { label: "Active", value: "true" },
-    { label: "Deactive", value: "false" },
-  ];
-
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
@@ -177,7 +172,7 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
                     <span>Customer ID</span>
                   </div>
                   <div>
-                    <span>{item.customer_id}</span>
+                    <span>{item.user_uuid}</span>
                   </div>
                 </div>
                 <div className="text-bold flex justify-between font-semibold ">
@@ -320,22 +315,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
             />
 
             <label htmlFor="customer_id">Customer List</label>
-          </span>
-        </div>
-        <div className="mx-auto mt-8 w-[34.5vw]">
-          <span className="p-float-label">
-            <Dropdown
-              id="status"
-              name="status"
-              options={stateOptions}
-              optionLabel="label"
-              optionValue="value"
-              className="p-dropdown"
-              value={editedDeviceData?.status || ""}
-              placeholder={selectedDevice?.status}
-              onChange={handleInputChange}
-            />
-            <label htmlFor="status">Status</label>
           </span>
         </div>
         <div className="mx-auto mt-8 w-[34.5vw]">

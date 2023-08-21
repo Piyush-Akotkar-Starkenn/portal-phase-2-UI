@@ -44,9 +44,10 @@ const DevicesAdmin = () => {
 
   const fetchDevicesData = () => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/admin/devices/get-all-devices`)
+      .get(`${process.env.REACT_APP_API_URL}/devices/list-devices`)
       .then((res) => {
-        const formattedData = res.data.data.device.map((item, index) => ({
+        console.log(res.data);
+        const formattedData = res.data.devices.map((item, index) => ({
           ...item,
           serialNo: index + 1,
         }));
@@ -62,7 +63,7 @@ const DevicesAdmin = () => {
   const handleEditDevice = (deviceId, editedDevice) => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/admin/devices/update-device/${deviceId}`,
+        `${process.env.REACT_APP_API_URL}/devices/edit-device/${deviceId}`,
         editedDevice
       )
       .then((res) => {
@@ -96,17 +97,17 @@ const DevicesAdmin = () => {
   };
 
   //delete api call
-  const handleDeleteDevice = (deviceId) => {
+  const handleDeleteDevice = (device_id) => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/admin/devices/delete-device/${deviceId}`
+        `${process.env.REACT_APP_API_URL}/devices/delete-device/${device_id}`
       )
       .then((res) => {
         fetchDevicesData();
         toastRef.current.show({
           severity: "success",
           summary: "Success",
-          detail: `Device ${deviceId} deleted successfully`,
+          detail: `Device ${device_id} deleted successfully`,
           life: 3000,
         });
       })
@@ -168,7 +169,6 @@ const DevicesAdmin = () => {
       .get(`${process.env.REACT_APP_API_URL}/admin/devices/get-customers`)
       .then((res) => {
         setListCustomers(res.data);
-        console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -182,7 +182,7 @@ const DevicesAdmin = () => {
     }));
   };
 
-  //add customer api call
+  //add device api call
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isFormValid()) {

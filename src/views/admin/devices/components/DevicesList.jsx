@@ -193,11 +193,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     { label: "DMS", value: "DMS" },
   ];
 
-  const stateOptions = [
-    { label: "Active", value: "true" },
-    { label: "Deactive", value: "false" },
-  ];
-
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/Admin/Devices/get-customers`)
@@ -302,22 +297,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
           </div>
           <div className="mx-auto mt-8 w-[34.5vw]">
             <span className="p-float-label">
-              <Dropdown
-                id="status"
-                name="status"
-                options={stateOptions}
-                optionLabel="label"
-                optionValue="value"
-                className="p-dropdown"
-                value={editData?.status || ""}
-                placeholder={deviceData?.device.status}
-                onChange={(e) => handleChange(e, "status")}
-              />
-              <label htmlFor="status">Status</label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-[34.5vw]">
-            <span className="p-float-label">
               <InputText
                 id="sim_number"
                 name="sim_number"
@@ -389,7 +368,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
           style={{ minWidth: "10rem" }}
         ></Column>
         <Column
-          field="customer_id"
+          field="user_uuid"
           header="Customer ID"
           sortable
           className="dark:bg-gray-900 dark:text-gray-200"
